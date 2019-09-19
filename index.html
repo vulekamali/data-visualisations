@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+/*
+#tooltip {
+    width: 100px;
+    height: 100px;
+    border: solid;
+    background-color: yellow;
+    position: absolute;
+    display: none;
+    padding: 5px;
+    font-size: 0.8em;
+}
+*/
+.heading {
+    font-family: sans-serif;
+    margin-left: 12px;
+    margin-bottom: 0px;
+    margin-top: 5px;
+    font-size: 0.8em;
+}
+
+.label {
+    font-weight: bold;
+}
+
+</style>
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz">
+    <div class="heading"><span class="label">Programme:</span> <span class="programme"></span></div>
+    <div class="heading"><span class="label">Subprogramme:</span> <span class="subprogramme"></span></div>
+    <div class="heading"><span class="label">Budget:</span> <span class="amount"></span></div>
+</div>
+<!--<div id="tooltip"></div>-->
+
+<script>
+
+function wrap(text, width) {
+    text.each(function () {
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.1, // ems
+            x = text.attr("x"),
+            y = text.attr("y"),
+            dy = 0, //parseFloat(text.attr("dy")),
+            tspan = text.text(null)
+                        .append("tspan")
+                        .attr("x", x)
+                        .attr("y", y)
+                        .attr("dy", dy + "em");
+        while (word = words.pop()) {
+            line.push(word);
+            tspan.text(line.join(" "));
+            if (tspan.node().getComputedTextLength() > width) {
+                line.pop();
+                tspan.text(line.join(" "));
+                line = [word];
+                tspan = text.append("tspan")
+                            .attr("x", x)
+                            .attr("y", y)
+                            .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                            .text(word);
+            }
+        }
+    });
+}
+var base_url = "https://openspending.org"
+var url = base_url + "/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AWater+and+Sanitation&drilldown=progno.programme%7Csprogno.subprogramme"
+
+// set the dimensions and margins of the graph
+var margin = {top: 10, right: 10, bottom: 10, left: 10},
+  width = 445 - margin.left - margin.right,
+  height = 445 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+var programme_label = d3.select(".heading .programme");
+var subprogramme_label = d3.select(".heading .subprogramme");
+var amount_label = d3.select(".heading .amount");
+
+var fmt = function(x) { 
+    return "R" + d3.format(",.0f")(x);
+}
+
+var color_brewer = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928']
+
+function unique(x) {
+    return x.reverse().filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).reverse();
+}
+
+// read json data
+d3.json(url, function(data) {
+  data = data.cells;
+  color_map = {};
+  var programmes = unique(data.map(function(d) {
+      return d["progno.programme"]
+  }));
+
+  programmes.map(function(d, idx) {
+      color_map[d] = color_brewer[idx];
+  });
+
+
+  var nested_data = d3.nest()
+    .key(function(d) { return d["progno.programme"]})
+    .entries(data)
+
+  var root = d3.hierarchy(
+      {values:nested_data},
+      function(d) { return d.values }
+  )
+  .sum(function(d) { return d["value.sum"]})
+
+  // Then d3.treemap computes the position of each element of the hierarchy
+  d3.treemap()
+    .size([width, height])
+    .padding(2)
+    (root)
+
+  // use this information to add rectangles:
+  var rects = svg
+    .selectAll("rect")
+    .data(root.leaves())
+    .enter()
+    .append("rect")
+      .attr('x', function (d) { return d.x0; })
+      .attr('y', function (d) { return d.y0; })
+      .attr('width', function (d) { return d.x1 - d.x0; })
+      .attr('height', function (d) { return d.y1 - d.y0; })
+      .style("stroke", "black")
+      .style("fill", function(d) {
+          return color_map[d.data["progno.programme"]];
+       })
+      .on("mouseover", function(d) {
+          subprogramme_label.text(d.data["sprogno.subprogramme"]);
+          programme_label.text(d.data["progno.programme"]);
+          amount_label.text(fmt(d.value));
+      })
+
+  // and to add the text labels
+  svg
+    .selectAll("text")
+    .data(root.leaves())
+    .enter()
+    .append("text")
+      .attr("x", function(d){ return d.x0+5})    // +10 to adjust position (more right)
+      .attr("y", function(d){ return d.y0+20})    // +20 to adjust position (lower)
+      .text(function(d){
+          var total = root.value;
+          var min_ratio = 0.1; // TODO move this further up
+          if (d.value / total > min_ratio) {
+              return d.data["sprogno.subprogramme"]
+          }
+          return "";
+      })
+      // TODO fix this - shouldn't be hardcoded
+      .call(wrap, 60)
+      .attr("font-size", "15px")
+      .attr("fill", "white")
+      //.on("mouseover", function(d) {
+      //     tooltip 
+      //        .style("display", "block")
+      //        .text(d.data["sprogno.subprogramme"]);
+      //})
+      //.on("mouseout", function(d) { tooltip.style("display", "none"); })
+      //.on("mousemove", function(){ move_tooltip(); })
+})
+</script>
