@@ -1,18 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-/*
-#tooltip {
-    width: 100px;
-    height: 100px;
-    border: solid;
-    background-color: yellow;
-    position: absolute;
-    display: none;
-    padding: 5px;
-    font-size: 0.8em;
-}
-*/
 .heading {
     font-family: sans-serif;
     margin-left: 12px;
@@ -25,6 +13,22 @@
     font-weight: bold;
 }
 
+
+#my_dataviz {
+    display: inline-block;
+    position: relative;
+    width: 50%;
+    padding-bottom: 100%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+}
 </style>
 
 <!-- Load d3.js -->
@@ -32,11 +36,7 @@
 
 <!-- Create a div where the graph will take place -->
 <div id="my_dataviz">
-    <div class="heading"><span class="label">Programme:</span> <span class="programme"></span></div>
-    <div class="heading"><span class="label">Subprogramme:</span> <span class="subprogramme"></span></div>
-    <div class="heading"><span class="label">Budget:</span> <span class="amount"></span></div>
 </div>
-<!--<div id="tooltip"></div>-->
 
 <script>
 
@@ -72,6 +72,11 @@ function wrap(text, width) {
         }
     });
 }
+
+function unique(x) {
+    return x.reverse().filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).reverse();
+}
+
 var base_url = "https://openspending.org"
 var url = base_url + "/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AWater+and+Sanitation&drilldown=progno.programme%7Csprogno.subprogramme"
 
@@ -79,19 +84,36 @@ var url = base_url + "/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of
 var margin = {top: 10, right: 10, bottom: 10, left: 10},
   width = 445 - margin.left - margin.right,
   height = 445 - margin.top - margin.bottom;
+var wrap_width = 180;
 
 // append the svg object to the body of the page
 var svg = d3.select("#my_dataviz")
     .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-      .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
+        //.attr("width", width + margin.left + margin.right)
+        //.attr("height", height + margin.top + margin.bottom)
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("viewBox", "0 0 600 400")
+        .classed("svg-content-responsive", true)
+        .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var programme_label = d3.select(".heading .programme");
-var subprogramme_label = d3.select(".heading .subprogramme");
-var amount_label = d3.select(".heading .amount");
+var labels = svg.append("g");
+var treemap = svg.append("g");
+
+var programme_label = labels.append("text")
+    .classed("heading", true)
+    .classed("programme", true);
+
+var subprogramme_label = labels
+    .append("text")
+        .attr("dy", "1.2em")
+        .classed("heading", true)
+        .classed("subprogramme", true)
+
+var amount_label = labels.append("text")
+    .attr("dy", "2.4em")
+    .classed("heading", true)
+    .classed("amount", true);
 
 var fmt = function(x) { 
     return "R" + d3.format(",.0f")(x);
@@ -99,22 +121,22 @@ var fmt = function(x) {
 
 var color_brewer = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928']
 
-function unique(x) {
-    return x.reverse().filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).reverse();
-}
-
 // read json data
+var createColorMap = function(data) {
+    color_map = {};
+    var programmes = unique(data.map(function(d) {
+        return d["progno.programme"]
+    }));
+
+    programmes.map(function(d, idx) {
+        color_map[d] = color_brewer[idx];
+    });
+
+    return color_map;
+}
 d3.json(url, function(data) {
   data = data.cells;
-  color_map = {};
-  var programmes = unique(data.map(function(d) {
-      return d["progno.programme"]
-  }));
-
-  programmes.map(function(d, idx) {
-      color_map[d] = color_brewer[idx];
-  });
-
+  color_map = createColorMap(data);
 
   var nested_data = d3.nest()
     .key(function(d) { return d["progno.programme"]})
@@ -132,8 +154,9 @@ d3.json(url, function(data) {
     .padding(2)
     (root)
 
+  treemap.attr("transform", "translate(0, 30)");
   // use this information to add rectangles:
-  var rects = svg
+  var rects = treemap
     .selectAll("rect")
     .data(root.leaves())
     .enter()
@@ -147,13 +170,13 @@ d3.json(url, function(data) {
           return color_map[d.data["progno.programme"]];
        })
       .on("mouseover", function(d) {
-          subprogramme_label.text(d.data["sprogno.subprogramme"]);
-          programme_label.text(d.data["progno.programme"]);
-          amount_label.text(fmt(d.value));
+          subprogramme_label.text("Subprogramme: " + d.data["sprogno.subprogramme"]);
+          programme_label.text("Programme: " + d.data["progno.programme"]);
+          amount_label.text("Amount: " + fmt(d.value));
       })
 
   // and to add the text labels
-  svg
+  treemap
     .selectAll("text")
     .data(root.leaves())
     .enter()
@@ -169,15 +192,8 @@ d3.json(url, function(data) {
           return "";
       })
       // TODO fix this - shouldn't be hardcoded
-      .call(wrap, 60)
+      .call(wrap, wrap_width)
       .attr("font-size", "15px")
       .attr("fill", "white")
-      //.on("mouseover", function(d) {
-      //     tooltip 
-      //        .style("display", "block")
-      //        .text(d.data["sprogno.subprogramme"]);
-      //})
-      //.on("mouseout", function(d) { tooltip.style("display", "none"); })
-      //.on("mousemove", function(){ move_tooltip(); })
 })
 </script>
