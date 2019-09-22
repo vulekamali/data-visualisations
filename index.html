@@ -42,7 +42,8 @@
 <script>
 
 var base_url = "https://openspending.org"
-var url = base_url + "/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AWater+and+Sanitation&drilldown=progno.programme%7Csprogno.subprogramme"
+var url = base_url +
+"/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3APublic+Service+and+Administration&drilldown=progno.programme%7Csprogno.subprogramme"
 
 // set the dimensions and margins of the graph
 var margin = {top: 10, right: 10, bottom: 10, left: 10},
@@ -129,8 +130,7 @@ function zoom(d) {
     d3.selectAll("#my_dataviz rect")
         .transition(t)
         .attr('x', function (d) { return clamp(x, d.x0) })
-        .attr('y', function (d) { 
-            return clamp(y, d.y0) })
+        .attr('y', function (d) { return clamp(y, d.y0) })
         .attr('width',  function(d) { return clamp(x, d.x1) - clamp(x, d.x0) })
         .attr('height', function(d) { return clamp(y, d.y1) - clamp(y, d.y0) })
     //d3.event.stopPropagation();
