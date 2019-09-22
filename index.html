@@ -24,6 +24,7 @@
 }
 
 .svg-content-responsive {
+    border: solid;
     display: inline-block;
     position: absolute;
     top: 10px;
@@ -33,58 +34,23 @@
 
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
+<script src="utils.js"></script>
 
 <!-- Create a div where the graph will take place -->
-<div id="my_dataviz">
-</div>
+<div id="my_dataviz"></div>
 
 <script>
-
-function wrap(text, width) {
-    text.each(function () {
-        var text = d3.select(this),
-            words = text.text().split(/\s+/).reverse(),
-            word,
-            line = [],
-            lineNumber = 0,
-            lineHeight = 1.1, // ems
-            x = text.attr("x"),
-            y = text.attr("y"),
-            dy = 0, //parseFloat(text.attr("dy")),
-            tspan = text.text(null)
-                        .append("tspan")
-                        .attr("x", x)
-                        .attr("y", y)
-                        .attr("dy", dy + "em");
-        while (word = words.pop()) {
-            line.push(word);
-            tspan.text(line.join(" "));
-            if (tspan.node().getComputedTextLength() > width) {
-                line.pop();
-                tspan.text(line.join(" "));
-                line = [word];
-                tspan = text.append("tspan")
-                            .attr("x", x)
-                            .attr("y", y)
-                            .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                            .text(word);
-            }
-        }
-    });
-}
-
-function unique(x) {
-    return x.reverse().filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).reverse();
-}
 
 var base_url = "https://openspending.org"
 var url = base_url + "/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AWater+and+Sanitation&drilldown=progno.programme%7Csprogno.subprogramme"
 
 // set the dimensions and margins of the graph
 var margin = {top: 10, right: 10, bottom: 10, left: 10},
-  width = 445 - margin.left - margin.right,
-  height = 445 - margin.top - margin.bottom;
-var wrap_width = 180;
+    width = 445 - margin.left - margin.right,
+    height = 445 - margin.top - margin.bottom,
+    x = d3.scaleLinear().domain([0, width]).range([0, width]),
+	y = d3.scaleLinear().domain([0, width]).range([0, height]),
+    wrap_width = 180;
 
 // append the svg object to the body of the page
 var svg = d3.select("#my_dataviz")
@@ -92,7 +58,7 @@ var svg = d3.select("#my_dataviz")
         //.attr("width", width + margin.left + margin.right)
         //.attr("height", height + margin.top + margin.bottom)
         .attr("preserveAspectRatio", "xMinYMin meet")
-        .attr("viewBox", "0 0 600 400")
+        .attr("viewBox", "0 0 600 600")
         .classed("svg-content-responsive", true)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -115,10 +81,6 @@ var amount_label = labels.append("text")
     .classed("heading", true)
     .classed("amount", true);
 
-var fmt = function(x) { 
-    return "R" + d3.format(",.0f")(x);
-}
-
 var color_brewer = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928']
 
 // read json data
@@ -134,66 +96,130 @@ var createColorMap = function(data) {
 
     return color_map;
 }
+
+function zoom(d) {
+
+    parent = d.parent;
+    // unzoom if already zoomed
+    if (
+           x.domain()[0] == parent.x0 && x.domain()[1] == parent.x1
+        && y.domain()[0] == parent.y0 && y.domain()[1] == parent.y1
+    ) {
+        x.domain([0, width]);
+        y.domain([0, height]);
+        parent = d.parent.parent;
+    } else {
+        x.domain([parent.x0, parent.x1]);
+        y.domain([parent.y0, parent.y1]);
+    }
+
+    var clamp = function(scale, val) {
+        if (val < scale.domain()[0])
+            return scale.range()[0];
+        else if (val > scale.domain()[1])
+            return scale.range()[1];
+        else
+            return scale(val)
+    }
+    
+    var t = d3.transition()
+        .duration(800)
+        .ease(d3.easeCubicOut);
+
+    d3.selectAll("#my_dataviz rect")
+        .transition(t)
+        .attr('x', function (d) { return clamp(x, d.x0) })
+        .attr('y', function (d) { 
+            return clamp(y, d.y0) })
+        .attr('width',  function(d) { return clamp(x, d.x1) - clamp(x, d.x0) })
+        .attr('height', function(d) { return clamp(y, d.y1) - clamp(y, d.y0) })
+    //d3.event.stopPropagation();
+
+    d3.selectAll("#my_dataviz .treemap-label")
+        .transition(t)
+        .attr("x", function(d){ return clamp(x, d.x0) + 5})    // +10 to adjust position (more right)
+        .attr("y", function(d){ return clamp(y, d.y0) + 20})    // +20 to adjust position (lower)
+        .text(function(d){
+            if (!parent.parent)
+                parent = d
+
+            var total = parent.value;
+            var min_ratio = 0.1; // TODO move this further up
+            var ratio = d.value / total;
+
+            if (ratio > min_ratio && d.parent == parent) {
+                return d.data["sprogno.subprogramme"]
+            }
+            return "";
+        })
+        // TODO fix this - shouldn't be hardcoded
+        .call(wrap, wrap_width)
+        .attr("font-size", "15px")
+        .attr("fill", "white")
+}
+
 d3.json(url, function(data) {
-  data = data.cells;
-  color_map = createColorMap(data);
+    data = data.cells;
+    color_map = createColorMap(data);
 
-  var nested_data = d3.nest()
-    .key(function(d) { return d["progno.programme"]})
-    .entries(data)
+    var nested_data = d3.nest()
+        .key(function(d) { return d["progno.programme"]})
+        .entries(data)
 
-  var root = d3.hierarchy(
-      {values:nested_data},
-      function(d) { return d.values }
-  )
-  .sum(function(d) { return d["value.sum"]})
+    var root = d3.hierarchy(
+        {values:nested_data},
+        function(d) { return d.values }
+    )
+    .sum(function(d) { return d["value.sum"]})
 
-  // Then d3.treemap computes the position of each element of the hierarchy
-  d3.treemap()
-    .size([width, height])
-    .padding(2)
-    (root)
+    // Then d3.treemap computes the position of each element of the hierarchy
+    d3.treemap()
+        .size([width, height])
+        .padding(2)
+        (root)
 
-  treemap.attr("transform", "translate(0, 30)");
-  // use this information to add rectangles:
-  var rects = treemap
-    .selectAll("rect")
-    .data(root.leaves())
-    .enter()
-    .append("rect")
-      .attr('x', function (d) { return d.x0; })
-      .attr('y', function (d) { return d.y0; })
-      .attr('width', function (d) { return d.x1 - d.x0; })
-      .attr('height', function (d) { return d.y1 - d.y0; })
-      .style("stroke", "black")
-      .style("fill", function(d) {
-          return color_map[d.data["progno.programme"]];
-       })
-      .on("mouseover", function(d) {
-          subprogramme_label.text("Subprogramme: " + d.data["sprogno.subprogramme"]);
-          programme_label.text("Programme: " + d.data["progno.programme"]);
-          amount_label.text("Amount: " + fmt(d.value));
-      })
+    treemap.attr("transform", "translate(0, 30)");
+    // use this information to add rectangles:
+    var rects = treemap
+        .selectAll("rect")
+        .data(root.leaves())
+        .enter()
+        .append("rect")
+            .attr('x', function (d) {return x(d.x0)})
+            .attr('y', function (d) { return y(d.y0)})
+            .attr('width', function (d) { return x(d.x1 - d.x0)})
+            .attr('height', function (d) { return y(d.y1 - d.y0)})
+            .style("stroke", "black")
+            .style("fill", function(d) {
+                return color_map[d.data["progno.programme"]];
+             })
+            .on("mouseover", function(d) {
+                subprogramme_label.text("Subprogramme: " + d.data["sprogno.subprogramme"]);
+                programme_label.text("Programme: " + d.data["progno.programme"]);
+                amount_label.text("Amount: " + rand_fmt(d.value));
+            })
+            .on("click", zoom)
 
-  // and to add the text labels
-  treemap
-    .selectAll("text")
-    .data(root.leaves())
-    .enter()
-    .append("text")
-      .attr("x", function(d){ return d.x0+5})    // +10 to adjust position (more right)
-      .attr("y", function(d){ return d.y0+20})    // +20 to adjust position (lower)
-      .text(function(d){
-          var total = root.value;
-          var min_ratio = 0.1; // TODO move this further up
-          if (d.value / total > min_ratio) {
-              return d.data["sprogno.subprogramme"]
-          }
-          return "";
-      })
-      // TODO fix this - shouldn't be hardcoded
-      .call(wrap, wrap_width)
-      .attr("font-size", "15px")
-      .attr("fill", "white")
+    // and to add the text labels
+    treemap
+      .selectAll("text")
+      .data(root.leaves())
+      .enter()
+      .append("text")
+        .classed("treemap-label", true)
+        .attr("x", function(d){ return d.x0+5})    // +10 to adjust position (more right)
+        .attr("y", function(d){ return d.y0+20})    // +20 to adjust position (lower)
+        .text(function(d){
+            var total = root.value;
+            var min_ratio = 0.1; // TODO move this further up
+            if (d.value / total > min_ratio) {
+                return d.data["sprogno.subprogramme"]
+            }
+            return "";
+        })
+        // TODO fix this - shouldn't be hardcoded
+        .call(wrap, wrap_width)
+        .attr("font-size", "15px")
+        .attr("fill", "white")
 })
 </script>
