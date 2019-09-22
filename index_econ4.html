@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+svg {
+    display: block;
+    margin-top: 20px;
+}
+
+.bar-total {
+    fill: rgb(180, 180, 180);
+}
+
+.programme-separator {
+    stroke: rgb(50,50,50);
+    stroke-width: 1;
+}
+
+.programme-text {
+    font-size: 1.1em;
+}
+
+.subprogramme-text {
+    font-size: 0.8em;
+}
+
+.label {
+    font-weight: bold;
+}
+
+text {
+    font-family: Roboto, sans-serif;
+}
+
+
+#my_dataviz {
+    display: inline-block;
+    position: relative;
+    width: 50%;
+    padding-bottom: 100%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+}
+</style>
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="utils.js"></script>
+
+<div id="my_dataviz"> </div>
+
+
+<script>
+
+var url = "https://openspending.org/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AXXX&drilldown=econ4.econ4%7Cprogno.programme%7Csprogno.subprogramme"
+var dept_url = "https://openspending.org/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019&drilldown=voteno.department"
+
+var unique_index = function(data, key) {
+    return d3.nest()
+        .key(function(d) { return d[key]})
+        .entries(data)
+}
+
+// set the dimensions and margins of the graph
+var margin = {top: 40, right: 10, bottom: 10, left: 10},
+  width = 800 - margin.left - margin.right,
+  height = 1400 - margin.top - margin.bottom,
+  lineHeight = 1.1;
+var wrapWidth = 280;
+
+var display_programmes = function(g_bar, nested_data, config) {
+    var shift_index = 0;
+
+    programmes = g_bar
+        .selectAll("text")
+        .data(nested_data)
+        .enter()
+        .append("text")
+            .classed("programme-text", true)
+            .text(function(d) {
+                return d.key;
+            })
+            .attr("y", function(d) {
+                var y = config.scaleY(shift_index);
+                shift_index += d.values.length + 1;
+                return y;
+            })
+            .attr("x", config.scaleX(0))
+
+    var shift_index = 0;
+    g_bar
+        .selectAll("line")
+        .data(nested_data)
+        .enter()
+        .append("line")
+            .classed("programme-separator", true)
+            .each(function(d) {
+                d["index"] = shift_index;
+                shift_index += d.values.length + 1;
+            })
+            .attr("x1", 0)
+            .attr("y1", function(d) {
+                return config.scaleY(d.index) + 4
+            })
+            .attr("x2", config.scaleX.range()[1])
+            .attr("y2", function(d) {
+                return config.scaleY(d.index) + 4
+            })
+
+    wrap(programmes, 500, lineHeight);
+}
+
+var displaySubProgrammes = function(g_bar, nested_data, config) {
+    var shift_index = 0;
+
+    nested_data.forEach(function(programme) {
+        g_bar
+            .selectAll("text.new")
+            .data(programme.values)
+            .enter()
+                .append("text")
+                    .classed("subprogramme-text", true)
+                    .text(function(d) {
+                        return d.key;
+                    })
+                    .attr("y", function(d) {
+                        shift_index += 1;
+                        return config.scaleY(shift_index);
+                    })
+                    .attr("x", config.scaleX(0))
+                .classed("subprogramme", true)
+        shift_index += 1;
+    })
+
+    wrap(d3.selectAll("text.subprogramme"), config.scaleX(1.6), lineHeight)
+}
+
+var displayBars = function(g_bar, nested_data, config) {
+    shift_index = 0;
+    nested_data.forEach(function(programme) {
+        g_bar
+            .selectAll("rect.new")
+            .data(programme.values)
+            .enter()
+                .append("rect")
+                    .attr("width", function(d) {
+                        return Math.max(10, config.scaleBar(d.value));
+                    })
+                    .classed("bar-total", true)
+                    .attr("height", 20)
+                    .attr("x", config.scaleX(1.7))
+                    .attr("y", function(d) {
+                        shift_index += 1;
+                        return config.scaleY(shift_index) - lineHeight * 15;
+                    })
+        shift_index += 1;
+                        
+    })
+}
+
+var display_bars_text = function(g_bar, nested_data, config) {
+    shift_index = 0;
+    nested_data.forEach(function(programme) {
+        g_bar
+            .selectAll("text.bar")
+            .data(programme.values)
+            .enter()
+                .append("text")
+                    .text(function(d) { return rand_human_fmt(d.value) })
+                    .attr("x", function(d) {
+                        return config.scaleX(1.7) + 5 + Math.max(config.scaleBar(d.value), 10);
+                    })
+                    .attr("y", function(d) {
+                        shift_index += 1;
+                        return config.scaleY(shift_index);
+                    })
+        shift_index += 1;
+    })
+}
+
+var update_barchart = function(g_bar, data, config) {
+    var _update_barchart = function() {
+        g_bar.selectAll("*").remove();
+
+        selectBox = d3.selectAll(".account-select");
+        selectedIdx = selectBox.node().selectedIndex;
+        econ4_cat = selectBox.node().options[selectedIdx].text;
+
+        filtered_data = data.filter(function(d) {
+            return d["econ4.econ4"] == econ4_cat;
+        })
+        var max_value = d3.max(filtered_data, function(d) { return d["value.sum"]; })
+        config.scaleBar = d3.scaleLinear().domain([0, max_value]).range([0, 200])
+        var nested_data = d3.nest()
+            .key(function(d) { return d["progno.programme"]})
+            .key(function(d) { return d["sprogno.subprogramme"]})
+            .rollup(function(leaves) {
+                return d3.sum(leaves, function(leaf) { return leaf["value.sum"] });
+            })
+            .entries(filtered_data)
+        
+        display_programmes(g_bar, nested_data, config);
+        displaySubProgrammes(g_bar, nested_data, config);
+        displayBars(g_bar, nested_data, config);
+        display_bars_text(g_bar, nested_data, config);
+    }
+    return _update_barchart;
+}
+
+var selectBox = d3.select("#my_dataviz")
+    .append("select")
+
+var deptBox = d3.select("#my_dataviz")
+    .append("select")
+
+var svg = d3.select("#my_dataviz")
+    .append("svg")
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("viewBox", "0 0 " + width + " " + height)
+        .classed("svg-content-responsive", true)
+        .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    var g_bar = svg.append("g");
+
+    d3.queue()
+        .defer(d3.json, url.replace("XXX", "Public Service and Administration"))
+        .defer(d3.json, dept_url)
+        .await(function(error, data, departmentData) {
+            if (error) {
+                console.log("Something went wrong: " + error);
+            } else {
+                data = data.cells;
+                departmentData = departmentData.cells;
+
+                var departments = unique_index(departmentData, "voteno.department");
+                var econ4 = unique_index(data, "econ4.econ4");
+                var subprogrammes = unique_index(data, "sprogno.subprogramme");
+                d3.select("svg").attr("viewBox", "0 0 " + width + " " + (height + 100))
+                var max_value = d3.max(data, function(d) { return d["value.sum"]; })
+                config = {
+                    scaleY: d3.scaleLinear().domain([0, subprogrammes.length]).range([0, height]),
+                    scaleX: d3.scaleLinear().domain([0, 3]).range([0, width]),
+                    scaleBar:  d3.scaleLinear().domain([0, max_value]).range([0, 200]),
+                }
+
+                funcDisplay = update_barchart(g_bar, data, config);
+
+                selectBox
+                    .on("change", update_barchart(g_bar, data, config))
+                    .classed("account-select", true)
+                    .selectAll("option")
+                    .data(econ4)
+                    .enter()
+                    .append("option")
+                        .text(function(d) { return d.key;})
+
+                deptBox
+                    .classed("dept-select", true)
+                    .selectAll("option")
+                    .data(departments)
+                    .enter()
+                    .append("option")
+                        .text(function(d) { return d.key;})
+
+                funcDisplay();
+            }
+
+
+        })
+</script>
+
