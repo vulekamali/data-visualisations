@@ -36,7 +36,7 @@ text {
 #my_dataviz {
     display: inline-block;
     position: relative;
-    width: 50%;
+    width: 100%;
     padding-bottom: 100%; /* aspect ratio */
     vertical-align: top;
     overflow: hidden;
@@ -232,7 +232,7 @@ var svg = d3.select("#my_dataviz")
     var g_bar = svg.append("g");
 
     d3.queue()
-        .defer(d3.json, url.replace("XXX", "Public Service and Administration"))
+        .defer(d3.json, url.replace("XXX", "Health"))
         .defer(d3.json, dept_url)
         .await(function(error, data, departmentData) {
             if (error) {
