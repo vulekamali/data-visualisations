@@ -1,6 +1,14 @@
 (function() {
-        var container = d3.selectAll("[data-viz-type=department-treemap]")
-        var url = container.attr("data-url")
+        var department = location.href.split("?")[1];
+        var url, container;
+
+        if (department != undefined) {
+            container = d3.select("#my_dataviz");
+            url = "https://openspending.org//api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AXXX&drilldown=progno.programme%7Csprogno.subprogramme".replace("XXX", department);
+        } else {
+            container = d3.selectAll("[data-viz-type=department-treemap]")
+            url = container.attr("data-url")
+        }
 
         var baseWidth = 800;
         var baseHeight = baseWidth;
