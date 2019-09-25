@@ -29,9 +29,7 @@
                 .attr("preserveAspectRatio", "xMinYMin meet")
                 .classed("svg-content-responsive", true)
                 .append("g")
-                    //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        // TODO top labels
         var labels = svg
             .append("g")
                 .classed("top-labels", true);
@@ -41,21 +39,6 @@
         var nester = d3
             .nest()
             .key(function(d) { return d["progno.programme"]})
-
-        var programme_label = labels.append("text")
-            .classed("heading", true)
-            .classed("programme", true);
-
-        var subprogramme_label = labels
-            .append("text")
-                .attr("dy", "1.2em")
-                .classed("heading", true)
-                .classed("subprogramme", true)
-
-        var amount_label = labels.append("text")
-            .attr("dy", "2.4em")
-            .classed("heading", true)
-            .classed("amount", true);
 
         var programmeButton = labels
             .append("g")
@@ -119,6 +102,33 @@
                 .attr("y1", 0)
                 .attr("y2", 70)
 
+
+function addProgrammeLabels(d) {
+    var subprogrammes = d.parent.data.values;
+    var maxBudget = d3.max(subprogrammes, function(x) { return x["value.sum"] })
+    var budget = d.data["value.sum"];
+
+    if (budget == maxBudget) {
+        if (d.y1 - d.y0 > 30) {
+            return d.data["progno.programme"]
+        } else {
+            return ""
+        }
+    }
+}
+
+function addSubprogrammeLabels(key, currency) {
+    return function(d) {
+        if (d.y1 - d.y0 > 20) {
+            if (currency)
+                return rand_human_fmt(d.data[key])
+            return d.data[key]
+        } else {
+            return ""
+        }
+    }
+}
+
 function zoom(d) {
 
     parent = d.parent;
@@ -155,10 +165,35 @@ function zoom(d) {
         .attr('width',  function(d) { return clamp(x, d.x1) - clamp(x, d.x0) })
         .attr('height', function(d) { return clamp(y, d.y1) - clamp(y, d.y0) })
 
-    d3.selectAll(".box text")
+    d3.selectAll(".box .programme-label tspan")
         .transition(t)
-        .attr('x', function (d) { return clamp(x, d.x0) })
-        .attr('y', function (d) { return clamp(y, d.y0) })
+        .attr("x", function(d) { return clamp(x, d.x0) + 5})
+        .attr("y", function(d) { return clamp(y, d.y0) + 15})
+        .text(addProgrammeLabels);
+    /*
+        .text(function(d) {
+            if (d.data["sprogno.subprogramme"]) {
+                console.log("stuff")
+            }
+            if (d.x1 - d.x0 > 80 || d.y1 - d.y0 > 20) {
+                return d.data["progno.programme"]
+            } else {
+                return ""
+            }
+        })
+        */
+
+    d3.selectAll(".box .subprogramme-label tspan")
+        .transition(t)
+        .attr("x", function(d) { return clamp(x, d.x0) + 5})
+        .attr("y", function(d) { return clamp(y, d.y1) - 18})
+        .text(addSubprogrammeLabels("sprogno.subprogramme"))
+
+    d3.selectAll(".box .subprogramme-budget-label tspan")
+        .transition(t)
+        .attr("x", function(d) { return clamp(x, d.x0) + 5})
+        .attr("y", function(d) { return clamp(y, d.y1) - 6})
+        .text(addSubprogrammeLabels("value.sum", true))
 }
 
 
@@ -233,18 +268,7 @@ d3.json(url, function(data) {
             .classed("programme-label", true)
             .attr("x", function(d) { return d.x0 + 5})
             .attr("y", function(d) { return d.y0 + 15})
-            .text(function(d) {
-                var subprogrammes = d.parent.data.values;
-                var maxBudget = d3.max(subprogrammes, function(x) { return x["value.sum"] })
-                var budget = d.data["value.sum"];
-                if (budget == maxBudget) {
-                    if (d.x1 - d.x0 > 80 && d.y1 - d.y0 > 30) {
-                        return d.data["progno.programme"]
-                    } else {
-                        return ""
-                    }
-                }
-            })
+            .text(addProgrammeLabels)
             .attr("font-size", "0.6em")
             .attr("fill", "white")
             .call(crop)
@@ -255,13 +279,7 @@ d3.json(url, function(data) {
             .classed("subprogramme-label", true)
             .attr("x", function(d) { return d.x0 + 5})
             .attr("y", function(d) { return d.y1 - 18})
-            .text(function(d) {
-                if (d.x1 - d.x0 > 80 && d.y1 - d.y0 > 20) {
-                    return d.data["sprogno.subprogramme"]
-                } else {
-                    return ""
-                }
-            })
+            .text(addSubprogrammeLabels("sprogno.subprogramme"))
             .attr("font-size", "0.6em")
             .attr("fill", "white")
             .call(crop)
@@ -272,13 +290,7 @@ d3.json(url, function(data) {
             .classed("subprogramme-budget-label", true)
             .attr("x", function(d) { return d.x0 + 5})
             .attr("y", function(d) { return d.y1 - 6})
-            .text(function(d) {
-                if (d.x1 - d.x0 > 80 && d.y1 - d.y0 > 20) {
-                    return rand_human_fmt(d.data["value.sum"])
-                } else {
-                    return ""
-                }
-            })
+            .text(addSubprogrammeLabels("value.sum", true))
             .attr("font-size", "0.6em")
             .attr("fill", "white")
             .call(crop)
