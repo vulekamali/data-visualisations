@@ -3,10 +3,6 @@
     font-size: 11px;
 }
 
-.main-label rect {
-    height: 23px;
-}
-
 rect.legend-item-box {
     width: 18px;
     height: 18px;

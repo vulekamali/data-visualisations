@@ -1,5 +1,6 @@
 .main-label rect {
     fill: #333333;
+    height: 23px;
 }
 
 .main-label text {
@@ -24,3 +25,12 @@
     font-family: arial;
     font-weight: bold;
 }
+
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+}
+
