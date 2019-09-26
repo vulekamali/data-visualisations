@@ -181,7 +181,9 @@ function zoom(d) {
 
 
 d3.json(url, function(data) {
-    data = data.cells;
+    data = data.cells.sort(function(a, b) {
+        return b["value.sum"] - a["value.sum"];
+    });
 
     var nested_data = nester.entries(data);
 
@@ -217,18 +219,15 @@ d3.json(url, function(data) {
             .attr('y', function (d) { return y(d.y0)})
             .attr('width', function (d) { return x(d.x1 - d.x0)})
             .attr('height', function (d) { return y(d.y1 - d.y0)})
-            .style("fill", function(d) {
+            .style("fill", function(d, idx) {
                 var programmes = root.data.values.map(function(d) { return d.key});
                 var subprogrammes = d.parent.data.values;
-                var minBudget = d3.min(subprogrammes, function(x) { return x["value.sum"] })
-                var maxBudget = d3.max(subprogrammes, function(x) { return x["value.sum"] })
-                var budget = d.data["value.sum"];
+                var subprogramme_labels = subprogrammes.map(function(d) { return d["sprogno.subprogramme"];});
 
-                var colScale = d3.scaleOrdinal().domain(programmes).range(cols)
-                var brightScale = d3.scaleLinear().domain([minBudget, maxBudget]).range([0.5, 1])
-                var col = d3.color(colScale(d.data["progno.programme"]));
-
-                return col.brighter(brightScale(budget));
+                var idx = programmes.indexOf(d.data["progno.programme"])
+                var idx2 = subprogramme_labels.indexOf(d.data["sprogno.subprogramme"]);
+                var hues = colorMap[idx];
+                return hues[idx2];
              })
             .on("mouseover", function(d) {
                 programmeLabel.text(d.data["progno.programme"])
