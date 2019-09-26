@@ -5,7 +5,6 @@
 
     var baseWidth = 800;
     var baseHeight = baseWidth;
-    var cols = ["#1E4C41", "#EE783E",  "#1C4897", "#D33630", "#594139", "#255214", "#B14121"]
     
     // set the dimensions and margins of the graph
     var margin = {top: 10, right: 10, bottom: 10, left: 10},
@@ -188,7 +187,7 @@
         .sum(function(d) { return d["value.sum"]})
 
         var programmes = root.data.values.map(function(d) { return d.key});
-        var colScale = d3.scaleOrdinal().domain(programmes).range(cols)
+        var colScale = d3.scaleOrdinal().domain(programmes).range(colorMap2)
 
         createHead(labels, programmes, colScale);
         createCircles(root, colScale);
