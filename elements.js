@@ -20,7 +20,7 @@ function createMainLabel(container, label, config) {
 
     var bbox = text.node().getBBox();
     text.attr("transform", "translate(" + padding + ", " + -bbox.y + ")")
-    text.attr("dy", "0.35em")
+    text.attr("dy", "0.3em")
 
     background
         .attr("width", bbox.width + 2 * padding)
