@@ -20,7 +20,7 @@
             x = d3.scaleLinear().domain([0, width]).range([0, width]),
             y = d3.scaleLinear().domain([0, height]).range([0, height]);
 
-        var svg = createSVG(container, baseWidth, baseHeight); 
+        var svg = createSVG(container, baseWidth, baseHeight);
 
         var labels = svg
             .append("g")
@@ -130,7 +130,7 @@ function zoom(d) {
             return scale(val)
     }
 
-    
+
     var t = d3.transition()
         .duration(800)
         .ease(d3.easeCubicOut);
@@ -143,7 +143,7 @@ function zoom(d) {
         .attr('height', function(d) { return clamp(y, d.y1) - clamp(y, d.y0) })
 
     function displayLabels(d) {
-        if (d.x0 < x.domain()[0] || d.x1 > x.domain()[1] 
+        if (d.x0 < x.domain()[0] || d.x1 > x.domain()[1]
             || d.y0 < y.domain()[0] || d.y1 > y.domain()[1])
             return "none";
         return "block"
@@ -172,7 +172,7 @@ function zoom(d) {
 }
 
 
-d3.json(url, function(data) {
+d3.json(url).then(function(data) {
     data = data.cells.sort(function(a, b) {
         return b["value.sum"] - a["value.sum"];
     });
