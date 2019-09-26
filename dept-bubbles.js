@@ -180,7 +180,7 @@
     }
 
 
-    d3.json(url, function(data) {
+    d3.json(url).then(function(data) {
         data = data.cells;
 
         var nested_data = nester.entries(data);
