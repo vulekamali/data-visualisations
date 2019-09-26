@@ -5,19 +5,23 @@ function createMainLabel(container, label, config) {
     var programmeButton = container
         .append("g")
             .classed("main-label", true)
-            .attr("transform", "translate(10, 15)")
+            .attr("transform", "translate(5, 5)")
 
     var background = programmeButton
         .append("rect")
             .attr("rx", 3)
             .attr("ry", 3)
-            .attr("transform", "translate(-5, -15)")
+            .attr("x", 0)
+            .attr("y", 0)
 
     var text = programmeButton
         .append("text")
             .text(label)
 
     var bbox = text.node().getBBox();
+    text.attr("transform", "translate(" + padding + ", " + -bbox.y + ")")
+    text.attr("dy", "0.35em")
+
     background
         .attr("width", bbox.width + 2 * padding)
 

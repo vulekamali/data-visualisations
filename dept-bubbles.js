@@ -50,12 +50,12 @@
         econclass.append("text")
             .classed("economic-classification", true)
             .text("None Selected")
-            .attr("transform", "translate(6, 40)")
+            .attr("transform", "translate(6, 45)")
 
         econclass.append("text")
             .classed("budget-amount", true)
             .text("R0")
-            .attr("transform", "translate(6, 64)")
+            .attr("transform", "translate(6, 70)")
 
     }
 
