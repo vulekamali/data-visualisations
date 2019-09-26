@@ -28,3 +28,7 @@ rect.legend-item-box {
     pointer-events: none;
 }
 
+.econ-circle:hover {
+    stroke:black;
+    stroke-width:2px;
+}
