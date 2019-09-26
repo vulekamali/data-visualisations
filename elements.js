@@ -28,6 +28,18 @@ function createMainLabel(container, label, config) {
     return programmeButton;
 }
 
+function createSVG(container, width, height) {
+    var svg = container
+        .append("svg")
+            .attr("viewBox", "0 0 " + width + " " + height)
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("preserveAspectRatio", "xMinYMin meet")
+            .classed("svg-content-responsive", true)
+            .append("g")
+
+    return svg
+}
+
 colorMap = [
     ["#2C35AA", "#4050C7", "#5D76F4", "#546BE7", "#5D76F4", "#788FF7", "#96A7F9", "#B2BEFA", "#D2D9FC", "#E7EAFC"],
     ["#7D1D4E", "#9F2757", "#B22E5B", "#C73361", "#D63864", "#DA4F7A", "#DF6B92", "#E793B0", "#EFBED0", "#F8E5EC"],

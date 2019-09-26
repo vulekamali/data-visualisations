@@ -1,4 +1,15 @@
 (function() {
+    var department = location.href.split("?")[1];
+    var url, container;
+
+    if (department != undefined) {
+        container = d3.select("#my_dataviz");
+        url = "https://openspending.org//api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=100000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AXXX&drilldown=econ4.econ4%7Cprogno.programme%7Csprogno.subprogramme".replace("XXX", department)
+    } else {
+        container = d3.selectAll("[data-viz-type=department-bubblechart]")
+        url = container.attr("data-url")
+    }
+
     var nester = d3
         .nest()
         .key(function(d) { return d["progno.programme"]})
@@ -15,13 +26,7 @@
 
     container = d3.selectAll("[data-viz-type=department-bubblechart]")
 
-    var svg = container
-        .append("svg")
-            .attr("viewBox", "0 0 " + baseWidth + " " + baseHeight)
-            .attr("xmlns", "http://www.w3.org/2000/svg")
-            .attr("preserveAspectRatio", "xMinYMin meet")
-            .classed("svg-content-responsive", true)
-            .append("g")
+    var svg = createSVG(container, baseWidth, baseHeight)
 
     var labels = svg
         .append("g")
@@ -175,7 +180,7 @@
     }
 
 
-    d3.json("econ4.json", function(data) {
+    d3.json(url, function(data) {
         data = data.cells;
 
         var nested_data = nester.entries(data);

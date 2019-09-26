@@ -19,16 +19,8 @@
             height = baseHeight - margin.top - margin.bottom,
             x = d3.scaleLinear().domain([0, width]).range([0, width]),
             y = d3.scaleLinear().domain([0, height]).range([0, height]);
-        var cols = ["#1E4C41", "#EE783E",  "#1C4897", "#D33630", "#594139", "#255214", "#B14121"]
 
-        // append the svg object to the body of the page
-        var svg = container
-            .append("svg")
-                .attr("viewBox", "0 0 " + baseWidth + " " + baseHeight)
-                .attr("xmlns", "http://www.w3.org/2000/svg")
-                .attr("preserveAspectRatio", "xMinYMin meet")
-                .classed("svg-content-responsive", true)
-                .append("g")
+        var svg = createSVG(container, baseWidth, baseHeight); 
 
         var labels = svg
             .append("g")
