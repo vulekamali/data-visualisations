@@ -1,0 +1,26 @@
+.main-label rect {
+    fill: #333333;
+}
+
+.main-label text {
+    font-family: arial;
+    font-size: 10px;
+    fill: white;
+}
+
+.label-separator {
+    stroke: #cccccc;
+}
+
+.top-labels .programme-label, .top-labels .subprogramme-label, .top-labels .economic-classification {
+    fill: black;
+    font-size: 13px;
+    font-family: arial;
+}
+
+.top-labels .budget-amount {
+    fill: black;
+    font-size: 20px;
+    font-family: arial;
+    font-weight: bold;
+}

@@ -1,9 +1,9 @@
-function crop(text) {
+function crop(text, width) {
     text.each(function(d) {
         var padding = 10;
         // TODO wish there was a cleaner way to pass the width in to this
         // function
-        var width = d.x1 - d.x0 - padding;
+        var width = width || (d.x1 - d.x0 - padding);
         var text = d3.select(this),
             words = text.text().split(/\s+/).reverse(),
             word,
@@ -29,7 +29,8 @@ function crop(text) {
 }
 function wrap(text, width, lineHeight) {
     lineHeight = lineHeight || 1.1; // ems
-    text.each(function() {
+    text.each(function(d) {
+        var padding = 10;
         var text = d3.select(this),
             words = text.text().split(/\s+/).reverse(),
             word,
@@ -43,6 +44,9 @@ function wrap(text, width, lineHeight) {
                         .attr("x", x)
                         .attr("y", y)
                         .attr("dy", dy + "em");
+            if (words.length > 1) {
+                console.log(text.text())
+            }
         while (word = words.pop()) {
             line.push(word);
             tspan.text(line.join(" "));

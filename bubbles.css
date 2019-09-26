@@ -1,0 +1,30 @@
+.top-labels .programme-label {
+    fill: black;
+    font-size: 11px;
+}
+
+.main-label rect {
+    height: 23px;
+}
+
+rect.legend-item-box {
+    width: 18px;
+    height: 18px;
+}
+
+.legend-item-text-background {
+    height: 25px;
+    fill: #F2F2F2;
+}
+
+.legend-item-text {
+    font-family: Arial;
+}
+
+.bubble .econ-label {
+    fill: white;
+    text-anchor: middle;
+    font: 24px "Helvetica Neue", Helvetica, Arial, sans-serif;
+    pointer-events: none;
+}
+
