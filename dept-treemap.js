@@ -153,6 +153,7 @@ function zoom(d) {
         else
             return scale(val)
     }
+
     
     var t = d3.transition()
         .duration(800)
@@ -165,35 +166,33 @@ function zoom(d) {
         .attr('width',  function(d) { return clamp(x, d.x1) - clamp(x, d.x0) })
         .attr('height', function(d) { return clamp(y, d.y1) - clamp(y, d.y0) })
 
+    function displayLabels(d) {
+        if (d.x0 < x.domain()[0] || d.x1 > x.domain()[1] 
+            || d.y0 < y.domain()[0] || d.y1 > y.domain()[1])
+            return "none";
+        return "block"
+    }
+
     d3.selectAll(".box .programme-label tspan")
         .transition(t)
         .attr("x", function(d) { return clamp(x, d.x0) + 5})
         .attr("y", function(d) { return clamp(y, d.y0) + 15})
-        .text(addProgrammeLabels);
-    /*
-        .text(function(d) {
-            if (d.data["sprogno.subprogramme"]) {
-                console.log("stuff")
-            }
-            if (d.x1 - d.x0 > 80 || d.y1 - d.y0 > 20) {
-                return d.data["progno.programme"]
-            } else {
-                return ""
-            }
-        })
-        */
+        .text(addProgrammeLabels)
+        .style("display", displayLabels)
 
     d3.selectAll(".box .subprogramme-label tspan")
         .transition(t)
         .attr("x", function(d) { return clamp(x, d.x0) + 5})
         .attr("y", function(d) { return clamp(y, d.y1) - 18})
         .text(addSubprogrammeLabels("sprogno.subprogramme"))
+        .style("display", displayLabels)
 
     d3.selectAll(".box .subprogramme-budget-label tspan")
         .transition(t)
         .attr("x", function(d) { return clamp(x, d.x0) + 5})
         .attr("y", function(d) { return clamp(y, d.y1) - 6})
         .text(addSubprogrammeLabels("value.sum", true))
+        .style("display", displayLabels)
 }
 
 
