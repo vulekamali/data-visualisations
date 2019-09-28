@@ -1,44 +1,32 @@
 (function() {
-    var department = location.href.split("?")[1];
-    var url, container;
+    var urlTemplate = "https://openspending.org//api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=100000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AXXX&drilldown=econ4.econ4%7Cprogno.programme";
+    var mainConfig = findUrlAndContainer(urlTemplate, d3.select("#my_dataviz"), "department-treemap");
 
-    if (department != undefined) {
-        container = d3.select("#my_dataviz");
-        url = "https://openspending.org//api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=100000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AXXX&drilldown=econ4.econ4%7Cprogno.programme%7Csprogno.subprogramme".replace("XXX", department)
-    } else {
-        container = d3.selectAll("[data-viz-type=department-bubblechart]")
-        url = container.attr("data-url")
-    }
-
-    var nester = d3
-        .nest()
-        .key(function(d) { return d["progno.programme"]})
-
-    var baseWidth = 800;
-    var baseHeight = baseWidth;
+    var viewport = getViewportDimensions();
     
     // set the dimensions and margins of the graph
     var margin = {top: 10, right: 10, bottom: 10, left: 10},
-        width = baseWidth - margin.left - margin.right,
-        height = baseHeight - margin.top - margin.bottom,
+        width = viewport.width - margin.left - margin.right,
+        height = viewport.height - margin.top - margin.bottom,
         x = d3.scaleLinear().domain([0, width]).range([0, width]),
         y = d3.scaleLinear().domain([0, height]).range([0, height]);
 
-    container = d3.selectAll("[data-viz-type=department-bubblechart]")
-
-    var svg = createSVG(container, baseWidth, baseHeight)
+    var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
 
     var labels = svg
         .append("g")
-            .classed("top-labels", true);
+            .classed("top-labels", true)
+            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
 
     var bubbleChart = svg
         .append("g")
-            .attr("transform", "translate(0, " + 100 + ")");
+            .classed("bubble-chart", true)
 
 
     function createBudgetSection(container) {
-        container
+        var econContainer = container.append("g");
+
+        econContainer
             .append("line")
                 .classed("label-separator", true)
                 .attr("x1", width / 2)
@@ -46,21 +34,19 @@
                 .attr("y1", 20)
                 .attr("y2", 90)
 
-        var econclass = container
-            .append("g")
-                .attr("transform", "translate(" + width / 1.9 + ", 20)")
+        createMainLabel(econContainer, "ECONOMIC CLASSIFICATION")
 
-        createMainLabel(econclass, "ECONOMIC CLASSIFICATION")
-
-        econclass.append("text")
+        econContainer.append("text")
             .classed("economic-classification", true)
             .text("None Selected")
-            .attr("transform", "translate(6, 45)")
+            .attr("transform", "translate(6, 55)")
 
-        econclass.append("text")
+        econContainer.append("text")
             .classed("budget-amount", true)
             .text("R0")
-            .attr("transform", "translate(6, 70)")
+            .attr("transform", "translate(6, 80)")
+
+        return econContainer
 
     }
 
@@ -69,8 +55,9 @@
             append("g")
                 .classed("legend", true)
 
-        var boxSpace = 33;
-        createMainLabel(legend, "PROGRAMME");
+        mainLabel = createMainLabel(legend, "PROGRAMME");
+
+        var bbox = getDimensions(mainLabel);
 
         legendItems = legend
             .append("g")
@@ -79,20 +66,29 @@
                 .data(programmes)
                 .enter()
                 .append("g")
-                .attr("transform", "translate(0, 8)")
-                    .classed("item", true);
-        legendItems
+                .attr("transform", "translate(0, " + (bbox.y + bbox.height) + ")")
+                    .classed("item", true)
+                    .on("click", function(d) { unselect(d); })
+
+        var rects = legendItems
             .append("rect")
                 .attr("x", 0)
                 .attr("y", 0)
                 .attr("rx", 2)
                 .attr("ry", 2)
-                .attr("transform", function(d, idx) {
-                    return "translate(5, " + (idx * boxSpace + 30) + ")"
-                })
                 .style("fill", colScale)
                 .classed("legend-item-box", true)
 
+        boxHeight = getDimensions(rects).width;
+        boxDisplacement = boxHeight + 15;
+
+        rects
+            .attr("transform", function(d, idx) {
+                return "translate(0, " + (idx * boxDisplacement) + ")"
+            })
+
+
+        var backgroundPadding = 2;
         var legendItemBackgrounds = legendItems
             .append("rect")
                 .attr("x", 0)
@@ -100,8 +96,9 @@
                 .attr("rx", 3)
                 .attr("ry", 3)
                 .attr("transform", function(d, idx) {
-                    return "translate(30, " + (idx * boxSpace + 27) + ")"
+                    return "translate(" + (boxDisplacement) + ", " + (idx * boxDisplacement - backgroundPadding) + ")"
                 })
+                .attr("height", boxHeight + 2 * backgroundPadding)
                 .classed("legend-item-text-background", true)
 
         legendItems
@@ -109,22 +106,18 @@
                 .attr("x", 0)
                 .attr("y", 0)
                 .attr("transform", function(d, idx) {
-                    return "translate(40, " + (idx * boxSpace + 45) + ")"
+                    return "translate(" + (boxDisplacement + backgroundPadding * 2) + ", " + (idx * boxDisplacement) + ")"
                 })
+                .attr("dy", "1em")
                 .text(function(d) { return d; })
                 .style("fill", "black")
                 .classed("legend-item-text", true)
 
         legendItemBackgrounds
             .each(function(d) {
-                console.log(d);
-                var bbox = this.nextSibling.getBBox();
+                var bbox = getDimensions(d3.select(this.nextSibling));
                 d3.select(this).attr("width", bbox.width + 20);
             });
-
-        legend
-            .attr("transform", "translate(0, " + 20 + ")")
-
 
         return legend;
     }
@@ -132,71 +125,136 @@
     function createHead(container, programmes, colScale) {
         legend = createLegend(container, programmes, colScale);
         budgetLabel = createBudgetSection(container);
+        var bbox = getDimensions(legend);
+        budgetLabel.attr("transform", "translate(" + (bbox.x + bbox.width) + ", 0)")
+    }
+
+    function unselect(programme) {
+        d3.selectAll(".bubble circle") 
+            .classed("unselected", function(d) {
+                if (d["progno.programme"] != programme)
+                    return !d3.select(this).classed("unselected")
+                return false
+            })
+
+        d3.selectAll(".legend-items rect") 
+            .classed("unselected", function(d) {
+                if (d != programme)
+                    return !d3.select(this).classed("unselected")
+                return false
+            })
     }
 
 
-    function createCircles(data, colScale) {
 
-        d3.pack()
-            .size([width, height])(data)
+    function createCircles(container, data, colScale) {
+        var simulation = d3.forceSimulation()
+            .force("x", d3.forceX(0 / 2).strength(0.1))
+            .force("y", d3.forceX(height / 2).strength(0.1))
+            .force("collide", d3.forceCollide(function(d) { return radiusScale(d["value.sum"])}))
 
-        var circles = bubbleChart
+        var radiusScale = d3.scaleSqrt().domain([
+            d3.min(data, function(d) { return d["value.sum"]}),
+            d3.max(data, function(d) { return d["value.sum"]})
+        ]).range([10, 100])
+
+        var circles = container
             .selectAll("g")
-            .data(data.leaves())
+            .data(data)
             .enter()
             .append("g")
                 .classed("bubble", true)
-                .attr("transform", function(d) {
-                    return "translate(" + d.x + ", " + d.y + ")";
+                .on("mouseover", function(d) {
+                    d3.select(".top-labels .economic-classification").text(d["econ4.econ4"])
+                    d3.select(".top-labels .budget-amount").text(rand_fmt(d["value.sum"]))
                 })
-            .on("mouseover", function(d) {
-                d3.select(".top-labels .economic-classification").text(d.data["econ4.econ4"])
-                d3.select(".top-labels .budget-amount").text(rand_fmt(d.data["value.sum"]))
-            });
+                .on("click", function(d) {
+                    var programme = d["progno.programme"]
+                    unselect(programme);
+                })
 
         circles
             .append("circle")
-                .attr("r", function(d) { return d.r })
+                .attr("r", function(d) { return radiusScale(d["value.sum"]) })
                 .style("fill", function(d) {
-                    return colScale(d.data["progno.programme"]);
+                    return colScale(d["progno.programme"]);
                 })
                 .classed("econ-circle", true)
 
         circles
             .append("text")
             .text(function(d) {
-                console.log(d);
-                if (d.r > 20) {
-                    return d.data["econ4.econ4"]
+                if (radiusScale(d["value.sum"]) > 20) {
+                    return d["econ4.econ4"]
                 } else {
                     return "";
                 }
             })
             .classed("econ-label", true)
             .style("font-size", function(d) {
-                return Math.min(2*d.r, (2 * d.r - 8) / this.getComputedTextLength() * 24) + "px"; 
+                radius = radiusScale(d["value.sum"])
+                a = Math.min(2 * radius, (2 * radius - 8) / this.getComputedTextLength() * 24) + "px"; 
+                console.log(a)
+                return a;
             })
             .attr("dy", ".35em")
+
+        simulation.nodes(data).on("tick", ticked);
+
+        function ticked() {
+            circles.attr("transform", function(d) {
+                var radius = radiusScale(d["value.sum"])
+                d.y = Math.max(radius * 2, Math.min(height - 30*margin.bottom - radius, d.y));
+                d.x = Math.max(radius, Math.min(width - radius, d.x));
+                return "translate(" + d.x + ", " + d.y + ")";
+            });
+
+            var bbox = getDimensions(bubbleChart);
+            svg.select(".bubble-chart-bbox")
+                .attr("x", bbox.x)
+                .attr("y", bbox.y)
+                .attr("width", bbox.width)
+                .attr("height", bbox.height)
+            }
     }
 
 
-    d3.json(url).then(function(data) {
+    d3.json(mainConfig.url).then(function(data) {
         data = data.cells;
 
-        var nested_data = nester.entries(data);
-
-        var root = d3.hierarchy(
-            {values:nested_data},
-            function(d) { return d.values }
-        )
-        .sum(function(d) { return d["value.sum"]})
-
-        var programmes = root.data.values.map(function(d) { return d.key});
+        var programmes = unique(data.map(function(d) { return d["progno.programme"]; }));
         var colScale = d3.scaleOrdinal().domain(programmes).range(colorMap2)
 
         createHead(labels, programmes, colScale);
-        createCircles(root, colScale);
 
+        var bbox = getDimensions(labels);
+        bubbleChart.attr("transform", "translate(0, " + (bbox.x + bbox.height) + ")")
+        createCircles(bubbleChart, data, colScale);
+
+        var bbox = getDimensions(labels);
+        svg.append("rect")
+            .attr("x", bbox.x)
+            .attr("y", bbox.y)
+            .attr("width", bbox.width)
+            .attr("height", bbox.height)
+            .classed("bounding-box", true)
+
+        var bbox = getDimensions(d3.select(".bubble-chart"));
+        svg.append("rect")
+            .attr("x", bbox.x)
+            .attr("y", bbox.y)
+            .attr("width", bbox.width)
+            .attr("height", bbox.height)
+            .classed("bubble-chart-bbox", true)
+            .attr("transform", "translate(0, " + margin.top + ")")
+            .classed("bounding-box", true)
+
+        svg.append("rect")
+            .attr("x", margin.left)
+            .attr("y", margin.top)
+            .attr("width", viewport.width - margin.left - margin.right)
+            .attr("height", viewport.height - margin.bottom - margin.top)
+            .classed("bounding-box", true)
 
     });
 
