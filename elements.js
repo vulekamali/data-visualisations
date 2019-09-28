@@ -5,7 +5,6 @@ function createMainLabel(container, label, config) {
     var programmeButton = container
         .append("g")
             .classed("main-label", true)
-            .attr("transform", "translate(5, 5)")
 
     var background = programmeButton
         .append("rect")
