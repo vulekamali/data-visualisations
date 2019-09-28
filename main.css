@@ -1,11 +1,11 @@
 .main-label rect {
     fill: #333333;
-    height: 23px;
+    height: 4vh;
 }
 
 .main-label text {
     font-family: arial;
-    font-size: 14px;
+    font-size: 2.3vh;
     fill: white;
 }
 
@@ -13,23 +13,9 @@
     stroke: #cccccc;
 }
 
-.top-labels .programme-label, .top-labels .subprogramme-label, .top-labels .economic-classification {
-    fill: black;
-    font-size: 13px;
-    font-family: arial;
-}
-
-.top-labels .budget-amount {
-    fill: black;
-    font-size: 20px;
-    font-family: arial;
-    font-weight: bold;
-}
-
 .svg-content-responsive {
     display: inline-block;
     position: absolute;
-    top: 10px;
     left: 0;
     width: 100%;
 }
