@@ -29,19 +29,20 @@
         econContainer
             .append("line")
                 .classed("label-separator", true)
-                .attr("x1", width / 2)
-                .attr("x2", width / 2)
-                .attr("y1", 20)
+                .attr("x1", 0)
+                .attr("x2", 0)
+                .attr("y1", 0)
                 .attr("y2", 90)
 
-        createMainLabel(econContainer, "ECONOMIC CLASSIFICATION")
+        var classifcationSection = econContainer.append("g").attr("transform", "translate(" + 10 + ", 0)")
+        createMainLabel(classifcationSection, "ECONOMIC CLASSIFICATION")
 
-        econContainer.append("text")
+        classifcationSection.append("text")
             .classed("economic-classification", true)
             .text("None Selected")
             .attr("transform", "translate(6, 55)")
 
-        econContainer.append("text")
+        classifcationSection.append("text")
             .classed("budget-amount", true)
             .text("R0")
             .attr("transform", "translate(6, 80)")
