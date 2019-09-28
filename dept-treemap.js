@@ -1,30 +1,20 @@
 (function() {
-        var department = location.href.split("?")[1];
-        var url, container;
+        urlTemplate = "https://openspending.org//api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AXXX&drilldown=progno.programme%7Csprogno.subprogramme"
+        var mainConfig = findUrlAndContainer(urlTemplate, d3.select("#my_dataviz"), "department-treemap");
 
-        if (department != undefined) {
-            container = d3.select("#my_dataviz");
-            url = "https://openspending.org//api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=10000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AXXX&drilldown=progno.programme%7Csprogno.subprogramme".replace("XXX", department);
-        } else {
-            container = d3.selectAll("[data-viz-type=department-treemap]")
-            url = container.attr("data-url")
-        }
-
-        // Dynamically get the size of the viewport
-        var baseWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-        var baseHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+        var viewport = getViewportDimensions();
 
         // set the dimensions and margins of the graph
         var margin = {top: 100, right: 0, bottom: 0, left: 0},
-            width = baseWidth - margin.left - margin.right,
-            height = baseHeight - margin.top - margin.bottom,
+            width = viewport.width - margin.left - margin.right,
+            height = viewport.height - margin.top - margin.bottom,
             x = d3.scaleLinear().domain([0, width]).range([0, width]),
             y = d3.scaleLinear().domain([0, height]).range([0, height]);
 
         var programmeOffset = 62;
         var budgetOffset = 86;
 
-        var svg = createSVG(container, baseWidth, baseHeight);
+        var svg = createSVG(mainConfig.container, viewport.width, viewport.height);
 
         var labels = svg
             .append("g")
@@ -190,7 +180,7 @@ function zoom(d) {
 }
 
 
-d3.json(url).then(function(data) {
+d3.json(mainConfig.url).then(function(data) {
     data = data.cells.sort(function(a, b) {
         return b["value.sum"] - a["value.sum"];
     });
