@@ -10,15 +10,19 @@
             url = container.attr("data-url")
         }
 
-        var baseWidth = 800;
-        var baseHeight = baseWidth;
+        // Dynamically get the size of the viewport
+        var baseWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        var baseHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
         // set the dimensions and margins of the graph
-        var margin = {top: 80, right: 10, bottom: 10, left: 0},
+        var margin = {top: 100, right: 0, bottom: 0, left: 0},
             width = baseWidth - margin.left - margin.right,
             height = baseHeight - margin.top - margin.bottom,
             x = d3.scaleLinear().domain([0, width]).range([0, width]),
             y = d3.scaleLinear().domain([0, height]).range([0, height]);
+
+        var programmeOffset = 62;
+        var budgetOffset = 86;
 
         var svg = createSVG(container, baseWidth, baseHeight);
 
@@ -42,13 +46,13 @@
             .append("text")
                 .classed("programme-label", true)
                 .text("All programmes")
-                .attr("transform", "translate(5, 44)")
+                .attr("transform", "translate(5, " + programmeOffset + ")")
 
         var programmeBudgetLabel = labels
             .append("text")
                 .classed("programme-budget-label", true)
                 .text("R0")
-                .attr("transform", "translate(5, 68)")
+                .attr("transform", "translate(5, " + budgetOffset + ")")
 
         var subprogrammeButton = labels
             .append("g")
@@ -62,13 +66,13 @@
             .append("text")
                 .classed("subprogramme-label", true)
                 .text("None selected")
-                .attr("transform", "translate(" + (width / 1.8 - 5) + ", 44)")
+                .attr("transform", "translate(" + (width / 1.8 - 5) + ", " + programmeOffset + ")")
 
         var subprogrammeBudgetLabel = labels
             .append("text")
                 .classed("subprogramme-budget-label", true)
                 .text("R0")
-                .attr("transform", "translate(" + (width / 1.8 - 5) + ", 68)")
+                .attr("transform", "translate(" + (width / 1.8 - 5) + ", " + budgetOffset + ")")
 
         labels
             .append("line")
@@ -85,7 +89,7 @@ function addProgrammeLabels(d) {
     var budget = d.data["value.sum"];
 
     if (budget == maxBudget) {
-        if (d.y1 - d.y0 > 30) {
+        if (d.ry1 - d.ry0 > 30) {
             return d.data["progno.programme"]
         } else {
             return ""
@@ -95,7 +99,10 @@ function addProgrammeLabels(d) {
 
 function addSubprogrammeLabels(key, currency) {
     return function(d) {
-        if (d.y1 - d.y0 > 20) {
+        if (d.data[key] == "Public Administration Policy Analysis") {
+            console.log(d);
+        }
+        if (d.ry1 - d.ry0 > 50 && d.rx1 - d.rx0 > 100) {
             if (currency)
                 return rand_human_fmt(d.data[key])
             return d.data[key]
@@ -103,6 +110,15 @@ function addSubprogrammeLabels(key, currency) {
             return ""
         }
     }
+}
+
+function updateRangeCoordinates(data, x, y) {
+    data.map(function(d) {
+        d.rx0 = x(d.x0);
+        d.rx1 = x(d.x1);
+        d.ry0 = y(d.y0);
+        d.ry1 = y(d.y1);
+    })
 }
 
 function zoom(d) {
@@ -120,6 +136,8 @@ function zoom(d) {
         x.domain([parent.x0, parent.x1]);
         y.domain([parent.y0, parent.y1]);
     }
+
+    updateRangeCoordinates(d3.selectAll(".box").data(), x, y)
 
     var clamp = function(scale, val) {
         if (val < scale.domain()[0])
@@ -152,14 +170,14 @@ function zoom(d) {
     d3.selectAll(".box .programme-label tspan")
         .transition(t)
         .attr("x", function(d) { return clamp(x, d.x0) + 5})
-        .attr("y", function(d) { return clamp(y, d.y0) + 15})
+        .attr("y", function(d) { return clamp(y, d.y0) + 28})
         .text(addProgrammeLabels)
         .style("display", displayLabels)
 
     d3.selectAll(".box .subprogramme-label tspan")
         .transition(t)
         .attr("x", function(d) { return clamp(x, d.x0) + 5})
-        .attr("y", function(d) { return clamp(y, d.y1) - 18})
+        .attr("y", function(d) { return clamp(y, d.y1) - 30})
         .text(addSubprogrammeLabels("sprogno.subprogramme"))
         .style("display", displayLabels)
 
@@ -191,6 +209,9 @@ d3.json(url).then(function(data) {
         .padding(1)
         .paddingOuter(3)
         (root)
+
+    updateRangeCoordinates(root.leaves(), x, y)
+
 
     // TODO double check this
     treemap.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
@@ -241,7 +262,7 @@ d3.json(url).then(function(data) {
         .append("text")
             .classed("programme-label", true)
             .attr("x", function(d) { return d.x0 + 5})
-            .attr("y", function(d) { return d.y0 + 15})
+            .attr("y", function(d) { return d.y0 + 28})
             .text(addProgrammeLabels)
             .attr("font-size", "0.6em")
             .attr("fill", "white")
@@ -252,7 +273,7 @@ d3.json(url).then(function(data) {
         .append("text")
             .classed("subprogramme-label", true)
             .attr("x", function(d) { return d.x0 + 5})
-            .attr("y", function(d) { return d.y1 - 18})
+            .attr("y", function(d) { return d.y1 - 30})
             .text(addSubprogrammeLabels("sprogno.subprogramme"))
             .attr("font-size", "0.6em")
             .attr("fill", "white")
@@ -263,7 +284,7 @@ d3.json(url).then(function(data) {
         .append("text")
             .classed("subprogramme-budget-label", true)
             .attr("x", function(d) { return d.x0 + 5})
-            .attr("y", function(d) { return d.y1 - 6})
+            .attr("y", function(d) { return d.y1 - 8})
             .text(addSubprogrammeLabels("value.sum", true))
             .attr("font-size", "0.6em")
             .attr("fill", "white")

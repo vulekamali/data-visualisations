@@ -4,11 +4,11 @@ text {
 
 .top-labels .programme-label, .top-labels .subprogramme-label {
     fill: black;
-    font-size: 11px;
+    font-size: 2.0vh;
 }
 
 .top-labels .programme-budget-label, .top-labels .subprogramme-budget-label  {
-    font-size: 22px;
+    font-size: 2.8vh;
 }
 
 .tile {
@@ -21,12 +21,21 @@ text {
 }
 
 .box .programme-label {
-    font-size: 13px;
+    font-size: 2vh;
     pointer-events: none;
 }
 
 .box .subprogramme-label, .box .subprogramme-budget-label {
     opacity: 0.7;
-    font-size: 11px;
+    font-size: 2vh;
     pointer-events: none;
+}
+
+#my_dataviz {
+}
+
+
+
+svg {
+    height: calc(100vh - 88px)
 }
