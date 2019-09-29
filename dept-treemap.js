@@ -180,7 +180,8 @@ function zoom(d) {
 }
 
 
-d3.json(mainConfig.url).then(function(data) {
+//d3.json(mainConfig.url).then(function(data) {
+d3.json(mainConfig.url, function(data) {
     data = data.cells.sort(function(a, b) {
         return b["value.sum"] - a["value.sum"];
     });
