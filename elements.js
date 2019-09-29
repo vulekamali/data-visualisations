@@ -23,6 +23,7 @@ function createMainLabel(container, label, config) {
 
     background
         .attr("width", bbox.width + 2 * padding)
+        .attr("height", bbox.height + 2 * padding)
 
     return programmeButton;
 }
