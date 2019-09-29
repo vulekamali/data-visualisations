@@ -125,5 +125,24 @@ var getViewportDimensions = function() {
 }
 
 var getDimensions = function(el) {
-    return el.node().getBoundingClientRect();
+    rect = el.node().getBoundingClientRect();
+    return {
+        x: rect.x || rect.left,
+        y: rect.y || rect.top,
+        width: rect.width,
+        height: rect.height
+
+    }
 }
+
+var createBoundingBox = function(container, el) {
+    var d = getDimensions(el);
+    var box = container.append("rect")
+        .attr("x", d.x)
+        .attr("y", d.y)
+        .attr("width", d.width)
+        .attr("height", d.height)
+        .classed("bounding-box", true)
+    return box
+}
+
