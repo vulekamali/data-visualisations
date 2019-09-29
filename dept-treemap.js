@@ -5,7 +5,7 @@
         var viewport = getViewportDimensions();
 
         // set the dimensions and margins of the graph
-        var margin = {top: 100, right: 0, bottom: 0, left: 0},
+        var margin = {top: 10, right: 0, bottom: 0, left: 10},
             width = viewport.width - margin.left - margin.right,
             height = viewport.height - margin.top - margin.bottom,
             x = d3.scaleLinear().domain([0, width]).range([0, width]),
@@ -13,14 +13,16 @@
 
         var programmeOffset = 62;
         var budgetOffset = 86;
+        var treemapPadding = 3;
 
-        var svg = createSVG(mainConfig.container, viewport.width, viewport.height);
+        var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
+            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
         var labels = svg
             .append("g")
                 .classed("top-labels", true);
 
-        var treemap = svg.append("g");
+        var treemap = svg.append("g")
 
         var nester = d3
             .nest()
@@ -36,13 +38,13 @@
             .append("text")
                 .classed("programme-label", true)
                 .text("All programmes")
-                .attr("transform", "translate(5, " + programmeOffset + ")")
+                .attr("transform", "translate(0, " + programmeOffset + ")")
 
         var programmeBudgetLabel = labels
             .append("text")
                 .classed("programme-budget-label", true)
                 .text("R0")
-                .attr("transform", "translate(5, " + budgetOffset + ")")
+                .attr("transform", "translate(0, " + budgetOffset + ")")
 
         var subprogrammeButton = labels
             .append("g")
@@ -194,19 +196,18 @@ d3.json(mainConfig.url, function(data) {
     )
     .sum(function(d) { return d["value.sum"]})
 
+
     // Then d3.treemap computes the position of each element of the hierarchy
     d3.treemap()
         .size([width, height])
         .padding(1)
-        .paddingOuter(3)
+        .paddingOuter(treemapPadding)
         (root)
 
     updateRangeCoordinates(root.leaves(), x, y)
 
-
-    // TODO double check this
-    treemap.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-
+    var bbox = getDimensions(labels);
+    treemap.attr("transform", "translate(" + -treemapPadding * 2 + ", " + (bbox.x + bbox.height) + ")")
 
     var boxes = treemap
         .selectAll("g")
