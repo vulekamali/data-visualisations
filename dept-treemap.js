@@ -5,24 +5,19 @@
         var viewport = getViewportDimensions();
 
         // set the dimensions and margins of the graph
-        var margin = {top: 10, right: 0, bottom: 0, left: 10},
+        var margin = {top: 0, right: 0, bottom: 0, left: 0},
             width = viewport.width - margin.left - margin.right,
-            height = viewport.height - margin.top - margin.bottom,
-            x = d3.scaleLinear().domain([0, width]).range([0, width]),
-            y = d3.scaleLinear().domain([0, height]).range([0, height]);
+            height = viewport.height - margin.top - margin.bottom 
 
         var programmeOffset = 62;
-        var budgetOffset = 86;
+        var budgetOffset = programmeOffset + 24;
         var treemapPadding = 3;
 
         var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
             .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
-        var labels = svg
-            .append("g")
+        var labels = svg.append("g")
                 .classed("top-labels", true);
-
-        var treemap = svg.append("g")
 
         var nester = d3
             .nest()
@@ -54,25 +49,35 @@
 
         createMainLabel(subprogrammeButton, "SUB-PROGRAMME")
 
-        var subprogrammeLabel = labels
+        var subprogrammeLabel = subprogrammeButton
             .append("text")
                 .classed("subprogramme-label", true)
                 .text("None selected")
-                .attr("transform", "translate(" + (width / 1.8 - 5) + ", " + programmeOffset + ")")
+                .attr("transform", "translate(0, " + programmeOffset + ")")
 
-        var subprogrammeBudgetLabel = labels
+        var subprogrammeBudgetLabel = subprogrammeButton
             .append("text")
                 .classed("subprogramme-budget-label", true)
                 .text("R0")
-                .attr("transform", "translate(" + (width / 1.8 - 5) + ", " + budgetOffset + ")")
+                .attr("transform", "translate(0, "  + budgetOffset + ")")
 
-        labels
+        var labelDimensions = getDimensions(labels);
+        var labelSeparatorOffset = -25;
+
+        subprogrammeButton
             .append("line")
                 .classed("label-separator", true)
-                .attr("x1", width / 1.9)
-                .attr("x2", width / 1.9)
-                .attr("y1", 0)
-                .attr("y2", 70)
+                .attr("x1", labelSeparatorOffset)
+                .attr("x2", labelSeparatorOffset)
+                .attr("y1", labelDimensions.y)
+                .attr("y2", labelDimensions.height + labelDimensions.y + 10)
+
+        var treemapOffset = 10;
+        var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapOffset;
+        var x = d3.scaleLinear().domain([0, width]).range([0, width])
+        var y = d3.scaleLinear().domain([0, treemapHeight]).range([0, treemapHeight]);
+        var treemap = svg.append("g")
+            .attr("transform", "translate(" + -treemapPadding * 2 + ", " + (labelDimensions.y + labelDimensions.height + treemapOffset) + ")")
 
 
 function addProgrammeLabels(d) {
@@ -91,9 +96,6 @@ function addProgrammeLabels(d) {
 
 function addSubprogrammeLabels(key, currency) {
     return function(d) {
-        if (d.data[key] == "Public Administration Policy Analysis") {
-            console.log(d);
-        }
         if (d.ry1 - d.ry0 > 50 && d.rx1 - d.rx0 > 100) {
             if (currency)
                 return rand_human_fmt(d.data[key])
@@ -122,11 +124,12 @@ function zoom(d) {
         && y.domain()[0] == parent.y0 && y.domain()[1] == parent.y1
     ) {
         x.domain([0, width]);
-        y.domain([0, height]);
+        y.domain([0, treemapHeight]);
         parent = d.parent.parent;
     } else {
         x.domain([parent.x0, parent.x1]);
         y.domain([parent.y0, parent.y1]);
+
     }
 
     updateRangeCoordinates(d3.selectAll(".box").data(), x, y)
@@ -149,8 +152,8 @@ function zoom(d) {
         .transition(t)
         .attr('x', function (d) { return clamp(x, d.x0) })
         .attr('y', function (d) { return clamp(y, d.y0) })
-        .attr('width',  function(d) { return clamp(x, d.x1) - clamp(x, d.x0) })
-        .attr('height', function(d) { return clamp(y, d.y1) - clamp(y, d.y0) })
+        .attr('width',  function(d) { return clamp(x, d.x1) - clamp(x, d.x0)})
+        .attr('height', function(d) { return clamp(y, d.y1) - clamp(y, d.y0)})
 
     function displayLabels(d) {
         if (d.x0 < x.domain()[0] || d.x1 > x.domain()[1]
@@ -199,15 +202,12 @@ d3.json(mainConfig.url, function(data) {
 
     // Then d3.treemap computes the position of each element of the hierarchy
     d3.treemap()
-        .size([width, height])
+        .size([width, treemapHeight])
         .padding(1)
         .paddingOuter(treemapPadding)
         (root)
 
     updateRangeCoordinates(root.leaves(), x, y)
-
-    var bbox = getDimensions(labels);
-    treemap.attr("transform", "translate(" + -treemapPadding * 2 + ", " + (bbox.x + bbox.height) + ")")
 
     var boxes = treemap
         .selectAll("g")
@@ -222,7 +222,7 @@ d3.json(mainConfig.url, function(data) {
             .classed("tile", true)
             .attr('x', function (d) {return x(d.x0)})
             .attr('y', function (d) { return y(d.y0)})
-            .attr('width', function (d) { return x(d.x1 - d.x0)})
+            .attr('width', function (d) {return x(d.x1- d.x0)})
             .attr('height', function (d) { return y(d.y1 - d.y0)})
             .style("fill", function(d, idx) {
                 var programmes = root.data.values.map(function(d) { return d.key});
@@ -265,7 +265,7 @@ d3.json(mainConfig.url, function(data) {
         .append("text")
             .classed("subprogramme-label", true)
             .attr("x", function(d) { return d.x0 + 5})
-            .attr("y", function(d) { return d.y1 - 30})
+            .attr("y", function(d) { return d.y1- 30})
             .text(addSubprogrammeLabels("sprogno.subprogramme"))
             .attr("font-size", "0.6em")
             .attr("fill", "white")
@@ -287,5 +287,6 @@ d3.json(mainConfig.url, function(data) {
         .text(function(d) {
             return rand_fmt(d.value)
     })
+
 })
 })()
