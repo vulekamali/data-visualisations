@@ -17,9 +17,10 @@ function createMainLabel(container, label, config) {
         .append("text")
             .text(label)
 
+    //var bbox = text.node().getBBox();
     var bbox = text.node().getBBox();
     text.attr("transform", "translate(" + padding + ", " + -bbox.y + ")")
-    text.attr("dy", "0.3em")
+    text.attr("dy", "5")
 
     background
         .attr("width", bbox.width + 2 * padding)
@@ -38,6 +39,28 @@ function createSVG(container, width, height) {
             .append("g")
 
     return svg
+}
+
+function addLinearGradient(container, id, color1, color2, offset1, offset2) {
+    var gradient = container
+        .append("defs")
+            .append("linearGradient")
+                .attr("id", id)
+                .attr("x1", "0%")
+                .attr("y1", "100%")
+                .attr("x2", "100%")
+                .attr("y2", "100%")
+
+    offset1 = offset1 || "0%"
+    offset2 = offset1 || "100%"
+
+    gradient.append("stop")
+        .attr("offset", 0)
+        .attr("stop-color")
+
+    gradient.append("stop")
+        .attr("offset", 100)
+        .attr("stop-color")
 }
 
 colorMap = [
