@@ -82,7 +82,7 @@ function wrap(text, width, lineHeight) {
                 tspan.text(line.join(" "));
                 line = [word];
                 tspan = text.append("tspan")
-                            .attr("x", x)
+                            .attr("x", 0)
                             .attr("y", y)
                             .attr("dy", ++lineNumber * lineHeight + dy + "em")
                             .text(word);
