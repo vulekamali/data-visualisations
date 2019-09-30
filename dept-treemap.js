@@ -16,6 +16,27 @@
         var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
             .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
+        gradient = svg
+            .append("defs")
+                .append("linearGradient")
+                    .attr("id", "text-fade")
+                    .attr("x1", "0%")
+                    .attr("y1", "100%")
+                    .attr("x2", "100%")
+                    .attr("y2", "100%")
+
+        gradient
+            .append("stop")
+                .attr("offset", "95%")
+                .style("stop-color", "rgb(255,255,255)")
+                .style("stop-opacity", "1")
+
+        gradient
+            .append("stop")
+                .attr("offset", "100%")
+                .style("stop-color", "rgb(255,255,255)")
+                .style("stop-opacity", "0")
+
         var labels = svg.append("g")
                 .classed("top-labels", true);
 
@@ -185,8 +206,7 @@ function zoom(d) {
 }
 
 
-//d3.json(mainConfig.url).then(function(data) {
-d3.json(mainConfig.url, function(data) {
+d3.json(mainConfig.url).then(function(data) {
     data = data.cells.sort(function(a, b) {
         return b["value.sum"] - a["value.sum"];
     });
@@ -198,7 +218,6 @@ d3.json(mainConfig.url, function(data) {
         function(d) { return d.values }
     )
     .sum(function(d) { return d["value.sum"]})
-
 
     // Then d3.treemap computes the position of each element of the hierarchy
     d3.treemap()
@@ -269,7 +288,7 @@ d3.json(mainConfig.url, function(data) {
             .text(addSubprogrammeLabels("sprogno.subprogramme"))
             .attr("font-size", "0.6em")
             .attr("fill", "white")
-            .call(crop)
+            .call(fade)
 
     // Add subprogramme budgets
     boxes
@@ -280,7 +299,7 @@ d3.json(mainConfig.url, function(data) {
             .text(addSubprogrammeLabels("value.sum", true))
             .attr("font-size", "0.6em")
             .attr("fill", "white")
-            .call(crop)
+            .call(fade)
 
     programmeBudgetLabel
         .datum(root)
