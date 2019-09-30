@@ -1,6 +1,9 @@
 (function() {
-    var urlTemplate = "https://openspending.org//api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?pagesize=100000&cut=budget_phase.budget_phase%3AMain+appropriation%7Cfinyear.finyear%3A2019%7Cvoteno.department%3AXXX&drilldown=econ4.econ4%7Cprogno.programme";
-    var mainConfig = findUrlAndContainer(urlTemplate, d3.select("#my_dataviz"), "department-treemap");
+    var container = d3.select(".department-bubbles")
+    var mainConfig = {
+        container: container,
+        url: container.attr("data-aggregate-url")
+    }
 
     var viewport = getViewportDimensions();
     var sectionPadding = 24;

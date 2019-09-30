@@ -113,34 +113,6 @@ var slugify = function(x) {
     return x.replace(/\s+/g, "-").toLowerCase()
 }
 
-var findUrlAndContainer = function(urlTemplate, defaultContainer, chartType) {
-    var department = location.href.split("?")[1];
-    var url, container;
-
-    if (department != undefined) {
-        if (defaultContainer) {
-            container = defaultContainer;
-            url = urlTemplate.replace("XXX", department);
-        } else {
-            throw "Expected a container if the querystring doesn't contain a department";
-
-        }
-    } else {
-        if (chartType != undefined) {
-            container = d3.selectAll("[data-viz-type=" + chartType + "]")
-            url = container.attr("data-url")
-        } else {
-            throw "Expected a valid chartType";
-        }
-    }
-
-    return {
-        url: url,
-        container: container
-    }
-    return [url, container];
-}
-
 var getViewportDimensions = function() {
     // Dynamically get the size of the viewport
     var baseWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
