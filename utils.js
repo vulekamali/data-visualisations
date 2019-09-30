@@ -2,9 +2,8 @@
 function fade(text, width) {
     text.each(function(d) {
         var padding = 10;
-        var width = width || (d.x1 - d.x0 - padding);
         var text = d3.select(this),
-            words = text.text().split(/\s+/).reverse(),
+            words = text.text().split("").reverse(),
             word,
             line = [],
             lineNumber = 0,
@@ -18,10 +17,10 @@ function fade(text, width) {
                         .attr("dy", dy + "em");
         while (word = words.pop()) {
             line.push(word);
-            tspan.text(line.join(" "));
+            tspan.text(line.join(""));
             if (tspan.node().getComputedTextLength() > width) {
                 line.pop()
-                tspan.text(line.join(" "));
+                tspan.text(line.join(""));
                 text.style("fill", "url(#text-fade)")
             }
         }
@@ -75,9 +74,6 @@ function wrap(text, width, lineHeight) {
                         .attr("x", x)
                         .attr("y", y)
                         .attr("dy", dy + "em");
-            if (words.length > 1) {
-                console.log(text.text())
-            }
         while (word = words.pop()) {
             line.push(word);
             tspan.text(line.join(" "));
@@ -114,6 +110,7 @@ var rand_fmt = function(x) {
 }
 
 var slugify = function(x) {
+    return x.replace(/\s+/g, "-").toLowerCase()
 }
 
 var findUrlAndContainer = function(urlTemplate, defaultContainer, chartType) {
