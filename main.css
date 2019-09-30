@@ -1,9 +1,12 @@
+text {
+    font-family: 'Roboto', sans-serif;
+}
+
 .main-label rect {
     fill: #333333;
 }
 
 .main-label text {
-    font-family: arial;
     font-size: 2.3vh;
     fill: white;
 }

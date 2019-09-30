@@ -1,7 +1,3 @@
-text {
-    font-family: Arial;
-}
-
 .top-labels .programme-label, .top-labels .subprogramme-label {
     fill: black;
     font-size: 2.0vh;
@@ -20,7 +16,7 @@ text {
     stroke-width:2px;
 }
 
-.box .programme-label {
+.programme-label, .programme-label tspan {
     font-size: 2vh;
     pointer-events: none;
 }
