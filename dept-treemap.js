@@ -5,6 +5,9 @@
         url: container.attr("data-aggregate-url")
     }
 
+    var progNameRef = "progno.programme"
+    var subprogNameRef = "sprogno.subprogramme"
+    var valueField = "value.sum"
 
     var viewport = getViewportDimensions();
 
@@ -19,16 +22,16 @@
 
     var largestBudget = function(d) {
         var subprogrammes = d.parent.data.values;
-        return d3.max(subprogrammes, function(x) { return x["value.sum"] })
+        return d3.max(subprogrammes, function(x) { return x[valueField] })
     }
 
     function addProgrammeLabels(d) {
         var maxBudget = largestBudget(d)
-        var budget = d.data["value.sum"];
+        var budget = d.data[valueField];
 
         if (budget == maxBudget) {
             if (d.ry1 - d.ry0 > 30) {
-                return d.data["progno.programme"]
+                return d.data[progNameRef]
             } else {
                 return ""
             }
@@ -37,7 +40,7 @@
 
     function fadeProgramme(d, i) {
         var maxBudget = largestBudget(d)
-        var budget = d.data["value.sum"];
+        var budget = d.data[valueField];
 
         if (budget == maxBudget) {
             var minX = d3.min(d.parent.children, function(el) { return el.x0;})
@@ -127,14 +130,14 @@
             .transition(t)
             .attr("x", function(d) { return clamp(x, d.x0) + 5})
             .attr("y", function(d) { return clamp(y, d.y1) - 30})
-            .text(addSubprogrammeLabels("sprogno.subprogramme"))
+            .text(addSubprogrammeLabels(subprogNameRef))
             .style("display", displayLabels)
 
         d3.selectAll(".box .subprogramme-budget-label tspan")
             .transition(t)
             .attr("x", function(d) { return clamp(x, d.x0) + 5})
             .attr("y", function(d) { return clamp(y, d.y1) - 6})
-            .text(addSubprogrammeLabels("value.sum", true))
+            .text(addSubprogrammeLabels(valueField, true))
             .style("display", displayLabels)
     }
 
@@ -168,7 +171,7 @@
 
     var nester = d3
         .nest()
-        .key(function(d) { return d["progno.programme"]})
+        .key(function(d) { return d[progNameRef]})
 
     var programmeButton = labels
         .append("g")
@@ -229,7 +232,7 @@
 
     d3.json(mainConfig.url).then(function(data) {
         data = data.cells.sort(function(a, b) {
-            return b["value.sum"] - a["value.sum"];
+            return b[valueField] - a[valueField];
         });
 
         var nested_data = nester.entries(data);
@@ -238,7 +241,7 @@
             {values:nested_data},
             function(d) { return d.values }
         )
-        .sum(function(d) { return d["value.sum"]})
+        .sum(function(d) { return d[valueField]})
 
         // Then d3.treemap computes the position of each element of the hierarchy
         d3.treemap()
@@ -265,21 +268,21 @@
                 .attr('width', function (d) {return x(d.x1- d.x0)})
                 .attr('height', function (d) { return y(d.y1 - d.y0)})
                 .attr("data-programme", function(d, i) {
-                    return slugify(d.data["progno.programme"])
+                    return slugify(d.data[progNameRef])
                 })
                 .style("fill", function(d, idx) {
                     var programmes = root.data.values.map(function(d) { return d.key});
                     var subprogrammes = d.parent.data.values;
-                    var subprogramme_labels = subprogrammes.map(function(d) { return d["sprogno.subprogramme"];});
+                    var subprogramme_labels = subprogrammes.map(function(d) { return d[subprogNameRef];});
 
-                    var idx = programmes.indexOf(d.data["progno.programme"])
-                    var idx2 = subprogramme_labels.indexOf(d.data["sprogno.subprogramme"]);
+                    var idx = programmes.indexOf(d.data[progNameRef])
+                    var idx2 = subprogramme_labels.indexOf(d.data[subprogNameRef]);
                     var hues = colorMap[idx];
                     return hues[idx2];
                  })
                 .on("mouseover", function(d) {
-                    programmeLabel.text(d.data["progno.programme"])
-                    subprogrammeLabel.text(d.data["sprogno.subprogramme"])
+                    programmeLabel.text(d.data[progNameRef])
+                    subprogrammeLabel.text(d.data[subprogNameRef])
                     programmeBudgetLabel.text(rand_fmt(d.parent.value));
                     subprogrammeBudgetLabel.text(rand_fmt(d.value));
 
@@ -312,7 +315,7 @@
                 .classed("subprogramme-label", true)
                 .attr("x", function(d) { return d.x0 + 5})
                 .attr("y", function(d) { return d.y1- 30})
-                .text(addSubprogrammeLabels("sprogno.subprogramme"))
+                .text(addSubprogrammeLabels(subprogNameRef))
                 .attr("font-size", "0.6em")
                 .attr("fill", "white")
                 .each(function(d, i) {
@@ -326,7 +329,7 @@
                 .classed("subprogramme-budget-label", true)
                 .attr("x", function(d) { return d.x0 + 5})
                 .attr("y", function(d) { return d.y1 - 8})
-                .text(addSubprogrammeLabels("value.sum", true))
+                .text(addSubprogrammeLabels(valueField, true))
                 .attr("font-size", "0.6em")
                 .attr("fill", "white")
                 .call(fade)

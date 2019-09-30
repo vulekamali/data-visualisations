@@ -5,6 +5,11 @@
         url: container.attr("data-aggregate-url")
     }
 
+    var progNameRef = "progno.programme"
+    var subprogNameRef = "sprogno.subprogramme"
+    var econ4Ref = "econ4.econ4"
+    var valueField = "value.sum"
+
     var viewport = getViewportDimensions();
     var sectionPadding = 24;
     var boxPadding = 15;
@@ -142,7 +147,7 @@
     function unselect(programme) {
         d3.selectAll(".bubble circle") 
             .classed("unselected", function(d) {
-                if (d["progno.programme"] != programme)
+                if (d[progNameRef] != programme)
                     return !d3.select(this).classed("unselected")
                 return false
             })
@@ -160,11 +165,11 @@
         var simulation = d3.forceSimulation()
             .force("x", d3.forceX(0 / 2).strength(0.1))
             .force("y", d3.forceX(height / 2).strength(0.1))
-            .force("collide", d3.forceCollide(function(d) { return radiusScale(d["value.sum"])}))
+            .force("collide", d3.forceCollide(function(d) { return radiusScale(d[valueField])}))
 
         var radiusScale = d3.scaleSqrt().domain([
-            d3.min(data, function(d) { return d["value.sum"]}),
-            d3.max(data, function(d) { return d["value.sum"]})
+            d3.min(data, function(d) { return d[valueField]}),
+            d3.max(data, function(d) { return d[valueField]})
         ]).range([viewport.height / 100, viewport.height / 10])
 
         var circles = container
@@ -174,35 +179,35 @@
             .append("g")
                 .classed("bubble", true)
                 .on("mouseover", function(d) {
-                    d3.select(".economic-classification").text(d["econ4.econ4"])
-                    d3.select(".budget-amount").text(rand_fmt(d["value.sum"]))
+                    d3.select(".economic-classification").text(d[econ4Ref])
+                    d3.select(".budget-amount").text(rand_fmt(d[valueField]))
                 })
 
                 .on("click", function(d) {
-                    var programme = d["progno.programme"]
+                    var programme = d[progNameRef]
                     unselect(programme);
                 })
 
         circles
             .append("circle")
-                .attr("r", function(d) { return radiusScale(d["value.sum"]) })
+                .attr("r", function(d) { return radiusScale(d[valueField]) })
                 .style("fill", function(d) {
-                    return colScale(d["progno.programme"]);
+                    return colScale(d[progNameRef]);
                 })
                 .classed("econ-circle", true)
 
         circles
             .append("text")
             .text(function(d) {
-                if (radiusScale(d["value.sum"]) > 20) {
-                    return d["econ4.econ4"]
+                if (radiusScale(d[valueField]) > 20) {
+                    return d[econ4Ref]
                 } else {
                     return "";
                 }
             })
             .classed("econ-label", true)
             .style("font-size", function(d) {
-                radius = radiusScale(d["value.sum"])
+                radius = radiusScale(d[valueField])
                 a = Math.min(2 * radius, (2 * radius - 8) / this.getComputedTextLength() * 24) + "px"; 
                 console.log(a)
                 return a;
@@ -213,7 +218,7 @@
 
         function ticked() {
             circles.attr("transform", function(d) {
-                var radius = radiusScale(d["value.sum"])
+                var radius = radiusScale(d[valueField])
                 d.y = Math.max(radius, Math.min(height - bubbleChartOffset - radius - 24, d.y));
                 d.x = Math.max(radius, Math.min(width - (sectionLeft + sectionPadding + radius), d.x));
                 return "translate(" + d.x + ", " + d.y + ")";
@@ -232,7 +237,7 @@
     d3.json(mainConfig.url).then(function(data) {
         data = data.cells;
 
-        var programmes = unique(data.map(function(d) { return d["progno.programme"]; }));
+        var programmes = unique(data.map(function(d) { return d[progNameRef]; }));
         var colScale = d3.scaleOrdinal().domain(programmes).range(colorMap2)
 
 
