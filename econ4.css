@@ -45,3 +45,7 @@ defs .bar-gradient  stop {
     font-size: 1.5vh;
     fill: white;
 }
+
+select {
+    max-width: 100%;
+}
