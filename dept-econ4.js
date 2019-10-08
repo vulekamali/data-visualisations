@@ -4,13 +4,14 @@
       height = 1400 - margin.top - margin.bottom,
       lineHeight = 1.1;
 
-    var progNameRef = "progno.programme"
-    var subprogNameRef = "sprogno.subprogramme"
+    var container = d3.select(".department-econ4")
+    var model = JSON.parse(container.attr("data-openspending-model"));
+    var progNameRef = getProgNameRef(model);
+    var subprogNameRef = getSubprogNameRef(model);
+    var econ4Ref = getEconClass4Ref(model);
     var valueField = "value.sum"
-    var econ4Ref = "econ4.econ4"
 
     var wrapWidth = 280;
-    var container = d3.select(".department-econ4")
     var mainConfig = {
         container: container,
         url: container.attr("data-aggregate-url")
@@ -27,7 +28,7 @@
         rightSectionWidth = viewport.width * 1/2
     }
 
-    
+
     var heightOffset = 0;
 
     /* Create the select box (temporary until we have a design */
@@ -54,7 +55,7 @@
     var valueSection = createMainLabel(programmesSection, "VALUE")
         .attr("transform", "translate(" + leftSectionWidth + ", 0)")
 
-    
+
     heightOffset += getDimensions(programmesSection).height
     heightOffset += 15 // TODO height units?
 
@@ -67,7 +68,7 @@
 
     //heightOffset = getDimensions(headingLine).y
     heightOffset += 20 // TODO height units
-    
+
     var valuesSection = svg
         .append("g")
             .classed("values-section", true)
@@ -167,7 +168,7 @@
                         .text(rand_fmt(subprogrammeData.value))
                         .attr("transform", "translate(" + (leftSectionWidth + scaleBar(subprogrammeData.value) + 5) + ", " + (offset) + ")")
                         .style("fill", "black")
-                        
+
 
                     offset += getDimensions(subprogrammeRow).height + subprogrammeRowPadding
                 }

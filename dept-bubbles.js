@@ -5,9 +5,10 @@
         url: container.attr("data-aggregate-url")
     }
 
-    var progNameRef = "progno.programme"
-    var subprogNameRef = "sprogno.subprogramme"
-    var econ4Ref = "econ4.econ4"
+    var model = JSON.parse(container.attr("data-openspending-model"));
+    var progNameRef = getProgNameRef(model);
+    var subprogNameRef = getSubprogNameRef(model);
+    var econ4Ref = getEconClass4Ref(model);
     var valueField = "value.sum"
 
     var viewport = getViewportDimensions();
@@ -43,7 +44,7 @@
             .attr("y1", 0)
             .attr("y2", 90)
             .attr("transform", "translate(" + sectionLeft + ", 0)")
-    
+
     var labels = svg
         .append("g")
             .classed("top-labels", true)
@@ -145,14 +146,14 @@
     }
 
     function unselect(programme) {
-        d3.selectAll(".bubble circle") 
+        d3.selectAll(".bubble circle")
             .classed("unselected", function(d) {
                 if (d[progNameRef] != programme)
                     return !d3.select(this).classed("unselected")
                 return false
             })
 
-        d3.selectAll(".legend-items rect") 
+        d3.selectAll(".legend-items rect")
             .classed("unselected", function(d) {
                 if (d != programme)
                     return !d3.select(this).classed("unselected")
@@ -208,7 +209,7 @@
             .classed("econ-label", true)
             .style("font-size", function(d) {
                 radius = radiusScale(d[valueField])
-                a = Math.min(2 * radius, (2 * radius - 8) / this.getComputedTextLength() * 24) + "px"; 
+                a = Math.min(2 * radius, (2 * radius - 8) / this.getComputedTextLength() * 24) + "px";
                 console.log(a)
                 return a;
             })
@@ -259,5 +260,5 @@
 
     });
 
-    
+
 })()
