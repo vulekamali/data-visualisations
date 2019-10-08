@@ -1,7 +1,5 @@
 (function() {
     var container = d3.select(".department-subprogramme-treemap")
-    if (container.empty())
-        return;
 
     var mainConfig = {
         container: container,
