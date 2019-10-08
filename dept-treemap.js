@@ -1,12 +1,14 @@
 (function() {
     var container = d3.select(".department-subprogramme-treemap")
+
     var mainConfig = {
         container: container,
-        url: container.attr("data-aggregate-url")
+        url: container.attr("data-aggregate-url"),
     }
 
-    var progNameRef = "progno.programme"
-    var subprogNameRef = "sprogno.subprogramme"
+    var model = JSON.parse(container.attr("data-openspending-model"));
+    var progNameRef = getProgNameRef(model);
+    var subprogNameRef = getSubprogNameRef(model);
     var valueField = "value.sum"
 
     var viewport = getViewportDimensions();
@@ -14,7 +16,7 @@
     // set the dimensions and margins of the graph
     var margin = {top: 0, right: 0, bottom: 0, left: 0},
         width = viewport.width - margin.left - margin.right,
-        height = viewport.height - margin.top - margin.bottom 
+        height = viewport.height - margin.top - margin.bottom
 
     var programmeOffset = 62;
     var budgetOffset = programmeOffset + 24;
