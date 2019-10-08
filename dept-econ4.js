@@ -212,7 +212,7 @@
         }
     }
 
-    d3.json(mainConfig.url).then(function(data) {
+    d3.json(mainConfig.url, function(data) {
         data = data.cells;
 
         var econ4 = unique_index(data, econ4Ref);

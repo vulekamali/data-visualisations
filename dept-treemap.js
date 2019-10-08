@@ -232,7 +232,7 @@
         .attr("transform", "translate(" + -treemapPadding * 2 + ", " + (labelDimensions.y + labelDimensions.height + treemapOffset) + ")")
 
 
-    d3.json(mainConfig.url).then(function(data) {
+    d3.json(mainConfig.url, function(data) {
         data = data.cells.sort(function(a, b) {
             return b[valueField] - a[valueField];
         });
