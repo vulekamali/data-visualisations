@@ -210,7 +210,7 @@
             .attr("y1", labelDimensions.y)
             .attr("y2", labelDimensions.height + labelDimensions.y - 10)
 
-    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapMargin;
+    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapMargin - 20;
     var labelsMargin = labelDimensions.y + labelDimensions.height + treemapMargin;
 
     var x = d3.scaleLinear().domain([0, width]).range([0, width])
