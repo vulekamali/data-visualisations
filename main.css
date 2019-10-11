@@ -16,8 +16,7 @@ text {
 }
 
 .svg-content-responsive {
-    display: inline-block;
-    position: absolute;
+    display: block;
     left: 0;
     width: 100%;
 }
