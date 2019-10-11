@@ -28,7 +28,7 @@
     var viewport = getViewportDimensions();
 
     // set the dimensions and margins of the graph
-    var margin = {top: 0, right: 0, bottom: 0, left: 0},
+    var margin = {top: 0, right: 8, bottom: 8, left: 0},
         width = viewport.width - margin.left - margin.right,
         height = viewport.height - margin.top - margin.bottom
 
