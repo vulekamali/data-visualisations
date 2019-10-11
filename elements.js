@@ -41,7 +41,7 @@ function createSVG(container, width, height) {
     return svg
 }
 
-function addLinearGradient(container, id, color1, color2, offset1, offset2) {
+function addLinearGradient(container, id, color1, color2, offset1, offset2, opacity1, opacity2) {
     var gradient = container
         .append("defs")
             .append("linearGradient")
@@ -51,16 +51,20 @@ function addLinearGradient(container, id, color1, color2, offset1, offset2) {
                 .attr("x2", "100%")
                 .attr("y2", "100%")
 
-    offset1 = offset1 || "0%"
-    offset2 = offset1 || "100%"
+    offset1 = offset1 != undefined ? offset1 : "0%";
+    offset2 = offset2 != undefined ? offset2 : "0%";
+    opacity1 = opacity1 != undefined ? opacity1 : "0%";
+    opacity2 = opacity2 != undefined ? opacity2 : "0%";
 
     gradient.append("stop")
-        .attr("offset", 0)
-        .attr("stop-color")
+        .attr("offset", offset1)
+        .attr("stop-color", color1)
+        .style("stop-opacity", opacity1)
 
     gradient.append("stop")
-        .attr("offset", 100)
-        .attr("stop-color")
+        .attr("offset", offset2)
+        .attr("stop-color", color2)
+        .style("stop-opacity", opacity2)
 }
 
 colorMap = [
