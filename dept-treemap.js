@@ -1,4 +1,11 @@
 (function() {
+    var labelSeparatorOffset = -25;
+    var treemapOffset = 10;
+    var programmeOffset = 62;
+    var budgetOffset = programmeOffset + 24;
+    var treemapOuterPadding = 0;
+    var treemapInnerPadding = 0;
+
     var container = d3.select(".department-subprogramme-treemap")
 
     var mainConfig = {
@@ -17,10 +24,6 @@
     var margin = {top: 0, right: 0, bottom: 0, left: 0},
         width = viewport.width - margin.left - margin.right,
         height = viewport.height - margin.top - margin.bottom
-
-    var programmeOffset = 62;
-    var budgetOffset = programmeOffset + 24;
-    var treemapPadding = 3;
 
     var largestBudget = function(d) {
         var subprogrammes = d.parent.data.values;
@@ -191,7 +194,6 @@
             .attr("transform", "translate(0, "  + budgetOffset + ")")
 
     var labelDimensions = getDimensions(labels);
-    var labelSeparatorOffset = -25;
 
     subprogrammeButton
         .append("line")
@@ -201,12 +203,14 @@
             .attr("y1", labelDimensions.y)
             .attr("y2", labelDimensions.height + labelDimensions.y + 10)
 
-    var treemapOffset = 10;
     var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapOffset;
+    var labelsMargin = labelDimensions.y + labelDimensions.height + treemapOffset;
+
     var x = d3.scaleLinear().domain([0, width]).range([0, width])
     var y = d3.scaleLinear().domain([0, treemapHeight]).range([0, treemapHeight]);
+
     var treemap = svg.append("g")
-        .attr("transform", "translate(" + -treemapPadding * 2 + ", " + (labelDimensions.y + labelDimensions.height + treemapOffset) + ")")
+        .attr("transform", "translate(" + -treemapOuterPadding * 2 + ", " + labelsMargin + ")")
 
 
     d3.json(mainConfig.url, function(data) {
@@ -225,8 +229,8 @@
         // Then d3.treemap computes the position of each element of the hierarchy
         d3.treemap()
             .size([width, treemapHeight])
-            .padding(1)
-            .paddingOuter(treemapPadding)
+            .padding(treemapInnerPadding)
+            .paddingOuter(treemapOuterPadding)
             (root)
 
         updateRangeCoordinates(root.leaves(), x, y)
@@ -244,7 +248,7 @@
                 .classed("tile", true)
                 .attr('x', function (d) {return x(d.x0)})
                 .attr('y', function (d) { return y(d.y0)})
-                .attr('width', function (d) {return x(d.x1- d.x0)})
+                .attr('width', function (d) {return x(d.x1 - d.x0)})
                 .attr('height', function (d) { return y(d.y1 - d.y0)})
                 .attr("data-programme", function(d, i) {
                     return slugify(d.data[progNameRef])
