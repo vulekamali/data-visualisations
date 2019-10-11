@@ -158,8 +158,7 @@
     var programmeButton = labels
         .append("g")
             .classed("programme-button", true)
-
-    createMainLabel(programmeButton, "PROGRAMME")
+            .call(createMainLabel, "PROGRAMME")
 
     var programmeLabel = labels
         .append("text")
@@ -177,9 +176,7 @@
         .append("g")
             .classed("subprogramme-button", true)
             .attr("transform", "translate(" + (width / 1.8 - 10) + ", 0)")
-
-
-    createMainLabel(subprogrammeButton, "SUB-PROGRAMME")
+            .call(createMainLabel, "SUB-PROGRAMME")
 
     var subprogrammeLabel = subprogrammeButton
         .append("text")
