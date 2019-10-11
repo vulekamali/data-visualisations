@@ -9,7 +9,7 @@
         programme : { x: 5, y: 20 },
         subprogramme : {
             label: { x: 5, y: -30 },
-            budget: { x: 5, y: -8 }
+            budget: { x: 5, y: -12 }
         }
     }
 
@@ -132,23 +132,23 @@
 
         d3.selectAll(".programme-label tspan")
             .transition(t)
-            .attr("x", function(d) { return clamp(x, d.x0) + 5})
-            .attr("y", function(d) { return clamp(y, d.y0) + 28})
+            .attr("x", function(d) { return clamp(x, d.x0) + treemapOffsets.programme.x})
+            .attr("y", function(d) { return clamp(y, d.y0) + treemapOffsets.programme.y})
             .text(addProgrammeLabels)
             .style("display", displayLabels)
             .each(fadeProgramme)
 
         d3.selectAll(".box .subprogramme-label tspan")
             .transition(t)
-            .attr("x", function(d) { return clamp(x, d.x0) + 5})
-            .attr("y", function(d) { return clamp(y, d.y1) - 30})
+            .attr("x", function(d) { return clamp(x, d.x0) + treemapOffsets.subprogramme.label.x})
+            .attr("y", function(d) { return clamp(y, d.y1) + treemapOffsets.subprogramme.label.y})
             .text(addSubprogrammeLabels(subprogNameRef))
             .style("display", displayLabels)
 
         d3.selectAll(".box .subprogramme-budget-label tspan")
             .transition(t)
-            .attr("x", function(d) { return clamp(x, d.x0) + 5})
-            .attr("y", function(d) { return clamp(y, d.y1) - 6})
+            .attr("x", function(d) { return clamp(x, d.x0) + treemapOffsets.subprogramme.budget.x})
+            .attr("y", function(d) { return clamp(y, d.y1) + treemapOffsets.subprogramme.budget.y})
             .text(addSubprogrammeLabels(valueField, true))
             .style("display", displayLabels)
     }
