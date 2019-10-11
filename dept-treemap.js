@@ -145,28 +145,8 @@
 
 
     var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
-        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-
-    gradient = svg
-        .append("defs")
-            .append("linearGradient")
-                .attr("id", "text-fade")
-                .attr("x1", "0%")
-                .attr("y1", "100%")
-                .attr("x2", "100%")
-                .attr("y2", "100%")
-
-    gradient
-        .append("stop")
-            .attr("offset", "95%")
-            .style("stop-color", "rgb(255,255,255)")
-            .style("stop-opacity", "1")
-
-    gradient
-        .append("stop")
-            .attr("offset", "100%")
-            .style("stop-color", "rgb(255,255,255)")
-            .style("stop-opacity", "0")
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+        .call(addLinearGradient, "text-fade", "rgb(255,255,255)", "rgb(255,255,255)", "95%", "100%", 1, 0)
 
     var labels = svg.append("g")
             .classed("top-labels", true);
