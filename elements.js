@@ -17,7 +17,6 @@ function createMainLabel(container, label, config) {
         .append("text")
             .text(label)
 
-    //var bbox = text.node().getBBox();
     var bbox = text.node().getBBox();
     text.attr("transform", "translate(" + padding + ", " + -bbox.y + ")")
     text.attr("dy", "5")
@@ -32,7 +31,8 @@ function createMainLabel(container, label, config) {
 function createSVG(container, width, height) {
     var svg = container
         .append("svg")
-            .attr("viewBox", "0 0 " + width + " " + height)
+            .attr("width", width)
+            .attr("height", height)
             .attr("xmlns", "http://www.w3.org/2000/svg")
             .attr("preserveAspectRatio", "xMinYMin meet")
             .classed("svg-content-responsive", true)
