@@ -1,10 +1,17 @@
 (function() {
     var labelSeparatorOffset = -25;
-    var treemapOffset = 10;
+    var treemapMargin = 0;
     var programmeOffset = 62;
     var budgetOffset = programmeOffset + 24;
     var treemapOuterPadding = 0;
     var treemapInnerPadding = 0;
+    var treemapOffsets = {
+        programme : { x: 5, y: 20 },
+        subprogramme : {
+            label: { x: 5, y: -30 },
+            budget: { x: 5, y: -8 }
+        }
+    }
 
     var container = d3.select(".department-subprogramme-treemap")
 
@@ -201,10 +208,10 @@
             .attr("x1", labelSeparatorOffset)
             .attr("x2", labelSeparatorOffset)
             .attr("y1", labelDimensions.y)
-            .attr("y2", labelDimensions.height + labelDimensions.y + 10)
+            .attr("y2", labelDimensions.height + labelDimensions.y - 10)
 
-    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapOffset;
-    var labelsMargin = labelDimensions.y + labelDimensions.height + treemapOffset;
+    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapMargin;
+    var labelsMargin = labelDimensions.y + labelDimensions.height + treemapMargin;
 
     var x = d3.scaleLinear().domain([0, width]).range([0, width])
     var y = d3.scaleLinear().domain([0, treemapHeight]).range([0, treemapHeight]);
@@ -285,8 +292,8 @@
             .enter()
             .append("text")
                 .classed("programme-label", true)
-                .attr("x", function(d) { return d.x0 + 5})
-                .attr("y", function(d) { return d.y0 + 28})
+                .attr("x", function(d) { return d.x0 + treemapOffsets.programme.x})
+                .attr("y", function(d) { return d.y0 + treemapOffsets.programme.y})
                 .text(addProgrammeLabels)
                 .attr("font-size", "0.6em")
                 .attr("fill", "white")
@@ -296,8 +303,8 @@
         boxes
             .append("text")
                 .classed("subprogramme-label", true)
-                .attr("x", function(d) { return d.x0 + 5})
-                .attr("y", function(d) { return d.y1- 30})
+                .attr("x", function(d) { return d.x0 + treemapOffsets.subprogramme.label.x})
+                .attr("y", function(d) { return d.y1 + treemapOffsets.subprogramme.label.y})
                 .text(addSubprogrammeLabels(subprogNameRef))
                 .attr("font-size", "0.6em")
                 .attr("fill", "white")
@@ -310,8 +317,8 @@
         boxes
             .append("text")
                 .classed("subprogramme-budget-label", true)
-                .attr("x", function(d) { return d.x0 + 5})
-                .attr("y", function(d) { return d.y1 - 8})
+                .attr("x", function(d) { return d.x0 + treemapOffsets.subprogramme.budget.x})
+                .attr("y", function(d) { return d.y1 + treemapOffsets.subprogramme.budget.y})
                 .text(addSubprogrammeLabels(valueField, true))
                 .attr("font-size", "0.6em")
                 .attr("fill", "white")
