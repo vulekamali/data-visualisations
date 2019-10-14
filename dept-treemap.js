@@ -1,16 +1,20 @@
 (function() {
     var treemap;
-    var labelSeparatorOffset = -25;
-    var treemapMargin = 0;
-    var programmeOffset = 62;
-    var budgetOffset = programmeOffset + 24;
     var treemapOuterPadding = 0;
     var treemapInnerPadding = 0;
     var treemapOffsets = {
-        programme : { x: 5, y: 20 },
+        programme: { x: 4, y: 16 },
         subprogramme : {
-            label: { x: 5, y: -30 },
+            label: { x: 5, y: -24 },
             budget: { x: 5, y: -8 }
+        },
+        label: {
+            programme: 52,
+            budget: 72,
+            separator: -25
+        },
+        treemap: {
+            margin: 5
         }
     }
 
@@ -121,8 +125,8 @@
 
         treemap.selectAll(".programme-label tspan")
             .transition(t)
-            .attr("x", function(d) { return x(d.x0) + 5})
-            .attr("y", function(d) { return y(d.y0) + 28})
+            .attr("x", function(d) { return x(d.x0) + treemapOffsets.programme.x})
+            .attr("y", function(d) { return y(d.y0) + treemapOffsets.programme.y})
             .style("display", displayLabels)
             .text(addProgrammeLabels)
             .on("end", function() {
@@ -134,15 +138,15 @@
 
         d3.selectAll(".box .subprogramme-label tspan")
             .transition(t)
-            .attr("x", function(d) { return x(d.x0) + 5})
-            .attr("y", function(d) { return y(d.y1) - 30})
+            .attr("x", function(d) { return x(d.x0) + treemapOffsets.subprogramme.label.x})
+            .attr("y", function(d) { return y(d.y1) + treemapOffsets.subprogramme.label.y})
             .text(addSubprogrammeLabels(subprogNameRef))
             .style("display", displayLabels)
 
         d3.selectAll(".box .subprogramme-budget-label tspan")
             .transition(t)
-            .attr("x", function(d) { return x(d.x0) + 5})
-            .attr("y", function(d) { return y(d.y1) - 6})
+            .attr("x", function(d) { return x(d.x0) + treemapOffsets.subprogramme.budget.x})
+            .attr("y", function(d) { return y(d.y1) + treemapOffsets.subprogramme.budget.y})
             .text(addSubprogrammeLabels(valueField, true))
             .style("display", displayLabels)
     }
@@ -168,13 +172,13 @@
         .append("text")
             .classed("programme-label", true)
             .text("All programmes")
-            .attr("transform", "translate(0, " + programmeOffset + ")")
+            .attr("transform", "translate(0, " + treemapOffsets.label.programme + ")")
 
     var programmeBudgetLabel = labels
         .append("text")
             .classed("programme-budget-label", true)
             .text("R0")
-            .attr("transform", "translate(0, " + budgetOffset + ")")
+            .attr("transform", "translate(0, " + treemapOffsets.label.budget + ")")
 
     var subprogrammeButton = labels
         .append("g")
@@ -186,29 +190,29 @@
         .append("text")
             .classed("subprogramme-label", true)
             .text("None selected")
-            .attr("transform", "translate(0, " + programmeOffset + ")")
+            .attr("transform", "translate(0, " + treemapOffsets.label.programme + ")")
 
     var subprogrammeBudgetLabel = subprogrammeButton
         .append("text")
             .classed("subprogramme-budget-label", true)
             .text("R0")
-            .attr("transform", "translate(0, "  + budgetOffset + ")")
+            .attr("transform", "translate(0, "  + treemapOffsets.label.budget + ")")
 
     var labelDimensions = getDimensions(labels);
 
     subprogrammeButton
         .append("line")
             .classed("label-separator", true)
-            .attr("x1", labelSeparatorOffset)
-            .attr("x2", labelSeparatorOffset)
+            .attr("x1", treemapOffsets.label.separator)
+            .attr("x2", treemapOffsets.label.separator)
             .attr("y1", labelDimensions.y)
-            .attr("y2", labelDimensions.height + labelDimensions.y - 10)
+            .attr("y2", labelDimensions.height + labelDimensions.y)
 
     var saveButtonMargin = 10;
     var saveButtonHeight = 30;
     var saveButtonWidth = 140;
-    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapMargin  - saveButtonMargin - saveButtonHeight;
-    var labelsMargin = labelDimensions.y + labelDimensions.height + treemapMargin;
+    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapOffsets.treemap.margin  - saveButtonMargin - saveButtonHeight;
+    var labelsMargin = labelDimensions.y + labelDimensions.height + treemapOffsets.treemap.margin;
 
     var x = d3.scaleLinear().domain([0, width]).range([0, width]).clamp(true)
     var y = d3.scaleLinear().domain([0, treemapHeight]).range([0, treemapHeight]).clamp(true);

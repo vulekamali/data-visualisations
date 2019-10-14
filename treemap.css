@@ -1,10 +1,10 @@
 .top-labels .programme-label, .top-labels .subprogramme-label {
     fill: black;
-    font-size: 2.0vh;
+    font-size: 1.5vh;
 }
 
 .top-labels .programme-budget-label, .top-labels .subprogramme-budget-label  {
-    font-size: 2.8vh;
+    font-size: 2.2vh;
 }
 
 .tile {
@@ -17,13 +17,13 @@
 }
 
 .programme-label, .programme-label tspan {
-    font-size: 2vh;
+    font-size: 1.8vh;
     pointer-events: none;
 }
 
 .box .subprogramme-label, .box .subprogramme-budget-label {
     opacity: 0.7;
-    font-size: 2vh;
+    font-size: 1.6vh;
     pointer-events: none;
 }
 
