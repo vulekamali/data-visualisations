@@ -1,4 +1,5 @@
 (function() {
+    var treemap;
     var labelSeparatorOffset = -25;
     var treemapMargin = 0;
     var programmeOffset = 62;
@@ -28,7 +29,7 @@
     var viewport = getViewportDimensions();
 
     // set the dimensions and margins of the graph
-    var margin = {top: 0, right: 8, bottom: 8, left: 0},
+    var margin = {top: 0, right: 0, bottom: 0, left: 0},
         width = viewport.width - margin.left - margin.right,
         height = viewport.height - margin.top - margin.bottom
 
@@ -42,11 +43,7 @@
         var budget = d.data[valueField];
 
         if (budget == maxBudget) {
-            if (d.ry1 - d.ry0 > 30) {
-                return d.data[progNameRef]
-            } else {
-                return ""
-            }
+            return d.data[progNameRef]
         }
     }
 
@@ -55,11 +52,11 @@
         var budget = d.data[valueField];
 
         if (budget == maxBudget) {
-            var minX = d3.min(d.parent.children, function(el) { return el.x0;})
-            var maxX = d3.max(d.parent.children, function(el) { return el.x1;})
+            var minX = d3.min(d.parent.children, function(el) { return x(el.x0);})
+            var maxX = d3.max(d.parent.children, function(el) { return x(el.x1);})
             var width = maxX - minX;
 
-            fade(d3.select(this), width - 10)
+            fade(d3.select(this), width)
         }
     }
 
@@ -86,7 +83,18 @@
 
     function zoom(d) {
 
-        parent = d.parent;
+        function displayLabels(d) {
+            if (d.x0 < x.domain()[0] || d.x1 > x.domain()[1]
+                || d.y0 < y.domain()[0] || d.y1 > y.domain()[1])
+                return "none";
+            return "block"
+        }
+
+        var t = d3.transition()
+            .duration(800)
+            .ease(d3.easeCubicOut);
+
+        var parent = d.parent;
         // unzoom if already zoomed
         if (
                x.domain()[0] == parent.x0 && x.domain()[1] == parent.x1
@@ -103,52 +111,38 @@
 
         updateRangeCoordinates(d3.selectAll(".box").data(), x, y)
 
-        var clamp = function(scale, val) {
-            if (val < scale.domain()[0])
-                return scale.range()[0];
-            else if (val > scale.domain()[1])
-                return scale.range()[1];
-            else
-                return scale(val)
-        }
-
-        var t = d3.transition()
-            .duration(800)
-            .ease(d3.easeCubicOut);
-
         d3.selectAll("rect.tile")
             .transition(t)
-            .attr('x', function (d) { return clamp(x, d.x0) })
-            .attr('y', function (d) { return clamp(y, d.y0) })
-            .attr('width',  function(d) { return clamp(x, d.x1) - clamp(x, d.x0)})
-            .attr('height', function(d) { return clamp(y, d.y1) - clamp(y, d.y0)})
+            .attr('x', function (d) { return x(d.x0) })
+            .attr('y', function (d) { return y(d.y0) })
+            .attr('width',  function(d) { return x(d.x1) - x(d.x0)})
+            .attr('height', function(d) { return y(d.y1) - y(d.y0)})
 
-        function displayLabels(d) {
-            if (d.x0 < x.domain()[0] || d.x1 > x.domain()[1]
-                || d.y0 < y.domain()[0] || d.y1 > y.domain()[1])
-                return "none";
-            return "block"
-        }
 
-        d3.selectAll(".programme-label tspan")
+        treemap.selectAll(".programme-label tspan")
             .transition(t)
-            .attr("x", function(d) { return clamp(x, d.x0) + 5})
-            .attr("y", function(d) { return clamp(y, d.y0) + 28})
-            .text(addProgrammeLabels)
+            .attr("x", function(d) { return x(d.x0) + 5})
+            .attr("y", function(d) { return y(d.y0) + 28})
             .style("display", displayLabels)
-            .each(fadeProgramme)
+            .text(addProgrammeLabels)
+            .on("end", function() {
+                treemap.selectAll(".programme-label tspan")
+                    .text(addProgrammeLabels)
+                    .each(fadeProgramme)
+            })
+
 
         d3.selectAll(".box .subprogramme-label tspan")
             .transition(t)
-            .attr("x", function(d) { return clamp(x, d.x0) + 5})
-            .attr("y", function(d) { return clamp(y, d.y1) - 30})
+            .attr("x", function(d) { return x(d.x0) + 5})
+            .attr("y", function(d) { return y(d.y1) - 30})
             .text(addSubprogrammeLabels(subprogNameRef))
             .style("display", displayLabels)
 
         d3.selectAll(".box .subprogramme-budget-label tspan")
             .transition(t)
-            .attr("x", function(d) { return clamp(x, d.x0) + 5})
-            .attr("y", function(d) { return clamp(y, d.y1) - 6})
+            .attr("x", function(d) { return x(d.x0) + 5})
+            .attr("y", function(d) { return y(d.y1) - 6})
             .text(addSubprogrammeLabels(valueField, true))
             .style("display", displayLabels)
     }
@@ -210,14 +204,21 @@
             .attr("y1", labelDimensions.y)
             .attr("y2", labelDimensions.height + labelDimensions.y - 10)
 
-    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapMargin - 20;
+    var saveButtonMargin = 10;
+    var saveButtonHeight = 30;
+    var saveButtonWidth = 140;
+    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapMargin  - saveButtonMargin - saveButtonHeight;
     var labelsMargin = labelDimensions.y + labelDimensions.height + treemapMargin;
 
-    var x = d3.scaleLinear().domain([0, width]).range([0, width])
-    var y = d3.scaleLinear().domain([0, treemapHeight]).range([0, treemapHeight]);
+    var x = d3.scaleLinear().domain([0, width]).range([0, width]).clamp(true)
+    var y = d3.scaleLinear().domain([0, treemapHeight]).range([0, treemapHeight]).clamp(true);
 
-    var treemap = svg.append("g")
+    treemap = svg.append("g")
         .attr("transform", "translate(" + -treemapOuterPadding * 2 + ", " + labelsMargin + ")")
+
+    var saveButtonContainer = createSaveButton(svg, saveButtonWidth, saveButtonHeight, viewport.width, viewport.height)
+        .attr("transform", "translate(" + (width - saveButtonWidth)  + ", " + (treemapHeight + labelsMargin + saveButtonMargin) + ")")
+
 
 
     d3.json(mainConfig.url, function(data) {
@@ -298,7 +299,7 @@
                 .attr("font-size", "0.6em")
                 .attr("fill", "white")
                 .each(fadeProgramme)
-
+        
         // Add subprogramme labels
         boxes
             .append("text")
