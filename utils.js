@@ -1,7 +1,6 @@
 // TODO refactor with crop and wrap
 function fade(text, width) {
     text.each(function(d) {
-        var padding = 10;
         var text = d3.select(this),
             words = text.text().split("").reverse(),
             word,
@@ -9,8 +8,10 @@ function fade(text, width) {
             lineNumber = 0,
             x = text.attr("x"),
             y = text.attr("y"),
-            dy = 0, //parseFloat(text.attr("dy")),
-            tspan = text.text(null)
+            dy = 0 //parseFloat(text.attr("dy")),
+
+            var tspan = text.text(null)
+
                         .append("tspan")
                         .attr("x", x)
                         .attr("y", y)
@@ -20,8 +21,9 @@ function fade(text, width) {
             tspan.text(line.join(""));
             if (tspan.node().getComputedTextLength() > width) {
                 line.pop()
-                tspan.text(line.join(""));
                 text.style("fill", "url(#text-fade)")
+                tspan.text(line.join(""));
+                break;
             }
         }
     });
