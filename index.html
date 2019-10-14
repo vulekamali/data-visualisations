@@ -29,7 +29,6 @@ body {
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="utils.js"></script>
 
-<button>Save as image</button>
 <div
   class="department-subprogramme-treemap"
   data-aggregate-url="https://openspending.vulekamali.gov.za/api/3/cubes/b9d2af843f3a7ca223eea07fb608e62a:estimates-of-national-expenditure-2019-20-uploaded-2019-02-20t1910/aggregate/?cut=finyear.finyear%3A2019%7Cvoteno.department%3AAgriculture%2C+Forestry+and+Fisheries%7Cbudget_phase.budget_phase%3AMain+appropriation&amp;drilldown=progno.progno%7Cprogno.programme%7Csprogno.subprogramme&amp;pagesize=10000"
@@ -43,10 +42,3 @@ body {
 <script src="dept-treemap.js"></script>
 <script src="saveSvgAsPng.js"></script>
 
-    <script>
-        d3.selectAll("button")
-            .on("click", function() {
-                svg = d3.selectAll("svg")
-                saveSvgAsPng(svg.node(), "diagram.png");
-            })
-    </script>
