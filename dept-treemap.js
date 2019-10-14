@@ -29,7 +29,7 @@
     var viewport = getViewportDimensions();
 
     // set the dimensions and margins of the graph
-    var margin = {top: 0, right: 8, bottom: 8, left: 0},
+    var margin = {top: 0, right: 0, bottom: 0, left: 0},
         width = viewport.width - margin.left - margin.right,
         height = viewport.height - margin.top - margin.bottom
 
@@ -131,6 +131,7 @@
                     .each(fadeProgramme)
             })
 
+
         d3.selectAll(".box .subprogramme-label tspan")
             .transition(t)
             .attr("x", function(d) { return x(d.x0) + 5})
@@ -203,7 +204,10 @@
             .attr("y1", labelDimensions.y)
             .attr("y2", labelDimensions.height + labelDimensions.y - 10)
 
-    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapMargin - 20;
+    var saveButtonMargin = 10;
+    var saveButtonHeight = 30;
+    var saveButtonWidth = 140;
+    var treemapHeight = height - labelDimensions.height - labelDimensions.y - treemapMargin  - saveButtonMargin - saveButtonHeight;
     var labelsMargin = labelDimensions.y + labelDimensions.height + treemapMargin;
 
     var x = d3.scaleLinear().domain([0, width]).range([0, width]).clamp(true)
@@ -211,6 +215,10 @@
 
     treemap = svg.append("g")
         .attr("transform", "translate(" + -treemapOuterPadding * 2 + ", " + labelsMargin + ")")
+
+    var saveButtonContainer = createSaveButton(svg, saveButtonWidth, saveButtonHeight, viewport.width, viewport.height)
+        .attr("transform", "translate(" + (width - saveButtonWidth)  + ", " + (treemapHeight + labelsMargin + saveButtonMargin) + ")")
+
 
 
     d3.json(mainConfig.url, function(data) {
