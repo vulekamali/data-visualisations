@@ -3,6 +3,7 @@
     var container = d3.select(".department-bubbles")
     var viewport = getViewportDimensions();
     var margin = {top: 0, right: 0, bottom: 0, left: 0}
+    var currentSelection = null;
 
     var cfg = {
         main: {
@@ -149,19 +150,58 @@
     }
 
     function unselect(programme) {
-        d3.selectAll(".bubble circle")
-            .classed("unselected", function(d) {
-                if (d[progNameRef] != programme)
-                    return !d3.select(this).classed("unselected")
-                return false
-            })
+        if (currentSelection == null)
+            currentSelection = programme
+        var newSelection = programme;
 
-        d3.selectAll(".legend-items rect")
-            .classed("unselected", function(d) {
-                if (d != programme)
-                    return !d3.select(this).classed("unselected")
-                return false
-            })
+        if (programme == currentSelection) {
+            currentSelection = null;
+
+            d3.selectAll(".bubble circle")
+                .classed("unselected", function(d) {
+                    if (d[progNameRef] != programme) {
+                        return !d3.select(this).classed("unselected")
+                    }
+                    return false
+                })
+
+            d3.selectAll(".legend-items rect")
+                .classed("unselected", function(d) {
+                    if (programme == undefined)
+                        return false
+                    if (d != programme)
+                        return !d3.select(this).classed("unselected")
+                    return false
+                })
+        } else {
+            d3.selectAll(".bubble circle")
+                .classed("unselected", function(d) {
+                    if (d[progNameRef] == currentSelection)
+                        return true
+                    else if (d[progNameRef] == newSelection) {
+                        return false
+                    } else {
+                        return true;
+                    }
+                })
+
+            d3.selectAll(".legend-items rect")
+                .classed("unselected", function(d) {
+                    if (d == currentSelection)
+                        return true
+                    else if (d == newSelection) {
+                        return false
+                    } else {
+                        return true;
+                    }
+                })
+            
+        }
+
+
+
+        currentSelection = programme;
+
     }
 
 
