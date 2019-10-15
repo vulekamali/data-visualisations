@@ -4,17 +4,17 @@
 }
 
 .programme-row text, .programme-row text tspan {
-    font-size: 1.6vh;
+    font-size: 14px;
     font-weight: bold;
 }
 
 .subprogramme-row text, .subprogramme-row text tspan {
-    font-size: 1.5vh;
+    font-size: 13px;
     fill: #5A5A5A;
 }
 
 text.spend-value , text.spend-value tspan {
-    font-size: 1.5vh;
+    font-size: 13px;
     fill: #484848;
 }
 
@@ -42,7 +42,8 @@ defs .bar-gradient  stop {
 }
 
 .main-label text {
-    font-size: 1.5vh;
+    font-size: 12px;
+    font-weight: bold;
     fill: white;
 }
 
