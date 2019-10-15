@@ -236,7 +236,7 @@
                 .text(function(d) { return d.key;})
 
 
-        funcDisplay("Advertising")
+        funcDisplay("Administration")
 
     })
 })()
