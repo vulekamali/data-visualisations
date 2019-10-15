@@ -30,6 +30,12 @@ function createMainLabel(container, label, config) {
 }
 
 function createSaveButton(container, width, height, imageWidth, imageHeight, cfg) {
+    // Skip Internet Explorer until a fix is found
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf("MSIE ");
+    if (msie > -1)
+        return
+
     cfg = cfg || {
         backgroundColor : "white",
         left : -10,
