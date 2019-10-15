@@ -126,8 +126,8 @@
                         .attr("transform", "translate(4, " + offset + ")")
                         .append("text")
                             .text(subprogrammeData.key)
-                            .call(wrap, leftSectionWidth, 1.1)
                             .each(textBump)
+                            .call(wrap, leftSectionWidth, 1.1)
 
                     var dimensions = getDimensions(subprogrammeRow);
 
