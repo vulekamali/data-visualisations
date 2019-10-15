@@ -1,4 +1,6 @@
 (function() {
+    // TODO temporary until the host page removes its margin
+    d3.select("body").style("margin", 0)
     var treemap;
     var treemapOuterPadding = 0;
     var treemapInnerPadding = 0;
