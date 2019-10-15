@@ -1,13 +1,17 @@
 (function() {
+    // TODO this should be passed in as a parameter
     var container = d3.select(".department-bubbles")
     var viewport = getViewportDimensions();
-
-    var mainConfig = {
-        container: container,
-        url: container.attr("data-aggregate-url")
-    }
+    var margin = {top: 0, right: 0, bottom: 0, left: 0}
 
     var cfg = {
+        main: {
+            url: container.attr("data-aggregate-url")
+        },
+        viz: {
+            width: viewport.width - margin.left - margin.right,
+            height: viewport.height - margin.top - margin.bottom,
+        },
         separator: { x: 20},
         padding: {
             section: 24,
@@ -38,12 +42,8 @@
     var valueField = "value.sum"
     var bubbleChartTop, bubbleChartHeight;
 
-    // set the dimensions and margins of the graph
-    var margin = {top: 0, right: 0, bottom: 0, left: 0},
-        width = viewport.width - margin.left - margin.right,
-        height = viewport.height - margin.top - margin.bottom,
-        x = d3.scaleLinear().domain([0, width]).range([0, width]),
-        y = d3.scaleLinear().domain([0, height]).range([0, height]);
+    x = d3.scaleLinear().domain([0, cfg.viz.width]).range([0, cfg.viz.width]),
+    y = d3.scaleLinear().domain([0, cfg.viz.height]).range([0, cfg.viz.height]);
 
 
     function createBudgetSection(container) {
@@ -161,7 +161,7 @@
     function createCircles(container, data, colScale) {
         var simulation = d3.forceSimulation()
             .force("x", d3.forceX(0 / 2).strength(0.1))
-            .force("y", d3.forceX(height / 2).strength(0.1))
+            .force("y", d3.forceX(cfg.viz.height / 2).strength(0.1))
             .force("collide", d3.forceCollide(function(d) { return radiusScale(d[valueField])}))
 
         var radiusScale = d3.scaleSqrt().domain([
@@ -217,7 +217,7 @@
             circles.attr("transform", function(d) {
                 var radius = radiusScale(d[valueField])
                 d.y = Math.max(radius, Math.min(cfg.bubbleChart.height - radius - 24, d.y));
-                d.x = Math.max(radius, Math.min(width - (cfg.offset.sectionLeft + cfg.padding.section + radius), d.x));
+                d.x = Math.max(radius, Math.min(cfg.viz.width - (cfg.offset.sectionLeft + cfg.padding.section + radius), d.x));
                 return "translate(" + d.x + ", " + d.y + ")";
             });
 
@@ -230,7 +230,7 @@
             }
     }
 
-    var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
+    var svg = createSVG(container, viewport.width, viewport.height)
 
     var leftSection = svg.append("g").classed("left-section", true);
     var middleSection = svg.append("g").classed("middle-section", true);
@@ -248,7 +248,7 @@
             .attr("y2", 90)
             .attr("transform", "translate(" + cfg.offset.sectionLeft + ", 0)")
 
-    d3.json(mainConfig.url, function(data) {
+    d3.json(cfg.main.url, function(data) {
         data = data.cells;
 
         var programmes = unique(data.map(function(d) { return d[progNameRef]; }));
@@ -262,7 +262,7 @@
         bbox = getDimensions(budgetLabel);
 
         cfg.bubbleChart.top = bbox.y + bbox.height + cfg.bubbleChart.offset.y
-        cfg.bubbleChart.height = height - cfg.bubbleChart.top - cfg.saveButton.height;
+        cfg.bubbleChart.height = cfg.viz.height - cfg.bubbleChart.top - cfg.saveButton.height;
 
         var bubbleChart = rightSection
             .append("g")
@@ -278,7 +278,7 @@
             filename: "programmes.png",
         }
         var saveButtonContainer = createSaveButton(svg, cfg.saveButton.width, cfg.saveButton.height, viewport.width, viewport.height, cfgButton)
-            .attr("transform", "translate(" + (width - cfg.saveButton.width)  + ", " + (viewport.height - cfg.saveButton.height) + ")")
+            .attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (viewport.height - cfg.saveButton.height) + ")")
 
         createCircles(bubbleChart, data, colScale);
 
