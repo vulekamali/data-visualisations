@@ -1,8 +1,34 @@
 (function() {
     var container = d3.select(".department-bubbles")
+    var viewport = getViewportDimensions();
+
     var mainConfig = {
         container: container,
         url: container.attr("data-aggregate-url")
+    }
+
+    var cfg = {
+        separator: { x: 20},
+        padding: {
+            section: 24,
+            box: 15,
+        },
+        offset: {
+            sectionLeft: (viewport.width - 24) / 2,
+            sectionRight: viewport.width - (viewport.width - 24) / 2,
+        },
+        bubbleChart: {
+            top: 0,
+            height: 0,
+            offset: {
+                y: 32
+            }
+        },
+        saveButton: {
+            margin: 10,
+            height: 30,
+            width: 140,
+        }
     }
 
     var model = JSON.parse(container.attr("data-openspending-model"));
@@ -10,14 +36,7 @@
     var subprogNameRef = getSubprogNameRef(model);
     var econ4Ref = getEconClass4Ref(model);
     var valueField = "value.sum"
-
-    var viewport = getViewportDimensions();
-    var sectionPadding = 24;
-    var boxPadding = 15;
-    var bubbleChartOffset = 0;
-    var sectionLeft = (viewport.width - 24) / 3;
-    var sectionRight = viewport.width - (viewport.width - 24) / 3;
-    var bubbleChart;
+    var bubbleChartTop, bubbleChartHeight;
 
     // set the dimensions and margins of the graph
     var margin = {top: 0, right: 0, bottom: 0, left: 0},
@@ -26,29 +45,6 @@
         x = d3.scaleLinear().domain([0, width]).range([0, width]),
         y = d3.scaleLinear().domain([0, height]).range([0, height]);
 
-    var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
-
-
-    var leftSection = svg.append("g").classed("left-section", true);
-    var middleSection = svg.append("g").classed("middle-section", true);
-    var rightSection = svg
-        .append("g")
-            .attr("transform", "translate(" + (sectionLeft + sectionPadding) + ", 0)")
-            .classed("right-section", true);
-
-    middleSection
-        .append("line")
-            .classed("label-separator", true)
-            .attr("x1", 0)
-            .attr("x2", 0)
-            .attr("y1", 0)
-            .attr("y2", 90)
-            .attr("transform", "translate(" + sectionLeft + ", 0)")
-
-    var labels = svg
-        .append("g")
-            .classed("top-labels", true)
-            .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
 
     function createBudgetSection(container) {
         var econContainer = container.append("g").classed("budget-section", true);
@@ -86,7 +82,7 @@
                 .data(programmes)
                 .enter()
                 .append("g")
-                .attr("transform", "translate(0, " + (bbox.y + bbox.height + sectionPadding) + ")")
+                .attr("transform", "translate(0, " + (bbox.y + bbox.height + cfg.padding.section) + ")")
                     .classed("item", true)
                     .on("click", function(d) { unselect(d); })
 
@@ -100,7 +96,7 @@
                 .classed("legend-item-box", true)
 
         boxHeight = getDimensions(rects).width;
-        boxDisplacement = boxHeight + boxPadding;
+        boxDisplacement = boxHeight + cfg.padding.box;
 
         rects
             .attr("transform", function(d, idx) {
@@ -171,7 +167,7 @@
         var radiusScale = d3.scaleSqrt().domain([
             d3.min(data, function(d) { return d[valueField]}),
             d3.max(data, function(d) { return d[valueField]})
-        ]).range([viewport.height / 100, viewport.height / 10])
+        ]).range([viewport.width / 100, viewport.height / 10])
 
         var circles = container
             .selectAll("g")
@@ -220,8 +216,8 @@
         function ticked() {
             circles.attr("transform", function(d) {
                 var radius = radiusScale(d[valueField])
-                d.y = Math.max(radius, Math.min(height - bubbleChartOffset - radius - 24, d.y));
-                d.x = Math.max(radius, Math.min(width - (sectionLeft + sectionPadding + radius), d.x));
+                d.y = Math.max(radius, Math.min(cfg.bubbleChart.height - radius - 24, d.y));
+                d.x = Math.max(radius, Math.min(width - (cfg.offset.sectionLeft + cfg.padding.section + radius), d.x));
                 return "translate(" + d.x + ", " + d.y + ")";
             });
 
@@ -234,6 +230,23 @@
             }
     }
 
+    var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
+
+    var leftSection = svg.append("g").classed("left-section", true);
+    var middleSection = svg.append("g").classed("middle-section", true);
+    var rightSection = svg
+        .append("g")
+            .attr("transform", "translate(" + (cfg.offset.sectionLeft + cfg.padding.section) + ", 0)")
+            .classed("right-section", true)
+
+    middleSection
+        .append("line")
+            .classed("label-separator", true)
+            .attr("x1", cfg.separator.x)
+            .attr("x2", cfg.separator.x)
+            .attr("y1", 0)
+            .attr("y2", 90)
+            .attr("transform", "translate(" + cfg.offset.sectionLeft + ", 0)")
 
     d3.json(mainConfig.url, function(data) {
         data = data.cells;
@@ -243,17 +256,29 @@
 
 
         legend = createLegend(leftSection, programmes, colScale);
-
         budgetLabel = createBudgetSection(rightSection);
 
 
         bbox = getDimensions(budgetLabel);
 
-        bubbleChartOffset = bbox.y + bbox.height + 32;
+        cfg.bubbleChart.top = bbox.y + bbox.height + cfg.bubbleChart.offset.y
+        cfg.bubbleChart.height = height - cfg.bubbleChart.top - cfg.saveButton.height;
+
         var bubbleChart = rightSection
             .append("g")
                 .classed("bubble-chart", true)
-                .attr("transform", "translate(0, " + bubbleChartOffset + ")")
+                .attr("transform", "translate(0, " + cfg.bubbleChart.top + ")")
+
+        cfgButton = {
+            backgroundColor : "white",
+            left : -10,
+            width: viewport.width + 20,
+            top: -10,
+            height: viewport.height - 40,
+            filename: "programmes.png",
+        }
+        var saveButtonContainer = createSaveButton(svg, cfg.saveButton.width, cfg.saveButton.height, viewport.width, viewport.height, cfgButton)
+            .attr("transform", "translate(" + (width - cfg.saveButton.width)  + ", " + (viewport.height - cfg.saveButton.height) + ")")
 
         createCircles(bubbleChart, data, colScale);
 
