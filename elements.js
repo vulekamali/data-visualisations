@@ -29,18 +29,21 @@ function createMainLabel(container, label, config) {
     return programmeButton;
 }
 
-function createSaveButton(container, width, height, imageWidth, imageHeight) {
+function createSaveButton(container, width, height, imageWidth, imageHeight, cfg) {
+    cfg = cfg || {
+        backgroundColor : "white",
+        left : -10,
+        width: imageWidth + 20,
+        top: -10,
+        height: imageHeight - 20,
+        filename: "diagram.png"
+    }
+
     var containerBBox = container.node().getBBox()
     var saveButtonContainer = container.append("g")
         .classed("save-button", true)
         .on("click", function() {
-            saveSvgAsPng(container.node(), "diagram.png", {
-                backgroundColor : "white",
-                left : -10,
-                width: imageWidth + 20,
-                top: -10,
-                height: imageHeight - 20
-            });
+            saveSvgAsPng(container.node(), cfg.filename, cfg);
         })
 
     var saveButtonRect = saveButtonContainer.append("rect")
