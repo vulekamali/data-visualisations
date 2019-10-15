@@ -208,6 +208,7 @@
                         .attr("y2", offset)
                         .classed("gridline", true)
 
+            pymChild.sendHeight()
 
         }
     }
@@ -223,10 +224,10 @@
 
         selectBox
            .on("change", function(d, i) {
-               element = d3.event.srcElement;
-               idx = element.selectedIndex
-               value = element.options[idx].value;
-               funcDisplay(value)
+                element = d3.event.srcElement;
+                idx = element.selectedIndex
+                value = element.options[idx].value;
+                funcDisplay(value)
            })
             .classed("account-select", true)
             .selectAll("option")
