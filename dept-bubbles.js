@@ -22,6 +22,7 @@
         offset: {
             sectionLeft: (viewport.width - 24) / 3,
             sectionRight: viewport.width - (viewport.width - 24) / 3,
+            budgetLabel: 0 // determined at runtime
         },
         bubbleChart: {
             // This gets set later once the data has loaded
@@ -29,7 +30,8 @@
             height: 0,
             offset: {
                 y: 10
-            }
+            },
+            densityCoefficient: 0.8
         },
         saveButton: {
             margin: 10,
@@ -208,15 +210,33 @@
 
 
     function createCircles(container, labelsContainer, data, colScale) {
+        bbox = getDimensions(container)
+        containerDimensions = {
+            left: cfg.offset.sectionLeft,
+            right: cfg.viz.width,
+            top: bbox.y,
+            bottom: cfg.viz.height - cfg.saveButton.height
+        }
+
+        var areaWidth = containerDimensions.right - containerDimensions.left
+        var areaHeight = containerDimensions.bottom - containerDimensions.top
+        var Area = (areaWidth * areaHeight)
+
+        var centerX = (containerDimensions.left + containerDimensions.right) / 2
+        var centerY = (containerDimensions.bottom + containerDimensions.top) / 2
+
         var simulation = d3.forceSimulation()
-            .force("x", d3.forceX(0 / 2).strength(0.1))
-            .force("y", d3.forceX(cfg.viz.height / 2).strength(0.1))
+            .force("x", d3.forceX(centerX/2).strength(0.1))
+            .force("y", d3.forceY(centerY/2).strength(0.1))
             .force("collide", d3.forceCollide(function(d) { return radiusScale(d[valueField])}))
 
-        var radiusScale = d3.scaleSqrt().domain([
-            d3.min(data, function(d) { return d[valueField]}),
-            d3.max(data, function(d) { return d[valueField]})
-        ]).range([viewport.width / 100, viewport.height / 10])
+        var totalValue = d3.sum(data, function(d) { return d["value.sum"]})
+        var maxValue = d3.max(data, function(d) { return d[valueField]})
+        var maxRatio = maxValue / totalValue
+
+        var radiusScale = d3.scaleSqrt()
+            .domain([0, maxValue])
+            .range([0, Math.sqrt(Area) * maxRatio * cfg.bubbleChart.densityCoefficient])
 
         var circles = container
             .selectAll("g")
@@ -256,7 +276,6 @@
             .style("font-size", function(d) {
                 radius = radiusScale(d[valueField])
                 a = Math.min(2 * radius, (2 * radius - 8) / this.getComputedTextLength() * 24) + "px";
-                console.log(a)
                 return a;
             })
             .attr("dy", ".35em")
@@ -266,8 +285,8 @@
         function ticked() {
             circles.attr("transform", function(d) {
                 var radius = radiusScale(d[valueField])
-                d.y = Math.max(radius, Math.min(cfg.bubbleChart.height - cfg.saveButton.height, d.y));
-                d.x = Math.max(radius, Math.min(cfg.viz.width - (cfg.offset.sectionLeft + cfg.padding.section + radius), d.x));
+                d.y = Math.max(radius, Math.min(containerDimensions.bottom, d.y));
+                d.x = Math.max(radius, Math.min(containerDimensions.right, d.x));
                 return "translate(" + d.x + ", " + d.y + ")";
             });
 
@@ -328,6 +347,7 @@
             rightSection: rightSection,
             legendContainer: legendContainer,
             bubbleChart: bubbleChart,
+            budgetLabel: budgetLabel,
         }
     }
 
