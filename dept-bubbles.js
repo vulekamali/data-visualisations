@@ -7,7 +7,8 @@
 
     var cfg = {
         main: {
-            url: container.attr("data-aggregate-url")
+            url: container.attr("data-aggregate-url"),
+            mobileBreakpoint: 500
         },
         viz: {
             width: viewport.width - margin.left - margin.right,
@@ -23,6 +24,7 @@
             sectionRight: viewport.width - (viewport.width - 24) / 3,
         },
         bubbleChart: {
+            // This gets set later once the data has loaded
             top: 0,
             height: 0,
             offset: {
@@ -334,7 +336,7 @@
 
     var svg = createSVG(container, cfg.viz.width, cfg.viz.height)
     var isMobile = false
-    if (cfg.viz.width < 500)
+    if (cfg.viz.width < cfg.main.mobileBreakpoint)
         isMobile = true
 
     var sections = createLayout(svg, isMobile)
