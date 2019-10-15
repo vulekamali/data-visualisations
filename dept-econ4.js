@@ -1,8 +1,7 @@
 (function() {
     var margin = {top: 0, right: 0, bottom: 0, left: 0},
       width = 800 - margin.left - margin.right,
-      height = 1400 - margin.top - margin.bottom,
-      lineHeight = 1.1;
+      height = 1400 - margin.top - margin.bottom
 
     var container = d3.select(".department-econ4")
     var model = JSON.parse(container.attr("data-openspending-model"));
@@ -42,8 +41,7 @@
     var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
         .style("margin", 0)
         .call(addLinearGradient, "bar-gradient")
-
-        //.attr("transform", "translate(0, " +  topSectionHeight + ")")
+        .attr("transform", "translate(0, 5)")
 
 
     /* Headings */
@@ -119,15 +117,17 @@
                 offset += getDimensions(programmeRow).height + subprogrammeRowPadding
 
                 for (idx2 in programmeData.values) {
-                    var backgroundRect = container.append("rect")
+                    var row = container.append("g")
+                    var backgroundRect = row.append("rect")
 
                     var subprogrammeData = programmeData.values[idx2];
-                    var subprogrammeRow = container.append("g")
+                    var subprogrammeRow = row.append("g")
                         .classed("subprogramme-row", true)
                         .attr("transform", "translate(4, " + offset + ")")
                         .append("text")
                             .text(subprogrammeData.key)
                             .call(wrap, leftSectionWidth, 1.1)
+                            .each(textBump)
 
                     var dimensions = getDimensions(subprogrammeRow);
 
@@ -135,9 +135,11 @@
                     backgroundRect
                         .classed("background-rect", true)
                         .attr("x", 0)
-                        .attr("y", offset - 10) // TODO Figure out how to calculate 10 which is the lineheight
+                        .attr("y", offset) // TODO Figure out how to calculate 10 which is the lineheight
                         .attr("width", leftSectionWidth - 5)
                         .attr("height", dimensions.height + 4)
+
+                    row.attr("transform", "translate(0, -12)")
 
                     var gridLines = container.append("g")
 
@@ -208,9 +210,17 @@
                         .attr("y2", offset)
                         .classed("gridline", true)
 
+            bbox = getDimensions(svg)
+            svg.attr("height", bbox.height)
             pymChild.sendHeight()
 
         }
+    }
+
+
+    function getSelectedCategory(el) {
+        idx = el.selectedIndex
+        value = el.options[idx].value;
     }
 
     d3.json(mainConfig.url, function(data) {
@@ -224,9 +234,7 @@
 
         selectBox
            .on("change", function(d, i) {
-                element = d3.event.srcElement;
-                idx = element.selectedIndex
-                value = element.options[idx].value;
+                getSelectedCategory(d3.event.srcElement)
                 funcDisplay(value)
            })
             .classed("account-select", true)
@@ -237,7 +245,8 @@
                 .text(function(d) { return d.key;})
 
 
-        funcDisplay("Administration")
+        getSelectedCategory(selectBox.node())
+        funcDisplay(value)
 
     })
 })()
