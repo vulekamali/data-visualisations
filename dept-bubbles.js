@@ -25,14 +25,23 @@
             top: 0,
             height: 0,
             offset: {
-                y: 32
+                y: 10
             }
         },
         saveButton: {
             margin: 10,
             height: 30,
             width: 140,
+            config: {
+                backgroundColor : "white",
+                left : -10,
+                width: viewport.width + 20,
+                top: -10,
+                height: viewport.height - 40,
+                filename: "programmes.png",
+            }
         }
+
     }
 
     var model = JSON.parse(container.attr("data-openspending-model"));
@@ -42,9 +51,6 @@
     var valueField = "value.sum"
     var bubbleChartTop, bubbleChartHeight;
 
-    x = d3.scaleLinear().domain([0, cfg.viz.width]).range([0, cfg.viz.width]),
-    y = d3.scaleLinear().domain([0, cfg.viz.height]).range([0, cfg.viz.height]);
-
 
     function createBudgetSection(container) {
         var econContainer = container.append("g").classed("budget-section", true);
@@ -53,14 +59,20 @@
         createMainLabel(classificationSection, "ECONOMIC CLASSIFICATION")
 
         classificationSection.append("text")
+            .classed("programme", true)
+            .text("None Selected")
+            .attr("transform", "translate(6, 50)")
+
+
+        classificationSection.append("text")
             .classed("economic-classification", true)
             .text("None Selected")
-            .attr("transform", "translate(6, 55)")
+            .attr("transform", "translate(6, 65)")
 
         classificationSection.append("text")
             .classed("budget-amount", true)
             .text("R0")
-            .attr("transform", "translate(6, 80)")
+            .attr("transform", "translate(6, 95)")
 
         return econContainer
 
@@ -71,10 +83,6 @@
             append("g")
                 .classed("legend", true)
 
-        mainLabel = createMainLabel(legend, "PROGRAMME");
-
-        var bbox = getDimensions(mainLabel);
-
         legendItems = legend
             .append("g")
                 .classed("legend-items", true)
@@ -82,7 +90,6 @@
                 .data(programmes)
                 .enter()
                 .append("g")
-                .attr("transform", "translate(0, " + (bbox.y + bbox.height + cfg.padding.section) + ")")
                     .classed("item", true)
                     .on("click", function(d) { unselect(d); })
 
@@ -158,7 +165,7 @@
     }
 
 
-    function createCircles(container, data, colScale) {
+    function createCircles(container, labelsContainer, data, colScale) {
         var simulation = d3.forceSimulation()
             .force("x", d3.forceX(0 / 2).strength(0.1))
             .force("y", d3.forceX(cfg.viz.height / 2).strength(0.1))
@@ -176,8 +183,9 @@
             .append("g")
                 .classed("bubble", true)
                 .on("mouseover", function(d) {
-                    d3.select(".economic-classification").text(d[econ4Ref])
-                    d3.select(".budget-amount").text(rand_fmt(d[valueField]))
+                    labelsContainer.select(".programme").text(d[progNameRef])
+                    labelsContainer.select(".economic-classification").text(d[econ4Ref])
+                    labelsContainer.select(".budget-amount").text(rand_fmt(d[valueField]))
                 })
 
                 .on("click", function(d) {
@@ -216,7 +224,7 @@
         function ticked() {
             circles.attr("transform", function(d) {
                 var radius = radiusScale(d[valueField])
-                d.y = Math.max(radius, Math.min(cfg.bubbleChart.height - radius - 24, d.y));
+                d.y = Math.max(radius, Math.min(cfg.bubbleChart.height - cfg.saveButton.height, d.y));
                 d.x = Math.max(radius, Math.min(cfg.viz.width - (cfg.offset.sectionLeft + cfg.padding.section + radius), d.x));
                 return "translate(" + d.x + ", " + d.y + ")";
             });
@@ -230,23 +238,66 @@
             }
     }
 
-    var svg = createSVG(container, viewport.width, viewport.height)
+    function createLayout(container, mobile) {
+    
+        var leftSection = svg.append("g").classed("left-section", true)
+        var middleSection = svg.append("g").classed("middle-section", true);
+        var rightSection = svg.append("g").classed("right-section", true)
+        var legendContainer = leftSection.append("g").classed("legend-container", true);
 
-    var leftSection = svg.append("g").classed("left-section", true);
-    var middleSection = svg.append("g").classed("middle-section", true);
-    var rightSection = svg
-        .append("g")
-            .attr("transform", "translate(" + (cfg.offset.sectionLeft + cfg.padding.section) + ", 0)")
-            .classed("right-section", true)
+        var mainLabel = createMainLabel(leftSection, "PROGRAMME");
 
-    middleSection
-        .append("line")
-            .classed("label-separator", true)
-            .attr("x1", cfg.separator.x)
-            .attr("x2", cfg.separator.x)
-            .attr("y1", 0)
-            .attr("y2", 90)
-            .attr("transform", "translate(" + cfg.offset.sectionLeft + ", 0)")
+        budgetLabel = createBudgetSection(rightSection);
+        bbox = getDimensions(budgetLabel);
+
+        cfg.bubbleChart.top = bbox.y + bbox.height + cfg.bubbleChart.offset.y
+        cfg.bubbleChart.height = cfg.viz.height - cfg.bubbleChart.top - cfg.saveButton.height;
+        var bubbleChart = rightSection
+            .append("g").classed("bubble-chart", true)
+            .attr("transform", "translate(0, " + cfg.bubbleChart.top + ")")
+
+
+        if (!mobile) {
+            var bbox = getDimensions(mainLabel);
+            legendContainer
+                .attr("transform", "translate(0, " + (bbox.y + bbox.height + cfg.padding.section) + ")")
+
+            middleSection
+                .append("line")
+                    .classed("label-separator", true)
+                    .attr("x1", cfg.separator.x)
+                    .attr("x2", cfg.separator.x)
+                    .attr("y1", 0)
+                    .attr("y2", 90)
+                    .attr("transform", "translate(" + cfg.offset.sectionLeft + ", 0)")
+
+            rightSection
+                .attr("transform", "translate(" + (cfg.offset.sectionLeft + cfg.padding.section) + ", 0)")
+                .classed("right-section", true)
+        } else {
+            leftSection.style("display", "none")
+            cfg.offset.sectionLeft = 0
+            cfg.padding.section = 0
+
+        }
+        return {
+            leftSection: leftSection,
+            middleSection: middleSection,
+            rightSection: rightSection,
+            legendContainer: legendContainer,
+            bubbleChart: bubbleChart,
+        }
+    }
+
+    x = d3.scaleLinear().domain([0, cfg.viz.width]).range([0, cfg.viz.width]),
+    y = d3.scaleLinear().domain([0, cfg.viz.height]).range([0, cfg.viz.height]);
+
+    var svg = createSVG(container, cfg.viz.width, cfg.viz.height)
+    var isMobile = false
+    if (cfg.viz.width < 500)
+        isMobile = true
+
+    var sections = createLayout(svg, isMobile)
 
     d3.json(cfg.main.url, function(data) {
         data = data.cells;
@@ -254,33 +305,12 @@
         var programmes = unique(data.map(function(d) { return d[progNameRef]; }));
         var colScale = d3.scaleOrdinal().domain(programmes).range(colorMap2)
 
+        legend = createLegend(sections.legendContainer, programmes, colScale);
+        createCircles(sections.bubbleChart, sections.rightSection, data, colScale);
 
-        legend = createLegend(leftSection, programmes, colScale);
-        budgetLabel = createBudgetSection(rightSection);
-
-
-        bbox = getDimensions(budgetLabel);
-
-        cfg.bubbleChart.top = bbox.y + bbox.height + cfg.bubbleChart.offset.y
-        cfg.bubbleChart.height = cfg.viz.height - cfg.bubbleChart.top - cfg.saveButton.height;
-
-        var bubbleChart = rightSection
-            .append("g")
-                .classed("bubble-chart", true)
-                .attr("transform", "translate(0, " + cfg.bubbleChart.top + ")")
-
-        cfgButton = {
-            backgroundColor : "white",
-            left : -10,
-            width: viewport.width + 20,
-            top: -10,
-            height: viewport.height - 40,
-            filename: "programmes.png",
-        }
-        var saveButtonContainer = createSaveButton(svg, cfg.saveButton.width, cfg.saveButton.height, viewport.width, viewport.height, cfgButton)
+        var saveButtonContainer = createSaveButton(svg, cfg.saveButton.width, cfg.saveButton.height, viewport.width, viewport.height, cfg.saveButton.config)
             .attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (viewport.height - cfg.saveButton.height) + ")")
 
-        createCircles(bubbleChart, data, colScale);
 
 
     });
