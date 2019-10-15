@@ -208,6 +208,8 @@
                         .attr("y2", offset)
                         .classed("gridline", true)
 
+            bbox = getDimensions(container)
+            svg.attr("height", bbox.height)
             pymChild.sendHeight()
 
         }
