@@ -210,7 +210,8 @@
                         .attr("y2", offset)
                         .classed("gridline", true)
 
-            bbox = getDimensions(container)
+            var bottomPadding = 50;
+            bbox = getDimensions(container + bottomPadding)
             svg.attr("height", bbox.height)
             pymChild.sendHeight()
 
