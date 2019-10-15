@@ -14,7 +14,9 @@
             separator: -25
         },
         treemap: {
-            margin: 5
+            margin: 5,
+            minSubprogrammeHeight: 70,
+            minSubprogrammeWidth: 100,
         }
     }
 
@@ -74,7 +76,7 @@
 
     function addSubprogrammeLabels(key, currency) {
         return function(d) {
-            if (d.ry1 - d.ry0 > 50 && d.rx1 - d.rx0 > 100) {
+            if (d.ry1 - d.ry0 > treemapOffsets.treemap.minSubprogrammeHeight && d.rx1 - d.rx0 > treemapOffsets.treemap.minSubprogrammeWidth) {
                 if (currency)
                     return rand_human_fmt(d.data[key])
                 return d.data[key]
