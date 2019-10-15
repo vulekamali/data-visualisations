@@ -16,15 +16,16 @@ function createMainLabel(container, label, config) {
     var text = programmeButton
         .append("text")
             .text(label)
+            .each(textBump)
 
     var bbox = text.node().getBBox();
-    text.attr("transform", "translate(" + padding + ", " + -bbox.y + ")")
-    text.attr("dy", "5")
 
     background
         .attr("width", bbox.width + 2 * padding)
         .attr("height", bbox.height + 2 * padding)
 
+    verticalAlign(background, text)
+    centerAlign(background, text)
     return programmeButton;
 }
 
@@ -151,6 +152,13 @@ function textBump() {
     text
         .attr("transform", "translate(0, " + bbox.height + ") " + currentTransforms)
         .attr("dy", "-0.2em")
+}
+
+function transform(selection, transform) {
+    a = selection.attr("transform", function(d, i) {
+        var me = d3.select(this)
+        return transform + " " + me.attr("transform")
+    })
 }
 
 colorMap = [
