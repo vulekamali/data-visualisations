@@ -19,8 +19,8 @@
             box: 15,
         },
         offset: {
-            sectionLeft: (viewport.width - 24) / 2,
-            sectionRight: viewport.width - (viewport.width - 24) / 2,
+            sectionLeft: (viewport.width - 24) / 3,
+            sectionRight: viewport.width - (viewport.width - 24) / 3,
         },
         bubbleChart: {
             top: 0,
