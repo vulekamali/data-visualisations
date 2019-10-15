@@ -25,3 +25,22 @@ text {
     stroke: none;
     fill: none;
 }
+
+.save-button text {
+    font-size: 0.8em;
+    fill: #333333;
+    pointer-events: none;
+}
+
+.save-button rect {
+    fill: #E5E5E5;
+    text-shadow: -1px 1px 0px rgba(30, 30, 30, 0.8);
+}
+
+.save-button rect:hover {
+    fill: #ccc;
+}
+
+.save-button rect:active {
+    fill: #aaa;
+}
