@@ -18,6 +18,9 @@
         }
     }
 
+    d3.select("head").append("script")
+        .attr("src", "https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js")
+
     var container = d3.select(".department-subprogramme-treemap")
 
     var mainConfig = {
