@@ -2,12 +2,23 @@
     var viewport = getViewportDimensions();
     var isMobile = viewport.width < 1000
     var margin = {top: 0, right: 0, bottom: 0, left: 0}
+    var container = d3.select(".department-econ4")
+    var model = JSON.parse(container.attr("data-openspending-model"))
 
     var cfg = {
+        main: {
+            url: container.attr("data-aggregate-url")
+        },
+        data: {
+            category: getProgNameRef(model),
+            subCategory: getSubprogNameRef(model),
+            valueLabel: getEconClass4Ref(model),
+            valueField: "value.sum"
+        },
         viz: {
             width: viewport.width - margin.left - margin.right,
             height: viewport.height - margin.top - margin.bottom,
-            isMobile: isMobile
+            isMobile: isMobile,
         },
         saveButton: {
             margin: 10,
@@ -31,33 +42,27 @@
         rightSection: {
             width: isMobile ? viewport.width * 1/2 : viewport.width * 3/5 
         },
+        bars: {
+            heightOffset: 0,
+            headingMargin: 15,
+            separatorMargin: 20,
+            programmeRowPadding: 10,
+            subprogrammeRowPadding: 8
+        }
     }
 
-    var container = d3.select(".department-econ4")
-    var model = JSON.parse(container.attr("data-openspending-model"));
-    var progNameRef = getProgNameRef(model);
-    var subprogNameRef = getSubprogNameRef(model);
-    var econ4Ref = getEconClass4Ref(model);
-    var valueField = "value.sum"
+    var saveButtonContainer;
 
-    var wrapWidth = 280;
-    var mainConfig = {
-        container: container,
-        url: container.attr("data-aggregate-url")
-    }
-
-
-    var heightOffset = 0;
 
     /* Create the select box (temporary until we have a design */
-    var topSection = mainConfig.container
+    var topSection = container
         .append("div").classed("top-section", true)
         .style("height", cfg.topSection.height)
 
     var selectBox = topSection.append("select")
 
 
-    var svg = createSVG(mainConfig.container, viewport.width, viewport.height)
+    var svg = createSVG(container, viewport.width, viewport.height)
         .style("margin", 0)
         .call(addLinearGradient, "bar-gradient")
         .attr("transform", "translate(0, 5)")
@@ -72,9 +77,9 @@
     var valueSection = createMainLabel(programmesSection, "VALUE")
         .attr("transform", "translate(" + cfg.leftSection.width + ", 0)")
 
-
+    heightOffset = cfg.bars.heightOffset
     heightOffset += getDimensions(programmesSection).height
-    heightOffset += 15 // TODO height units?
+    heightOffset += cfg.bars.headingMargin
 
     var headingLine = svg.append("line")
         .attr("x1", 0)
@@ -84,45 +89,38 @@
         .classed("heading-line", true)
 
     //heightOffset = getDimensions(headingLine).y
-    heightOffset += 20 // TODO height units
+    heightOffset += cfg.bars.separatorMargin
 
     var valuesSection = svg
         .append("g")
             .classed("values-section", true)
             .attr("transform", "translate(0, " + heightOffset + ")")
 
+    bbox = getDimensions(container)
+    var saveButtonContainer = createSaveButton(svg, {width: cfg.saveButton.width, height: cfg.saveButton.height}, viewport.height, cfg.saveButton.config)
+        .attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (bbox.height - cfg.saveButton.height) + ")")
 
-
-    var unique_index = function(data, key) {
-        return d3.nest()
-            .key(function(d) { return d[key]})
-            .entries(data)
-    }
 
     var displayClassification = function(data, container) {
         return function(classification) {
             container.selectAll("*").remove()
-            var econ4 = unique_index(data, econ4Ref);
-            var subprogrammes = unique_index(data, subprogNameRef);
             filtered_data = data.filter(function(d) {
-                return d[econ4Ref] == classification;
+                return d[cfg.data.valueLabel] == classification;
             })
 
-            var max_value = d3.max(filtered_data, function(d) { return d[valueField]; })
+            var max_value = d3.max(filtered_data, function(d) { return d[cfg.data.valueField]; })
             var maxBarLength = cfg.rightSection.width * 2 / 3
             scaleBar = d3.scaleLinear().domain([0, max_value]).range([0, maxBarLength])
 
             var nestedData = d3.nest()
-                .key(function(d) { return d[progNameRef]})
-                .key(function(d) { return d[subprogNameRef]})
+                .key(function(d) { return d[cfg.data.category]})
+                .key(function(d) { return d[cfg.data.subCategory]})
                 .rollup(function(leaves) {
-                    return d3.sum(leaves, function(leaf) { return leaf[valueField] });
+                    return d3.sum(leaves, function(leaf) { return leaf[cfg.data.valueField] });
                 })
                 .entries(filtered_data)
 
             var offset = 0 // TODO fix this - not sure why the transform on the container isn't working
-            var programmeRowPadding = 10 // TODO move this to the config section
-            var subprogrammeRowPadding = 8 // TODO move this to the config section
 
             for (idx in nestedData) {
                 var programmeData = nestedData[idx];
@@ -134,7 +132,7 @@
                         .text(programmeData.key)
                         .call(wrap, cfg.leftSection.width)
 
-                offset += getDimensions(programmeRow).height + subprogrammeRowPadding
+                offset += getDimensions(programmeRow).height + cfg.bars.subprogrammeRowPadding
 
                 for (idx2 in programmeData.values) {
                     var row = container.append("g")
@@ -187,18 +185,18 @@
 
                     value = container.append("text")
                         .classed("spend-value", true)
-                        .text(rand_fmt(subprogrammeData.value))
+                        .text(rand_human_fmt(subprogrammeData.value, false))
                         .attr("transform", "translate(" + (cfg.leftSection.width + scaleBar(subprogrammeData.value) + 5) + ", " + (offset) + ")")
                         .style("fill", "black")
 
 
-                    offset += getDimensions(subprogrammeRow).height + subprogrammeRowPadding
+                    offset += getDimensions(subprogrammeRow).height + cfg.bars.subprogrammeRowPadding
                 }
 
-                offset += programmeRowPadding
+                offset += cfg.bars.programmeRowPadding
             }
 
-            offset -= programmeRowPadding;
+            offset -= cfg.bars.programmeRowPadding;
 
             container
                 .append("line")
@@ -244,12 +242,11 @@
         value = el.options[idx].value;
     }
 
-    d3.json(mainConfig.url, function(data) {
+    d3.json(cfg.main.url, function(data) {
         data = data.cells;
 
-        var econ4 = unique_index(data, econ4Ref);
-        var subprogrammes = unique_index(data, subprogNameRef);
-        var max_value = d3.max(data, function(d) { return d[valueField]; })
+        var valueIndex = regroupByIndex(data, cfg.data.valueLabel);
+        var max_value = d3.max(data, function(d) { return d[cfg.data.valueField]; })
 
         var funcDisplay = displayClassification(data, valuesSection);
 
@@ -260,7 +257,7 @@
            })
             .classed("account-select", true)
             .selectAll("option")
-            .data(econ4)
+            .data(valueIndex)
             .enter()
             .append("option")
                 .text(function(d) { return d.key;})
