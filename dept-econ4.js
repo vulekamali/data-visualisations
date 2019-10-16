@@ -47,7 +47,8 @@
             headingMargin: 15,
             separatorMargin: 20,
             programmeRowPadding: 10,
-            subprogrammeRowPadding: 8
+            subprogrammeRowPadding: 8,
+            numTicks: 3,
         }
     }
 
@@ -123,71 +124,79 @@
             var offset = 0 // TODO fix this - not sure why the transform on the container isn't working
 
             for (idx in nestedData) {
-                var programmeData = nestedData[idx];
-
-                programmeRow = container.append("g")
-                    .classed("programme-row", true)
-                    .attr("transform", "translate(0, " + offset + ")")
-                    .append("text")
-                        .text(programmeData.key)
-                        .call(wrap, cfg.leftSection.width)
-
-                offset += getDimensions(programmeRow).height + cfg.bars.subprogrammeRowPadding
-
-                for (idx2 in programmeData.values) {
-                    var row = container.append("g")
-                    var backgroundRect = row.append("rect")
-
-                    var subprogrammeData = programmeData.values[idx2];
-                    var subprogrammeRow = row.append("g")
-                        .classed("subprogramme-row", true)
-                        .attr("transform", "translate(4, " + offset + ")")
+                function drawRow(offset, nestedData) {
+                    var programmeData = nestedData[idx];
+                    programmeRow = container.append("g")
+                        .classed("programme-row", true)
+                        .attr("transform", "translate(0, " + offset + ")")
                         .append("text")
-                            .text(subprogrammeData.key)
-                            .each(textBump)
-                            .call(wrap, cfg.leftSection.width, 1.1)
+                            .text(programmeData.key)
+                            .call(wrap, cfg.leftSection.width)
 
-                    var dimensions = getDimensions(subprogrammeRow);
+                    offset += getDimensions(programmeRow).height + cfg.bars.subprogrammeRowPadding
 
-
-                    backgroundRect
-                        .classed("background-rect", true)
-                        .attr("x", 0)
-                        .attr("y", offset) // TODO Figure out how to calculate 10 which is the lineheight
-                        .attr("width", cfg.leftSection.width - 5)
-                        .attr("height", dimensions.height + 4)
-
-                    row.attr("transform", "translate(0, -12)")
-
-                    var gridLines = container.append("g")
+                    for (idx2 in programmeData.values) {
+                        var row = container.append("g")
+                        var backgroundRect = row.append("rect")
 
 
-                    // Hack to display gradient - display the gradient full
-                    // width then draw a white box over it to cover up the
-                    // unused part of the rectangle
-                    // TODO current assumption is that the background is white
-                    // - might want to paramaterise it
-                    barRect = container.append("rect")
-                       .classed("bar-rect", true)
-                       .attr("x", cfg.leftSection.width)
-                       .attr("y", offset - 10)
-                       .attr("width", maxBarLength)
-                       .attr("height", 14)
+                        var subprogrammeData = programmeData.values[idx2];
+                        var subprogrammeRow = row.append("g")
+                            .classed("subprogramme-row", true)
+                            .attr("transform", "translate(4, " + offset + ")")
+                            .append("text")
+                                .text(subprogrammeData.key)
+                                .each(textBump)
+                                .call(wrap, cfg.leftSection.width, 1.1)
 
-                    barRect = container.append("rect")
-                       .classed("bar-rect", true)
-                       .attr("x", cfg.leftSection.width)
-                       .attr("y", offset - 10)
-                       .attr("width", maxBarLength - scaleBar(subprogrammeData.value) + 1)
-                       .attr("height", 16)
-                       .style("fill", "white")
-                       .attr("transform", "translate(" + scaleBar(subprogrammeData.value) + ", -1)")
+                        var dimensions = getDimensions(subprogrammeRow);
 
-                    value = container.append("text")
-                        .classed("spend-value", true)
-                        .text(rand_human_fmt(subprogrammeData.value, false))
-                        .attr("transform", "translate(" + (cfg.leftSection.width + scaleBar(subprogrammeData.value) + 5) + ", " + (offset) + ")")
-                        .style("fill", "black")
+
+                        backgroundRect
+                            .classed("background-rect", true)
+                            .attr("x", 0)
+                            .attr("y", offset) // TODO Figure out how to calculate 10 which is the lineheight
+                            .attr("width", cfg.leftSection.width - 5)
+                            .attr("height", dimensions.height + 4)
+
+                        row.attr("transform", "translate(0, -12)")
+
+
+
+                        // Hack to display gradient - display the gradient full
+                        // width then draw a white box over it to cover up the
+                        // unused part of the rectangle
+                        // TODO current assumption is that the background is white
+                        // - might want to paramaterise it
+                        barRect = container.append("rect")
+                           .classed("bar-rect", true)
+                           .attr("x", cfg.leftSection.width)
+                           .attr("y", offset - 10)
+                           .attr("width", maxBarLength)
+                           .attr("height", 14)
+
+                        barRect = container.append("rect")
+                           .classed("bar-rect", true)
+                           .attr("x", cfg.leftSection.width)
+                           .attr("y", offset - 10)
+                           .attr("width", maxBarLength - scaleBar(subprogrammeData.value) + 1)
+                           .attr("height", 16)
+                           .style("fill", "white")
+                           .attr("transform", "translate(" + scaleBar(subprogrammeData.value) + ", -1)")
+
+                        var gridLines = container
+                            .append("g")
+                                .selectAll("line")
+                                .data(scaleBar.ticks(cfg.bars.numTicks))
+                                .enter()
+                                .append("line")
+                                    .classed("gridline", true)
+
+                        value = container.append("text")
+                            .classed("spend-value", true)
+                            .text(rand_human_fmt(subprogrammeData.value, false))
+                            .attr("transform", "translate(" + (cfg.leftSection.width + scaleBar(subprogrammeData.value) + 5) + ", " + (offset) + ")")
+                            .style("fill", "black")
 
 
                     offset += getDimensions(subprogrammeRow).height + cfg.bars.subprogrammeRowPadding
@@ -198,35 +207,21 @@
 
             offset -= cfg.bars.programmeRowPadding;
 
-            container
-                .append("line")
-                    .attr("x1", cfg.leftSection.width)
-                    .attr("x2", cfg.leftSection.width)
-                    .attr("y1", 0)
-                    .attr("y2", offset) // TODO remove the last offset
-                    .classed("heading-line", true)
-
-            var numTicks = 3
             var xAxis = d3.axisBottom(scaleBar)
-                .ticks(numTicks)
+                .ticks(cfg.bars.numTicks)
                 .tickFormat(rand_human_fmt)
+
+            gridLines
+                .attr("x1", function(d) { return cfg.leftSection.width + scaleBar(d); })
+                .attr("x2", function(d) { return cfg.leftSection.width + scaleBar(d); })
+                .attr("y1", 0)
+                .attr("y2", offset)
 
             container
                 .append("g")
                     .attr("transform", "translate(" + cfg.leftSection.width + ", " + offset + ")")
                     .call(xAxis)
 
-            container
-                .append("g")
-                    .selectAll("line")
-                    .data(scaleBar.ticks(numTicks))
-                    .enter()
-                    .append("line")
-                        .attr("x1", function(d) { return cfg.leftSection.width + scaleBar(d); })
-                        .attr("x2", function(d) { return cfg.leftSection.width + scaleBar(d); })
-                        .attr("y1", 0)
-                        .attr("y2", offset)
-                        .classed("gridline", true)
 
             var bottomPadding = 50;
             bbox = getDimensions(container)
