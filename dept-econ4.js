@@ -1,7 +1,37 @@
 (function() {
-    var margin = {top: 0, right: 0, bottom: 0, left: 0},
-      width = 800 - margin.left - margin.right,
-      height = 1400 - margin.top - margin.bottom
+    var viewport = getViewportDimensions();
+    var isMobile = viewport.width < 1000
+    var margin = {top: 0, right: 0, bottom: 0, left: 0}
+
+    var cfg = {
+        viz: {
+            width: viewport.width - margin.left - margin.right,
+            height: viewport.height - margin.top - margin.bottom,
+            isMobile: isMobile
+        },
+        saveButton: {
+            margin: 10,
+            height: 30,
+            width: 140,
+            config: {
+                backgroundColor : "white",
+                left : -10,
+                width: viewport.width + 20,
+                top: -10,
+                height: viewport.height - 40,
+                filename: "economic-classifications.png",
+            }
+        },
+        topSection: {
+            height: 40,
+        },
+        leftSection: {
+            width: isMobile ? viewport.width * 1/2 : viewport.width * 2/5 
+        },
+        rightSection: {
+            width: isMobile ? viewport.width * 1/2 : viewport.width * 3/5 
+        },
+    }
 
     var container = d3.select(".department-econ4")
     var model = JSON.parse(container.attr("data-openspending-model"));
@@ -16,24 +46,13 @@
         url: container.attr("data-aggregate-url")
     }
 
-    var viewport = getViewportDimensions();
-
-    topSectionHeight = 40;
-    if (viewport.width > 1000) {
-        leftSectionWidth = viewport.width * 2/5
-        rightSectionWidth = viewport.width * 3/5
-    } else {
-        leftSectionWidth = viewport.width * 1/2
-        rightSectionWidth = viewport.width * 1/2
-    }
-
 
     var heightOffset = 0;
 
     /* Create the select box (temporary until we have a design */
     var topSection = mainConfig.container
         .append("div").classed("top-section", true)
-        .style("height", topSectionHeight)
+        .style("height", cfg.topSection.height)
 
     var selectBox = topSection.append("select")
 
@@ -51,7 +70,7 @@
 
     var subprogrammesSection = createMainLabel(programmesSection, "SUB-PROGRAMMES")
     var valueSection = createMainLabel(programmesSection, "VALUE")
-        .attr("transform", "translate(" + leftSectionWidth + ", 0)")
+        .attr("transform", "translate(" + cfg.leftSection.width + ", 0)")
 
 
     heightOffset += getDimensions(programmesSection).height
@@ -73,6 +92,7 @@
             .attr("transform", "translate(0, " + heightOffset + ")")
 
 
+
     var unique_index = function(data, key) {
         return d3.nest()
             .key(function(d) { return d[key]})
@@ -89,7 +109,7 @@
             })
 
             var max_value = d3.max(filtered_data, function(d) { return d[valueField]; })
-            var maxBarLength = rightSectionWidth * 2 / 3
+            var maxBarLength = cfg.rightSection.width * 2 / 3
             scaleBar = d3.scaleLinear().domain([0, max_value]).range([0, maxBarLength])
 
             var nestedData = d3.nest()
@@ -112,7 +132,7 @@
                     .attr("transform", "translate(0, " + offset + ")")
                     .append("text")
                         .text(programmeData.key)
-                        .call(wrap, leftSectionWidth)
+                        .call(wrap, cfg.leftSection.width)
 
                 offset += getDimensions(programmeRow).height + subprogrammeRowPadding
 
@@ -127,7 +147,7 @@
                         .append("text")
                             .text(subprogrammeData.key)
                             .each(textBump)
-                            .call(wrap, leftSectionWidth, 1.1)
+                            .call(wrap, cfg.leftSection.width, 1.1)
 
                     var dimensions = getDimensions(subprogrammeRow);
 
@@ -136,7 +156,7 @@
                         .classed("background-rect", true)
                         .attr("x", 0)
                         .attr("y", offset) // TODO Figure out how to calculate 10 which is the lineheight
-                        .attr("width", leftSectionWidth - 5)
+                        .attr("width", cfg.leftSection.width - 5)
                         .attr("height", dimensions.height + 4)
 
                     row.attr("transform", "translate(0, -12)")
@@ -151,14 +171,14 @@
                     // - might want to paramaterise it
                     barRect = container.append("rect")
                        .classed("bar-rect", true)
-                       .attr("x", leftSectionWidth)
+                       .attr("x", cfg.leftSection.width)
                        .attr("y", offset - 10)
                        .attr("width", maxBarLength)
                        .attr("height", 14)
 
                     barRect = container.append("rect")
                        .classed("bar-rect", true)
-                       .attr("x", leftSectionWidth)
+                       .attr("x", cfg.leftSection.width)
                        .attr("y", offset - 10)
                        .attr("width", maxBarLength - scaleBar(subprogrammeData.value) + 1)
                        .attr("height", 16)
@@ -168,7 +188,7 @@
                     value = container.append("text")
                         .classed("spend-value", true)
                         .text(rand_fmt(subprogrammeData.value))
-                        .attr("transform", "translate(" + (leftSectionWidth + scaleBar(subprogrammeData.value) + 5) + ", " + (offset) + ")")
+                        .attr("transform", "translate(" + (cfg.leftSection.width + scaleBar(subprogrammeData.value) + 5) + ", " + (offset) + ")")
                         .style("fill", "black")
 
 
@@ -182,8 +202,8 @@
 
             container
                 .append("line")
-                    .attr("x1", leftSectionWidth)
-                    .attr("x2", leftSectionWidth)
+                    .attr("x1", cfg.leftSection.width)
+                    .attr("x2", cfg.leftSection.width)
                     .attr("y1", 0)
                     .attr("y2", offset) // TODO remove the last offset
                     .classed("heading-line", true)
@@ -195,7 +215,7 @@
 
             container
                 .append("g")
-                    .attr("transform", "translate(" + leftSectionWidth + ", " + offset + ")")
+                    .attr("transform", "translate(" + cfg.leftSection.width + ", " + offset + ")")
                     .call(xAxis)
 
             container
@@ -204,8 +224,8 @@
                     .data(scaleBar.ticks(numTicks))
                     .enter()
                     .append("line")
-                        .attr("x1", function(d) { return leftSectionWidth + scaleBar(d); })
-                        .attr("x2", function(d) { return leftSectionWidth + scaleBar(d); })
+                        .attr("x1", function(d) { return cfg.leftSection.width + scaleBar(d); })
+                        .attr("x2", function(d) { return cfg.leftSection.width + scaleBar(d); })
                         .attr("y1", 0)
                         .attr("y2", offset)
                         .classed("gridline", true)
