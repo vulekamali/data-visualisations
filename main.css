@@ -26,7 +26,7 @@ text {
 }
 
 .bounding-box {
-    stroke: none;
+    stroke: black;
     fill: none;
 }
 
