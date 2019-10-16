@@ -124,7 +124,6 @@
             var offset = 0 // TODO fix this - not sure why the transform on the container isn't working
 
             for (idx in nestedData) {
-                function drawRow(offset, nestedData) {
                     var programmeData = nestedData[idx];
                     programmeRow = container.append("g")
                         .classed("programme-row", true)
@@ -160,8 +159,6 @@
                             .attr("height", dimensions.height + 4)
 
                         row.attr("transform", "translate(0, -12)")
-
-
 
                         // Hack to display gradient - display the gradient full
                         // width then draw a white box over it to cover up the
