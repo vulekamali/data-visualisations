@@ -99,6 +99,13 @@
 
     bbox = getDimensions(container)
 
+    var saveButtonContainer = createSaveButton(
+        svg, 
+        {width: cfg.saveButton.width, height: cfg.saveButton.height},
+        {width: cfg.saveButton.config.width, height: cfg.saveButton.config.height},
+        cfg.saveButton.config
+    )
+
 
     var displayClassification = function(data, container) {
         return function(classification) {
@@ -108,7 +115,7 @@
             })
 
             var max_value = d3.max(filtered_data, function(d) { return d[cfg.data.valueField]; })
-            var maxBarLength = cfg.rightSection.width * 2 / 3
+            var maxBarLength = cfg.rightSection.width * 2/3
             scaleBar = d3.scaleLinear().domain([0, max_value]).range([0, maxBarLength])
 
             var nestedData = d3.nest()
@@ -218,19 +225,13 @@
                     .call(xAxis)
 
 
-            var bottomPadding = 50;
+            var bottomPadding = 60;
             bbox = getDimensions(container)
             vizHeight = bbox.height + bottomPadding + cfg.saveButton.height
             svg.attr("height", vizHeight)
             cfg.saveButton.config.height = vizHeight - 10;
-            var saveButtonContainer = createSaveButton(
-                svg, 
-                {width: cfg.saveButton.width, height: cfg.saveButton.height},
-                {width: cfg.saveButton.config.width, height: cfg.saveButton.config.height},
-                cfg.saveButton.config
-            )
-            .attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (bbox.height + bottomPadding) + ")")
-            pymChild.sendHeight()
+            saveButtonContainer.attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (bbox.height + bottomPadding) + ")")
+            //pymChild.sendHeight()
 
         }
     }
