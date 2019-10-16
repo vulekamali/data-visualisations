@@ -29,7 +29,7 @@ function createMainLabel(container, label, config) {
     return programmeButton;
 }
 
-function createSaveButton(container, width, height, imageWidth, imageHeight, cfg) {
+function createSaveButton(container, buttonDimensions, imageWidth, imageHeight, cfg) {
     // Skip Internet Explorer until a fix is found
     var ua = window.navigator.userAgent;
     var msie = ua.indexOf("MSIE ");
@@ -53,8 +53,8 @@ function createSaveButton(container, width, height, imageWidth, imageHeight, cfg
         })
 
     var saveButtonRect = saveButtonContainer.append("rect")
-        .attr("width", width)
-        .attr("height", height)
+        .attr("width", buttonDimensions.width)
+        .attr("height", buttonDimensions.height)
             .attr("rx", 3)
             .attr("ry", 3)
 

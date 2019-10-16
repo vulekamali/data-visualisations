@@ -228,7 +228,7 @@
     treemap = svg.append("g")
         .attr("transform", "translate(" + -treemapOuterPadding * 2 + ", " + labelsMargin + ")")
 
-    var saveButtonContainer = createSaveButton(svg, saveButtonWidth, saveButtonHeight, viewport.width, viewport.height)
+    var saveButtonContainer = createSaveButton(svg, {width: saveButtonWidth, height: saveButtonHeight}, viewport.width, viewport.height)
         .attr("transform", "translate(" + (width - saveButtonWidth)  + ", " + (treemapHeight + labelsMargin + saveButtonMargin) + ")")
 
 

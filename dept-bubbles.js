@@ -370,7 +370,7 @@
         legend = createLegend(sections.legendContainer, programmes, colScale);
         createCircles(sections.bubbleChart, sections.rightSection, data, colScale);
 
-        var saveButtonContainer = createSaveButton(svg, cfg.saveButton.width, cfg.saveButton.height, viewport.width, viewport.height, cfg.saveButton.config)
+        var saveButtonContainer = createSaveButton(svg, cfg.saveButton, viewport.width, viewport.height, cfg.saveButton.config)
             .attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (viewport.height - cfg.saveButton.height) + ")")
 
 
