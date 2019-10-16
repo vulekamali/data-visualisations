@@ -79,13 +79,6 @@ function createSaveButton(container, buttonDimensions, imageDimensions, cfg) {
     verticalAlign(saveButtonImageGroup, saveButtonText)
     verticalAlign(saveButtonRect, saveButtonContents)
 
-        d3.selectAll("button")
-            .on("click", function() {
-                svg = d3.selectAll("svg")
-                    .attr("viewport", "(0, 0 1000, 800)")
-                saveSvgAsPng(svg.node(), "diagram.png");
-            })
-
     return saveButtonContainer
 }
 
