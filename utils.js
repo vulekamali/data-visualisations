@@ -97,6 +97,38 @@ function unique(x) {
     return x.reverse().filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).reverse();
 }
 
+/*
+Given an array with the following structure 
+[
+    {key: value1, a11: b11, c11: d11, .... },
+    {key: value1, a12: b12, c12: d12, .... },
+    {key: value1, a13: b13, c13: d13, .... },
+    {key: value2, a21: b22, c23: d24, .... },
+    ...
+]
+
+return
+[
+    {
+        key: value1, values: [
+            {key: value1, a11: b11, c11: d11, .... },
+            {key: value1, a12: b12, c12: d12, .... },
+            {key: value1, a13: b13, c13: d13, .... },
+        ]
+    },
+    {
+        key: value2, values: [
+            {key: value2, a21: b21, c21: d21, .... },
+        ]
+    }
+*/
+function regroupByIndex(data, key) {
+    return d3.nest()
+        .key(function(d) { return d[key]})
+        .entries(data)
+}
+
+
 var rand_human_fmt = function(x) {
     if (x >= 1000000000) {
         return rand_fmt(x / 1000000000) + " billion"
