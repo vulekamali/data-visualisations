@@ -98,8 +98,6 @@
             .attr("transform", "translate(0, " + heightOffset + ")")
 
     bbox = getDimensions(container)
-    var saveButtonContainer = createSaveButton(svg, {width: cfg.saveButton.width, height: cfg.saveButton.height}, viewport.height, cfg.saveButton.config)
-        .attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (bbox.height - cfg.saveButton.height) + ")")
 
 
     var displayClassification = function(data, container) {
@@ -222,7 +220,16 @@
 
             var bottomPadding = 50;
             bbox = getDimensions(container)
-            svg.attr("height", bbox.height + bottomPadding)
+            vizHeight = bbox.height + bottomPadding + cfg.saveButton.height
+            svg.attr("height", vizHeight)
+            cfg.saveButton.config.height = vizHeight - 10;
+            var saveButtonContainer = createSaveButton(
+                svg, 
+                {width: cfg.saveButton.width, height: cfg.saveButton.height},
+                {width: cfg.saveButton.config.width, height: cfg.saveButton.config.height},
+                cfg.saveButton.config
+            )
+            .attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (bbox.height + bottomPadding) + ")")
             pymChild.sendHeight()
 
         }
