@@ -41,11 +41,6 @@ defs .bar-gradient  stop {
     stroke: #EFEFEF;
 }
 
-.main-label text {
-    font-size: 12px;
-    font-weight: bold;
-    fill: white;
-}
 
 select {
     max-width: 100%;
