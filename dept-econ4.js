@@ -231,7 +231,7 @@
             svg.attr("height", vizHeight)
             cfg.saveButton.config.height = vizHeight - 10;
             saveButtonContainer.attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (bbox.height + bottomPadding) + ")")
-            //pymChild.sendHeight()
+            pymChild.sendHeight()
 
         }
     }
