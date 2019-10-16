@@ -177,7 +177,11 @@ var getDimensions = function(el) {
 }
 
 var createBoundingBox = function(container, el) {
-    var d = getDimensions(el);
+    if (el.x != undefined && el.y != undefined && el.width != undefined && el.height != undefined)
+        d = el;
+    else
+        d = getDimensions(el);
+
     var box = container.append("rect")
         .attr("x", d.x)
         .attr("y", d.y)
