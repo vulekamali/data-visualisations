@@ -29,7 +29,7 @@ function createMainLabel(container, label, config) {
     return programmeButton;
 }
 
-function createSaveButton(container, buttonDimensions, imageWidth, imageHeight, cfg) {
+function createSaveButton(container, buttonDimensions, imageDimensions, cfg) {
     // Skip Internet Explorer until a fix is found
     var ua = window.navigator.userAgent;
     var msie = ua.indexOf("MSIE ");
@@ -39,9 +39,9 @@ function createSaveButton(container, buttonDimensions, imageWidth, imageHeight, 
     cfg = cfg || {
         backgroundColor : "white",
         left : -10,
-        width: imageWidth + 20,
+        width: imageDimensions.width + 20,
         top: -10,
-        height: imageHeight - 20,
+        height: imageDimensions.height - 20,
         filename: "diagram.png"
     }
 
