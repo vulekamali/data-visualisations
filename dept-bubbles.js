@@ -212,14 +212,19 @@
     function createCircles(container, labelsContainer, data, colScale) {
         bbox = getDimensions(container)
         containerDimensions = {
-            left: cfg.offset.sectionLeft,
+            left: cfg.offset.sectionLeft + cfg.padding.section,
             right: cfg.viz.width,
             top: bbox.y,
-            bottom: cfg.viz.height - cfg.saveButton.height
+            bottom: cfg.viz.height - cfg.saveButton.height,
+            width: cfg.viz.width - cfg.offset.sectionLeft - cfg.padding.section,
+            height: (cfg.viz.height - cfg.saveButton.height) - bbox.y
         }
+        containerDimensions.x = containerDimensions.left
+        containerDimensions.y = containerDimensions.top
 
+        
         var areaWidth = containerDimensions.right - containerDimensions.left
-        var areaHeight = containerDimensions.bottom - containerDimensions.top
+        var areaHeight = (containerDimensions.bottom - containerDimensions.top) * 0.5
         var Area = (areaWidth * areaHeight)
 
         var centerX = (containerDimensions.left + containerDimensions.right) / 2
@@ -280,13 +285,15 @@
             })
             .attr("dy", ".35em")
 
+        bbox = getDimensions(container) 
+
         simulation.nodes(data).on("tick", ticked);
 
         function ticked() {
             circles.attr("transform", function(d) {
                 var radius = radiusScale(d[valueField])
-                d.y = Math.max(radius, Math.min(containerDimensions.bottom, d.y));
-                d.x = Math.max(radius, Math.min(containerDimensions.right, d.x));
+                d.y = Math.max(radius, Math.min(containerDimensions.bottom - radius, d.y));
+                d.x = Math.max(radius, Math.min(containerDimensions.right - radius * 1, d.x));
                 return "translate(" + d.x + ", " + d.y + ")";
             });
 
