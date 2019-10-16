@@ -129,11 +129,18 @@ function regroupByIndex(data, key) {
 }
 
 
-var rand_human_fmt = function(x) {
+var rand_human_fmt = function(x, longForm) {
+    longForm = longForm == undefined ? true : longForm
+    suffixBillion = longForm == true ? " billion" : "bn"
+    suffixMillion = longForm == true ? " million" : "m"
+    suffixThousand = longForm == true ? "  thousand" : "k"
+
     if (x >= 1000000000) {
-        return rand_fmt(x / 1000000000) + " billion"
+        return rand_fmt(x / 1000000000) + suffixBillion
     } else if (x >= 1000000) {
-        return rand_fmt(x / 1000000) + " million"
+        return rand_fmt(x / 1000000) + suffixMillion
+    } else if (!longForm && x >= 100000) {
+        return rand_fmt(x / 1000) + suffixThousand
     } else {
         return rand_fmt(x)
     }
