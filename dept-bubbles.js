@@ -166,6 +166,119 @@ function BubbleChart(config) {
 
     return my
 }
+    
+function legend() {
+    var rx = constant(8),
+        ry = constant(8),
+        boxSize = 10,
+        boxDisplacement = constant(5)
+        boxStyle = {},
+        boxAttr = { }
+
+    function my(selection) {
+        selection.each(function(d, i) {
+            var container = d3.select(this)
+                .append("g")
+                .classed("legend", true)
+
+            var legendItems = container
+                .append("g")
+                    .classed("legend-items", true)
+                    .selectAll(".item")
+                    .data(d)
+                    .enter() 
+                    .append("g")
+                        .classed("item", true)
+                        .on("click", function(d) { unselect(d); }) 
+                        .attr("transform", function(d, idx) {
+                            return "translate(0, " + (idx * boxDisplacement()) + ")"
+                        })
+
+            var rects = legendItems.append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("rx", rx)
+                .attr("ry", ry)
+                .style("fill", "blue")
+                .attr("width",boxSize())
+                .attr("height", boxSize())
+                .classed("legend-item-box", true)
+                .call(function(selection) {
+                    for (attr in boxStyle) {
+                        func = boxStyle[attr]
+                        selection.style(attr, func)
+                    }
+
+                    for (attr in boxAttr) {
+                        func = boxAttr[attr]
+                        selection.attr(attr, func)
+                    }
+                    
+                })
+
+            backgroundPadding = 4 // TODO
+            backgroundHeight = boxSize() + 2 * backgroundPadding
+
+            var backgrounds = legendItems
+                .append("g")
+                .attr("transform", "translate(" + boxDisplacement() + ", " + (- (backgroundHeight - boxSize()) / 2) + ")")
+
+            var legendItemBackgrounds = backgrounds
+                .append("rect")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("rx", 3) // TODO
+                    .attr("ry", 3)
+                    .attr("transform", function(d, idx) {
+                        return "translate(" + (- backgroundPadding) + ", " + 0 + ")"
+                    })
+                    .attr("height", boxSize() + 2 * backgroundPadding)
+                    .classed("legend-item-text-background", true)
+
+            backgrounds
+                .append("text")
+                    .attr("x", 0)
+                    .attr("y", backgroundHeight / 2)
+                    .attr("dy", "0.35em")
+                    .text(function(d) { return d; })
+                    // TODO default fill style
+                    .classed("legend-item-text", true)
+
+            legendItemBackgrounds
+                .each(function(d) {
+                    var bbox = getDimensions(d3.select(this.nextSibling));
+                    d3.select(this).attr("width", bbox.width + backgroundPadding * 2);
+                });
+            })
+    }
+
+    my.rx = function(_) {
+        return arguments.length ? (rx = typeof _ === "function" ? _ : constant(+_), my) : rx;
+    };
+
+    my.ry = function(_) {
+        return arguments.length ? (ry = typeof _ === "function" ? _ : constant(+_), my) : ry;
+    };
+
+    my.boxSize = function(_) {
+        return arguments.length ? (boxSize = typeof _ === "function" ? _ : constant(+_), my) : boxSize;
+    };
+
+    my.boxDisplacement = function(_) {
+        return arguments.length ? (boxDisplacement = typeof _ === "function" ? _ : constant(+_), my) : boxDisplacement;
+    };
+
+    my.boxStyle = function(attr, _) {
+        return arguments.length ? (boxStyle[attr] = typeof _ === "function" ? _ : constant(+_), my) : boxStyle[attr];
+    }
+
+    my.boxAttr = function(attr, _) {
+        return arguments.length ? (boxAttr[attr] = typeof _ === "function" ? _ : constant(+_), my) : boxAttr[attr];
+    }
+
+
+    return my
+}
 
 (function() {
     // TODO this should be passed in as a parameter
@@ -251,70 +364,17 @@ function BubbleChart(config) {
     }
 
     function createLegend(container, programmes, colScale) {
-        var legend = container.
-            append("g")
-                .classed("legend", true)
+        boxHeight = 15
+        var programmeLegend = legend()
+            .boxSize(boxHeight)
+            .boxDisplacement(boxHeight * 2)
+            .boxStyle("fill", colScale)
 
-        legendItems = legend
-            .append("g")
-                .classed("legend-items", true)
-                .selectAll(".item")
-                .data(programmes)
-                .enter()
-                .append("g")
-                    .classed("item", true)
-                    .on("click", function(d) { unselect(d); })
+        container
+            .datum(programmes)
+            .call(programmeLegend)
 
-        var rects = legendItems
-            .append("rect")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("rx", 8)
-                .attr("ry", 8)
-                .style("fill", colScale)
-                .classed("legend-item-box", true)
-
-        boxHeight = getDimensions(rects).width;
-        boxDisplacement = boxHeight + cfg.padding.box;
-
-        rects
-            .attr("transform", function(d, idx) {
-                return "translate(0, " + (idx * boxDisplacement) + ")"
-            })
-
-
-        var backgroundPadding = 2;
-        var legendItemBackgrounds = legendItems
-            .append("rect")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("rx", 3)
-                .attr("ry", 3)
-                .attr("transform", function(d, idx) {
-                    return "translate(" + (boxDisplacement) + ", " + (idx * boxDisplacement - backgroundPadding) + ")"
-                })
-                .attr("height", boxHeight + 2 * backgroundPadding)
-                .classed("legend-item-text-background", true)
-
-        legendItems
-            .append("text")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("transform", function(d, idx) {
-                    return "translate(" + (boxDisplacement + backgroundPadding * 2) + ", " + (idx * boxDisplacement) + ")"
-                })
-                .attr("dy", "1em")
-                .text(function(d) { return d; })
-                .style("fill", "black")
-                .classed("legend-item-text", true)
-
-        legendItemBackgrounds
-            .each(function(d) {
-                var bbox = getDimensions(d3.select(this.nextSibling));
-                d3.select(this).attr("width", bbox.width + backgroundPadding * 4);
-            });
-
-        return legend;
+        return container;
     }
 
     function unselect(programme) {

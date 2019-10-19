@@ -23,13 +23,11 @@ text {
     font-weight: bold;
 }
 
-
-rect.legend-item-box {
-    width: 2vh;
-    height: 2vh;
+.legend .legend-item-text {
+    fill: black;
 }
 
-.legend-item-text-background {
+.legend .legend-item-text-background {
     fill: #F2F2F2;
 }
 
