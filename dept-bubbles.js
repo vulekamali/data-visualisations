@@ -160,6 +160,7 @@ function BubbleChart(config) {
 
     return my
 }
+
 (function() {
     // TODO this should be passed in as a parameter
     var container = d3.select(".department-bubbles")
@@ -310,9 +311,6 @@ function BubbleChart(config) {
         return legend;
     }
 
-    function createHead(container, programmes, colScale) {
-    }
-
     function unselect(programme) {
         if (currentSelection == null)
             currentSelection = programme
@@ -321,7 +319,7 @@ function BubbleChart(config) {
         if (programme == currentSelection) {
             currentSelection = null;
 
-            d3.selectAll(".bubble circle")
+            d3.selectAll(".bubble-chart circle")
                 .classed("unselected", function(d) {
                     if (d[progNameRef] != programme) {
                         return !d3.select(this).classed("unselected")
@@ -338,7 +336,7 @@ function BubbleChart(config) {
                     return false
                 })
         } else {
-            d3.selectAll(".bubble circle")
+            d3.selectAll(".bubble-chart circle")
                 .classed("unselected", function(d) {
                     if (d[progNameRef] == currentSelection)
                         return true
