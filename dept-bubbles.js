@@ -47,7 +47,6 @@ function BubbleChart(config) {
                 .data(d)
                 .enter()
                 .append("g")
-                    .classed("bubble", true)
                     .on("mouseover", function(d, i) { if (events["mouseover"]) { events["mouseover"](d, i) } })
                     .on("mousemove", function(d, i) { if (events["mousemove"]) { events["mousemove"](d, i) } })
                     .on("mouseout", function(d, i) { if (events["mouseout"]) { events["mouseout"](d, i) } })
@@ -68,12 +67,10 @@ function BubbleChart(config) {
                         }
                         
                     })
-                    .classed("econ-circle", true)
 
             if (text) {
                 circles
                     .append("text")
-                    .classed("econ-label", true)
                     .text(function(d, i) {
                         return d[econ4Ref]
                     })
@@ -427,7 +424,9 @@ function BubbleChart(config) {
 
         container
             .datum(data)
-            .call(chart)
+            .append("g")
+                .classed("bubble-chart", true)
+                .call(chart)
     }
 
     function createLayout(container, mobile) {
