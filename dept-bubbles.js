@@ -462,6 +462,7 @@ function legend() {
             .boxDisplacement(boxHeight * 2)
             .boxStyle("fill", colScale)
             .width(width)
+            .labelStyle("pointer-events", "none")
             .on("click", function(d) {
                 unselect(d);
             })
