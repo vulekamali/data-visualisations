@@ -38,8 +38,8 @@ function BubbleChart(config) {
             var centerY = containerDimensions.height
 
             var simulation = d3.forceSimulation()
-                .force("x", d3.forceX(centerX/2).strength(xForce))
-                .force("y", d3.forceY(centerY/2).strength(yForce))
+                .force("x", d3.forceX(centerX / 2).strength(xForce))
+                .force("y", d3.forceY(centerY / 2).strength(yForce))
                 .force("collide", d3.forceCollide(function(d) { return radiusScale(d[valueField])}))
 
             var circles = container
