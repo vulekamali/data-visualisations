@@ -400,7 +400,7 @@ function legend() {
             top: 0,
             height: 0,
             offset: {
-                y: 10
+                y: 32
             },
             densityCoefficient: 0.7 
         },
@@ -604,32 +604,33 @@ function legend() {
         budgetLabel = createBudgetSection(rightSection);
         bbox = getDimensions(budgetLabel);
 
-        cfg.bubbleChart.top = bbox.y + bbox.height + cfg.bubbleChart.offset.y
+        cfg.bubbleChart.top = bbox.y + bbox.height
         cfg.bubbleChart.height = cfg.viz.height - cfg.bubbleChart.top - cfg.saveButton.height;
+
         var bubbleChart = rightSection
             .append("g").classed("bubble-chart", true)
             .attr("transform", "translate(0, " + cfg.bubbleChart.top + ")")
+            .call(stretch, {width: 100, height: cfg.bubbleChart.height})
 
 
         if (!mobile) {
             var bbox = getDimensions(mainLabel);
             legendContainer
-                .attr("transform", "translate(0, " + (bbox.y + bbox.height + cfg.padding.section) + ")")
+                .attr("transform", "translate(0, " + (bbox.y + bbox.height + 18) + ")")
 
+            var bbox = getDimensions(budgetLabel)
             middleSection
                 .attr("transform", "translate(" + (cfg.offset.sectionLeft + 24) + ", 0)")
-
-            middleSection
                 .append("line")
                     .classed("label-separator", true)
                     .attr("x1", 0)
                     .attr("x2", 0)
                     .attr("y1", 0)
-                    .attr("y2", 100)
+                    .attr("y2", bbox.height)
 
             rightSection
-                .classed("right-section", true)
                 .attr("transform", "translate(" + (cfg.offset.sectionLeft + 48) + ", 0)")
+
         } else {
             leftSection.style("display", "none")
             middleSection.style("display", "none")
@@ -663,8 +664,8 @@ function legend() {
         var programmes = unique(data.map(function(d) { return d[progNameRef]; }));
         var colScale = d3.scaleOrdinal().domain(programmes).range(colorMap2)
 
-        leftDim = getDimensions(sections.leftSection)
-        legend = createLegend(sections.legendContainer, programmes, colScale, leftDim.width);
+        leftSectionDimensions = getDimensions(sections.leftSection)
+        legend = createLegend(sections.legendContainer, programmes, colScale, leftSectionDimensions.width);
         createCircles(sections.bubbleChart, sections.rightSection, data, colScale);
 
         var saveButtonContainer = createSaveButton(svg, cfg.saveButton, viewport, cfg.saveButton.config)
