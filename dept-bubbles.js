@@ -145,23 +145,23 @@ function BubbleChart(config) {
     }
 
     my.bubbleStyle = function(attr, _) {
-        return arguments.length ? (bubbleStyle[attr] = typeof _ === "function" ? _ : constant(+_), my) : bubbleStyle[attr];
+        return arguments.length ? (bubbleStyle[attr] = typeof _ === "function" ? _ : constant(_), my) : bubbleStyle[attr];
     }
 
     my.textStyle = function(attr, _) {
-        return arguments.length ? (textStyle[attr] = typeof _ === "function" ? _ : constant(+_), my) : textStyle[attr];
+        return arguments.length ? (textStyle[attr] = typeof _ === "function" ? _ : constant(_), my) : textStyle[attr];
     }
 
     my.bubbleAttr = function(attr, _) {
-        return arguments.length ? (bubbleAttr[attr] = typeof _ === "function" ? _ : constant(+_), my) : bubbleAttr[attr];
+        return arguments.length ? (bubbleAttr[attr] = typeof _ === "function" ? _ : constant(_), my) : bubbleAttr[attr];
     }
 
     my.textAttr = function(attr, _) {
-        return arguments.length ? (textAttr[attr] = typeof _ === "function" ? _ : constant(+_), my) : textAttr[attr];
+        return arguments.length ? (textAttr[attr] = typeof _ === "function" ? _ : constant(_), my) : textAttr[attr];
     }
 
     my.text = function(_) {
-        return arguments.length ? (text = typeof _ === "function" ? _ : constant(+_), my) : text;
+        return arguments.length ? (text = typeof _ === "function" ? _ : constant(_), my) : text;
     }
 
     return my
@@ -170,10 +170,18 @@ function BubbleChart(config) {
 function legend() {
     var rx = constant(8),
         ry = constant(8),
-        boxSize = 10,
+        backgroundRx = constant(3),
+        backgroundRy = constant(3),
+        boxSize = constant(10),
         boxDisplacement = constant(5)
+        backgroundPadding = constant(4)
         boxStyle = {},
-        boxAttr = { }
+        boxAttr = {},
+        backgroundStyle = {},
+        backgroundAttr = {},
+        labelStyle = {"fill": "black"},
+        labelAttr = {},
+        width = constant(100)
 
     function my(selection) {
         selection.each(function(d, i) {
@@ -216,8 +224,7 @@ function legend() {
                     
                 })
 
-            backgroundPadding = 4 // TODO
-            backgroundHeight = boxSize() + 2 * backgroundPadding
+            backgroundHeight = boxSize() + 2 * backgroundPadding()
 
             var backgrounds = legendItems
                 .append("g")
@@ -227,33 +234,78 @@ function legend() {
                 .append("rect")
                     .attr("x", 0)
                     .attr("y", 0)
-                    .attr("rx", 3) // TODO
-                    .attr("ry", 3)
+                    .attr("rx", backgroundRx)
+                    .attr("ry", backgroundRy)
                     .attr("transform", function(d, idx) {
-                        return "translate(" + (- backgroundPadding) + ", " + 0 + ")"
+                        return "translate(" + (- backgroundPadding()) + ", " + 0 + ")"
                     })
-                    .attr("height", boxSize() + 2 * backgroundPadding)
+                    .attr("height", boxSize() + 2 * backgroundPadding())
                     .classed("legend-item-text-background", true)
+                    .call(function(selection) {
+                        for (attr in backgroundStyle) {
+                            func = backgroundStyle[attr]
+                            selection.style(attr, func)
+                        }
 
-            backgrounds
+                        for (attr in backgroundAttr) {
+                            func = backgroundAttr[attr]
+                            selection.attr(attr, func)
+                        }
+                        
+                    })
+
+            var labels = backgrounds
                 .append("text")
                     .attr("x", 0)
                     .attr("y", backgroundHeight / 2)
                     .attr("dy", "0.35em")
                     .text(function(d) { return d; })
-                    // TODO default fill style
+                    .style("fill", labelStyle["fill"])
                     .classed("legend-item-text", true)
+                    .call(function(selection) {
+                        for (attr in labelStyle) {
+                            func = labelStyle[attr]
+                            selection.style(attr, func)
+                        }
+
+                        for (attr in labelAttr) {
+                            func = labelAttr[attr]
+                            selection.attr(attr, func)
+                        }
+                        
+                    })
+                    .call(crop, width() - boxDisplacement())
+                    .each(function() {
+                        // Correct the downshift after crop creates tspans
+                        d3.select(this).select("tspan").attr("dy", "0.35em")
+                    })
 
             legendItemBackgrounds
                 .each(function(d) {
                     var bbox = getDimensions(d3.select(this.nextSibling));
-                    d3.select(this).attr("width", bbox.width + backgroundPadding * 2);
+                    d3.select(this).attr("width", bbox.width + backgroundPadding() * 2);
                 });
             })
     }
 
+    my.width = function(_) {
+        return arguments.length ? (width = typeof _ === "function" ? _ : constant(+_), my) : width;
+    };
+
     my.rx = function(_) {
         return arguments.length ? (rx = typeof _ === "function" ? _ : constant(+_), my) : rx;
+    };
+
+    my.ry = function(_) {
+        return arguments.length ? (ry = typeof _ === "function" ? _ : constant(+_), my) : ry;
+    };
+
+    my.backgroundRx = function(_) {
+        return arguments.length ? (backgroundRx = typeof _ === "function" ? _ : constant(+_), my) : backgroundRx;
+    };
+
+    my.backgroundRy = function(_) {
+        return arguments.length ? (backgroundRy = typeof _ === "function" ? _ : constant(+_), my) : backgroundRy;
     };
 
     my.ry = function(_) {
@@ -268,13 +320,34 @@ function legend() {
         return arguments.length ? (boxDisplacement = typeof _ === "function" ? _ : constant(+_), my) : boxDisplacement;
     };
 
+    my.backgroundPadding = function(_) {
+        return arguments.length ? (backgroundPadding = typeof _ === "function" ? _ : constant(+_), my) : backgroundPadding;
+    };
+
     my.boxStyle = function(attr, _) {
-        return arguments.length ? (boxStyle[attr] = typeof _ === "function" ? _ : constant(+_), my) : boxStyle[attr];
+        return arguments.length ? (boxStyle[attr] = typeof _ === "function" ? _ : constant(_), my) : boxStyle[attr];
     }
 
     my.boxAttr = function(attr, _) {
-        return arguments.length ? (boxAttr[attr] = typeof _ === "function" ? _ : constant(+_), my) : boxAttr[attr];
+        return arguments.length ? (boxAttr[attr] = typeof _ === "function" ? _ : constant(_), my) : boxAttr[attr];
     }
+
+    my.backgroundStyle = function(attr, _) {
+        return arguments.length ? (backgroundStyle[attr] = typeof _ === "function" ? _ : constant(_), my) : backgroundStyle[attr];
+    }
+
+    my.backgroundAttr = function(attr, _) {
+        return arguments.length ? (backgroundAttr[attr] = typeof _ === "function" ? _ : constant(_), my) : backgroundAttr[attr];
+    }
+
+    my.labelStyle = function(attr, _) {
+        return arguments.length ? (labelStyle[attr] = typeof _ === "function" ? _ : constant(_), my) : labelStyle[attr];
+    }
+
+    my.labelAttr = function(attr, _) {
+        return arguments.length ? (labelAttr[attr] = typeof _ === "function" ? _ : constant(_), my) : labelAttr[attr];
+    }
+
 
 
     return my
@@ -314,6 +387,9 @@ function legend() {
                 y: 10
             },
             densityCoefficient: 0.7 
+        },
+        legend: {
+            boxHeight: 15
         },
         saveButton: {
             margin: 10,
@@ -363,12 +439,13 @@ function legend() {
 
     }
 
-    function createLegend(container, programmes, colScale) {
-        boxHeight = 15
+    function createLegend(container, programmes, colScale, width) {
+        boxHeight = cfg.legend.boxHeight
         var programmeLegend = legend()
             .boxSize(boxHeight)
             .boxDisplacement(boxHeight * 2)
             .boxStyle("fill", colScale)
+            .width(width)
 
         container
             .datum(programmes)
@@ -494,9 +571,13 @@ function legend() {
 
     function createLayout(container, mobile) {
     
-        var leftSection = svg.append("g").classed("left-section", true)
+        var leftSection = svg.append("g")
+            .classed("left-section", true)
+            .call(stretch, {width: cfg.offset.sectionLeft, height: 20})
+
         var middleSection = svg.append("g").classed("middle-section", true);
         var rightSection = svg.append("g").classed("right-section", true)
+
         var legendContainer = leftSection.append("g").classed("legend-container", true);
 
         var mainLabel = createMainLabel(leftSection, "PROGRAMME");
@@ -560,13 +641,12 @@ function legend() {
         var programmes = unique(data.map(function(d) { return d[progNameRef]; }));
         var colScale = d3.scaleOrdinal().domain(programmes).range(colorMap2)
 
-        legend = createLegend(sections.legendContainer, programmes, colScale);
+        leftDim = getDimensions(sections.leftSection)
+        legend = createLegend(sections.legendContainer, programmes, colScale, leftDim.width);
         createCircles(sections.bubbleChart, sections.rightSection, data, colScale);
 
         var saveButtonContainer = createSaveButton(svg, cfg.saveButton, viewport, cfg.saveButton.config)
             .attr("transform", "translate(" + (cfg.viz.width - cfg.saveButton.width)  + ", " + (viewport.height - cfg.saveButton.height) + ")")
-
-
 
     });
 
