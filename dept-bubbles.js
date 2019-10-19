@@ -1,3 +1,169 @@
+var valueField = "value.sum"
+var viewport = getViewportDimensions();
+var econ4Ref = "econ4.econ4"
+
+function BubbleChart(config) {
+    var width = constant(600),
+        height = constant(600),
+        radiusScale = d3.scaleSqrt()
+            .domain([0, 100000000])
+            .range([0, 10]),
+        xForce = constant(0.1),
+        yForce = constant(0.1),
+        mouseOver = null,
+        events = {
+            "mouseover": null,
+            "click": null,
+        },
+        bubbleStyle = { "fill": constant("Black") },
+        bubbleAttr = { },
+        textStyle = { "fill": constant("White") },
+        textAttr = { },
+        text = null
+
+    function my(selection) {
+
+        selection.each(function(d, i) {
+            var container = d3.select(this)
+            containerDimensions = {
+                x: 0,
+                y: 0,
+                width: width(),
+                height: height(),
+                right: width(),
+                bottom: height(),
+            }
+
+            var centerX = containerDimensions.width
+            var centerY = containerDimensions.height
+            container.append("circle").attr("r", 5).attr("cx", centerX / 2).attr("cy", centerY / 2).style("fill", "blue")
+
+            var simulation = d3.forceSimulation()
+                .force("x", d3.forceX(centerX/2).strength(xForce))
+                .force("y", d3.forceY(centerY/2).strength(yForce))
+                .force("collide", d3.forceCollide(function(d) { return radiusScale(d[valueField])}))
+
+            var circles = container
+                .selectAll("g")
+                .data(d)
+                .enter()
+                .append("g")
+                    .classed("bubble", true)
+                    .on("mouseover", function(d, i) { if (events["mouseover"]) { events["mouseover"](d, i) } })
+                    .on("mousemove", function(d, i) { if (events["mousemove"]) { events["mousemove"](d, i) } })
+                    .on("mouseout", function(d, i) { if (events["mouseout"]) { events["mouseout"](d, i) } })
+                    .on("click", function(d, i) { if (events["click"]) { events["click"](d, i) } })
+
+            circles
+                .append("circle")
+                    .attr("r", function(d) { return radiusScale(d[valueField]) })
+                    .call(function(selection) {
+                        for (attr in bubbleStyle) {
+                            func = bubbleStyle[attr]
+                            selection.style(attr, func)
+                        }
+
+                        for (attr in bubbleAttr) {
+                            func = bubbleAttr[attr]
+                            selection.attr(attr, func)
+                        }
+                        
+                    })
+                    .classed("econ-circle", true)
+
+            if (text) {
+                circles
+                    .append("text")
+                    .classed("econ-label", true)
+                    .text(function(d, i) {
+                        return d[econ4Ref]
+                    })
+                    .attr("dy", ".35em")
+                    .call(function(selection) {
+                        for (attr in textStyle) {
+                            func = textStyle[attr]
+                            selection.style(attr, func)
+                        }
+
+                        for (attr in textAttr) {
+                            func = textAttr[attr]
+                            selection.attr(attr, func)
+                        }
+                        
+                    })
+                    .style("font-size", function(d) {
+                        radius = radiusScale(d[valueField])
+                        a = Math.min(2 * radius, (2 * radius - 8) / this.getComputedTextLength() * 24);
+                        if (a <= 0)
+                            return 0
+                        return a + "px"
+                    })
+            }
+
+            function ticked() {
+                circles.attr("transform", function(d) {
+                    var radius = radiusScale(d[valueField])
+                    d.y = Math.max(radius, Math.min(containerDimensions.bottom - radius, d.y));
+                    d.x = Math.max(radius, Math.min(containerDimensions.right - radius * 1, d.x));
+                    return "translate(" + d.x + ", " + d.y + ")";
+                });
+            }
+            simulation.nodes(d).on("tick", ticked);
+        })
+    };
+
+    my.width = function(_) {
+        return arguments.length ? (width = typeof _ === "function" ? _ : constant(+_), my) : width;
+    };
+
+    my.height = function(_) {
+        return arguments.length ? (height = typeof _ === "function" ? _ : constant(+_), my) : height;
+    };
+
+    my.radius = function(_) {
+        return arguments.length ? (radiusScale = typeof _ === "function" ? _ : constant(+_), my) : radiusScale;
+    }
+
+    my.xForce = function(_) {
+        return arguments.length ? (xForce = typeof _ === "function" ? _ : constant(+_), my) : xForce;
+    }
+
+    my.yForce = function(_) {
+        return arguments.length ? (yForce = typeof _ === "function" ? _ : constant(+_), my) : yForce;
+    }
+
+    my.on = function(event, func) {
+        if (arguments.length == 1) {
+            return events[event]            
+        } else {
+            events[event] = func
+        }
+
+        return my
+    }
+
+    my.bubbleStyle = function(attr, _) {
+        return arguments.length ? (bubbleStyle[attr] = typeof _ === "function" ? _ : constant(+_), my) : bubbleStyle[attr];
+    }
+
+    my.textStyle = function(attr, _) {
+        return arguments.length ? (textStyle[attr] = typeof _ === "function" ? _ : constant(+_), my) : textStyle[attr];
+    }
+
+    my.bubbleAttr = function(attr, _) {
+        return arguments.length ? (bubbleAttr[attr] = typeof _ === "function" ? _ : constant(+_), my) : bubbleAttr[attr];
+    }
+
+    my.textAttr = function(attr, _) {
+        return arguments.length ? (textAttr[attr] = typeof _ === "function" ? _ : constant(+_), my) : textAttr[attr];
+    }
+
+    my.text = function(_) {
+        return arguments.length ? (text = typeof _ === "function" ? _ : constant(+_), my) : text;
+    }
+
+    return my
+}
 (function() {
     // TODO this should be passed in as a parameter
     var container = d3.select(".department-bubbles")
@@ -52,8 +218,6 @@
     var model = JSON.parse(container.attr("data-openspending-model"));
     var progNameRef = getProgNameRef(model);
     var subprogNameRef = getSubprogNameRef(model);
-    var econ4Ref = getEconClass4Ref(model);
-    var valueField = "value.sum"
     var bubbleChartTop, bubbleChartHeight;
 
 
@@ -230,11 +394,6 @@
         var centerX = (containerDimensions.left + containerDimensions.right) / 2
         var centerY = (containerDimensions.bottom + containerDimensions.top) / 2
 
-        var simulation = d3.forceSimulation()
-            .force("x", d3.forceX(centerX/2).strength(0.1))
-            .force("y", d3.forceY(centerY/2).strength(0.1))
-            .force("collide", d3.forceCollide(function(d) { return radiusScale(d[valueField])}))
-
         var totalValue = d3.sum(data, function(d) { return d["value.sum"]})
         var maxValue = d3.max(data, function(d) { return d[valueField]})
         var maxRatio = maxValue / totalValue
@@ -243,67 +402,34 @@
             .domain([0, maxValue])
             .range([0, Math.sqrt(Area) * maxRatio * cfg.bubbleChart.densityCoefficient])
 
-        var circles = container
-            .selectAll("g")
-            .data(data)
-            .enter()
-            .append("g")
-                .classed("bubble", true)
-                .on("mouseover", function(d) {
-                    labelsContainer.select(".programme").text(d[progNameRef])
-                    labelsContainer.select(".economic-classification").text(d[econ4Ref])
-                    labelsContainer.select(".budget-amount").text(rand_fmt(d[valueField]))
-                })
-
-                .on("click", function(d) {
-                    var programme = d[progNameRef]
-                    unselect(programme);
-                })
-
-        circles
-            .append("circle")
-                .attr("r", function(d) { return radiusScale(d[valueField]) })
-                .style("fill", function(d) {
-                    return colScale(d[progNameRef]);
-                })
-                .classed("econ-circle", true)
-
-        circles
-            .append("text")
-            .text(function(d) {
-                if (radiusScale(d[valueField]) > 20) {
+        chart = BubbleChart({})
+            .width(containerDimensions.width)
+            .height(containerDimensions.height)
+            .radius(radiusScale)
+            .on("mouseover", function(d, i) {
+                labelsContainer.select(".programme").text(d[progNameRef])
+                labelsContainer.select(".economic-classification").text(d[econ4Ref])
+                labelsContainer.select(".budget-amount").text(rand_fmt(d[valueField]))
+            })
+            .on("click", function(d, i) {
+                var programme = d[progNameRef]
+                unselect(programme);
+            })
+            .bubbleStyle("fill", function(d, i) {
+                return colScale(d[progNameRef]);
+            })
+            .text(function(d, i) {
+                return d[econ4Ref]
+                if (radiusScale(d[valueField]) > 1) {
                     return d[econ4Ref]
                 } else {
                     return "";
                 }
             })
-            .classed("econ-label", true)
-            .style("font-size", function(d) {
-                radius = radiusScale(d[valueField])
-                a = Math.min(2 * radius, (2 * radius - 8) / this.getComputedTextLength() * 24) + "px";
-                return a;
-            })
-            .attr("dy", ".35em")
 
-        bbox = getDimensions(container) 
-
-        simulation.nodes(data).on("tick", ticked);
-
-        function ticked() {
-            circles.attr("transform", function(d) {
-                var radius = radiusScale(d[valueField])
-                d.y = Math.max(radius, Math.min(containerDimensions.bottom - radius, d.y));
-                d.x = Math.max(radius, Math.min(containerDimensions.right - radius * 1, d.x));
-                return "translate(" + d.x + ", " + d.y + ")";
-            });
-
-            var bbox = getDimensions(container);
-            svg.select(".bubble-chart-bbox")
-                .attr("x", bbox.x)
-                .attr("y", bbox.y)
-                .attr("width", bbox.width)
-                .attr("height", bbox.height)
-            }
+        container
+            .datum(data)
+            .call(chart)
     }
 
     function createLayout(container, mobile) {
