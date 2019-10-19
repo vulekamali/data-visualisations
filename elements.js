@@ -163,6 +163,17 @@ function transform(selection, transform) {
     })
 }
 
+function stretch(selection, dimensions) {
+    selection.each(function(d, i) {
+        d3.select(this).append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", dimensions.width)
+            .attr("height", dimensions.height)
+            .style("visibility", "hidden")
+    })
+}
+
 colorMap = [
     ["#2C35AA", "#4050C7", "#5D76F4", "#546BE7", "#5D76F4", "#788FF7", "#96A7F9", "#B2BEFA", "#D2D9FC", "#E7EAFC"],
     ["#7D1D4E", "#9F2757", "#B22E5B", "#C73361", "#D63864", "#DA4F7A", "#DF6B92", "#E793B0", "#EFBED0", "#F8E5EC"],
