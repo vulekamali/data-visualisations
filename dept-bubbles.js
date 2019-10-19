@@ -181,6 +181,10 @@ function legend() {
         backgroundAttr = {},
         labelStyle = {"fill": "black"},
         labelAttr = {},
+        events = {
+            "mouseover": null,
+            "click": null,
+        },
         width = constant(100)
 
     function my(selection) {
@@ -201,6 +205,10 @@ function legend() {
                         .attr("transform", function(d, idx) {
                             return "translate(0, " + (idx * boxDisplacement()) + ")"
                         })
+                    .on("mouseover", function(d, i) { if (events["mouseover"]) { events["mouseover"](d, i) } })
+                    .on("mousemove", function(d, i) { if (events["mousemove"]) { events["mousemove"](d, i) } })
+                    .on("mouseout", function(d, i) { if (events["mouseout"]) { events["mouseout"](d, i) } })
+                    .on("click", function(d, i) { if (events["click"]) { events["click"](d, i) } })
 
             var rects = legendItems.append("rect")
                 .attr("x", 0)
@@ -348,7 +356,15 @@ function legend() {
         return arguments.length ? (labelAttr[attr] = typeof _ === "function" ? _ : constant(_), my) : labelAttr[attr];
     }
 
+    my.on = function(event, func) {
+        if (arguments.length == 1) {
+            return events[event]            
+        } else {
+            events[event] = func
+        }
 
+        return my
+    }
 
     return my
 }
@@ -446,6 +462,9 @@ function legend() {
             .boxDisplacement(boxHeight * 2)
             .boxStyle("fill", colScale)
             .width(width)
+            .on("click", function(d) {
+                unselect(d);
+            })
 
         container
             .datum(programmes)
