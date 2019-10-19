@@ -167,13 +167,17 @@ var getViewportDimensions = function() {
 
 var getDimensions = function(el) {
     rect = el.node().getBoundingClientRect();
-    return {
+    dim = {
         x: rect.x || rect.left,
         y: rect.y || rect.top,
         width: rect.width,
-        height: rect.height
+        height: rect.height,
 
     }
+    dim.bottom = dim.y + dim.height
+    dim.right = dim.x + dim.width
+
+    return dim
 }
 
 var createBoundingBox = function(container, el) {
@@ -191,3 +195,8 @@ var createBoundingBox = function(container, el) {
     return box
 }
 
+function constant(x) {
+  return function constant() {
+    return x;
+  };
+}
