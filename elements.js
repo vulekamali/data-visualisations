@@ -163,14 +163,15 @@ function transform(selection, transform) {
     })
 }
 
-function stretch(selection, dimensions) {
+function stretch(selection, dimensions, visibility) {
+    visibility = visibility || "hidden"
     selection.each(function(d, i) {
         d3.select(this).append("rect")
             .attr("x", 0)
             .attr("y", 0)
             .attr("width", dimensions.width)
             .attr("height", dimensions.height)
-            .style("visibility", "hidden")
+            .style("visibility", visibility)
     })
 }
 
