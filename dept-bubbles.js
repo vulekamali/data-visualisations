@@ -54,7 +54,12 @@ function BubbleChart(config) {
 
             circles
                 .append("circle")
-                    .attr("r", function(d) { return radiusScale(d[valueField]) })
+                    .attr("r", function(d) {
+                        var r = radiusScale(d[valueField]) 
+                        if (r < 0)
+                            return 0
+                        return r
+                    })
                     .call(function(selection) {
                         for (attr in bubbleStyle) {
                             func = bubbleStyle[attr]
@@ -99,6 +104,7 @@ function BubbleChart(config) {
             function ticked() {
                 circles.attr("transform", function(d) {
                     var radius = radiusScale(d[valueField])
+
                     d.y = Math.max(radius, Math.min(containerDimensions.bottom - radius, d.y));
                     d.x = Math.max(radius, Math.min(containerDimensions.right - radius * 1, d.x));
                     return "translate(" + d.x + ", " + d.y + ")";
@@ -194,7 +200,7 @@ function BubbleChart(config) {
             offset: {
                 y: 10
             },
-            densityCoefficient: 0.8
+            densityCoefficient: 0.7 
         },
         saveButton: {
             margin: 10,
@@ -371,7 +377,7 @@ function BubbleChart(config) {
         containerDimensions = {
             left: cfg.offset.sectionLeft + cfg.padding.section,
             right: cfg.viz.width,
-            top: bbox.y,
+            top: 0,
             bottom: cfg.viz.height - cfg.saveButton.height,
             width: cfg.viz.width - cfg.offset.sectionLeft - cfg.padding.section,
             height: (cfg.viz.height - cfg.saveButton.height) - bbox.y
@@ -379,13 +385,12 @@ function BubbleChart(config) {
         containerDimensions.x = containerDimensions.left
         containerDimensions.y = containerDimensions.top
 
-        
-        var areaWidth = containerDimensions.right - containerDimensions.left
-        var areaHeight = (containerDimensions.bottom - containerDimensions.top) * 0.5
+        var areaWidth = containerDimensions.width
+        var areaHeight = containerDimensions.height
         var Area = (areaWidth * areaHeight)
 
-        var centerX = (containerDimensions.left + containerDimensions.right) / 2
-        var centerY = (containerDimensions.bottom + containerDimensions.top) / 2
+        var centerX = containerDimensions.width / 2 + containerDimensions.left
+        var centerY = containerDimensions.height / 2 + containerDimensions.top 
 
         var totalValue = d3.sum(data, function(d) { return d[valueField]})
         var maxValue = d3.max(data, function(d) { return d[valueField]})
@@ -395,7 +400,7 @@ function BubbleChart(config) {
             .domain([0, maxValue])
             .range([0, Math.sqrt(Area) * maxRatio * cfg.bubbleChart.densityCoefficient])
 
-        chart = BubbleChart({})
+        chart = BubbleChart()
             .width(containerDimensions.width)
             .height(containerDimensions.height)
             .radius(radiusScale)
@@ -420,7 +425,7 @@ function BubbleChart(config) {
                 }
             })
 
-        container
+        var bubbleChartContainer = container
             .datum(data)
             .append("g")
                 .classed("bubble-chart", true)
