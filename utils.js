@@ -32,11 +32,8 @@ function fade(text, width) {
 function crop(text, width) {
     text.each(function(d) {
         var padding = 10;
-        // TODO wish there was a cleaner way to pass the width in to this
-        // function
-        var width = width || (d.x1 - d.x0 - padding);
         var text = d3.select(this),
-            words = text.text().split(/\s+/).reverse(),
+            words = text.text().split("").reverse(),
             word,
             line = [],
             lineNumber = 0,
@@ -50,11 +47,14 @@ function crop(text, width) {
                         .attr("dy", dy + "em");
         while (word = words.pop()) {
             line.push(word);
-            tspan.text(line.join(" "));
+            tspan.text(line.join("") + "...");
             if (tspan.node().getComputedTextLength() > width) {
                 line.pop()
-                tspan.text(line.join(" "));
+                suffix = "..."
+                tspan.text(line.join("") + suffix);
+                break
             }
+            tspan.text(line.join(""));
         }
     });
 }
