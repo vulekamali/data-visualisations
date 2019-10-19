@@ -391,8 +391,8 @@ function legend() {
             box: 15,
         },
         offset: {
-            sectionLeft: (viewport.width - 24) / 3,
-            sectionRight: viewport.width - (viewport.width - 24) / 3,
+            sectionLeft: (viewport.width - 48) / 3,
+            sectionRight: viewport.width - (viewport.width - 48) / 3,
             budgetLabel: 0 // determined at runtime
         },
         bubbleChart: {
@@ -432,12 +432,12 @@ function legend() {
     function createBudgetSection(container) {
         var econContainer = container.append("g").classed("budget-section", true);
 
-        var classificationSection = econContainer.append("g").attr("transform", "translate(" + 10 + ", 0)")
+        var classificationSection = econContainer.append("g")
         createMainLabel(classificationSection, "ECONOMIC CLASSIFICATION")
 
         classificationSection.append("text")
             .classed("programme", true)
-            .text("None Selected")
+            .text("Hover over the circles for more information")
             .attr("transform", "translate(6, 50)")
 
 
@@ -594,7 +594,7 @@ function legend() {
             .classed("left-section", true)
             .call(stretch, {width: cfg.offset.sectionLeft, height: 20})
 
-        var middleSection = svg.append("g").classed("middle-section", true);
+        var middleSection = svg.append("g").classed("middle-section", true)
         var rightSection = svg.append("g").classed("right-section", true)
 
         var legendContainer = leftSection.append("g").classed("legend-container", true);
@@ -617,19 +617,22 @@ function legend() {
                 .attr("transform", "translate(0, " + (bbox.y + bbox.height + cfg.padding.section) + ")")
 
             middleSection
+                .attr("transform", "translate(" + (cfg.offset.sectionLeft + 24) + ", 0)")
+
+            middleSection
                 .append("line")
                     .classed("label-separator", true)
-                    .attr("x1", cfg.separator.x)
-                    .attr("x2", cfg.separator.x)
+                    .attr("x1", 0)
+                    .attr("x2", 0)
                     .attr("y1", 0)
-                    .attr("y2", 90)
-                    .attr("transform", "translate(" + cfg.offset.sectionLeft + ", 0)")
+                    .attr("y2", 100)
 
             rightSection
-                .attr("transform", "translate(" + (cfg.offset.sectionLeft + cfg.padding.section) + ", 0)")
                 .classed("right-section", true)
+                .attr("transform", "translate(" + (cfg.offset.sectionLeft + 48) + ", 0)")
         } else {
             leftSection.style("display", "none")
+            middleSection.style("display", "none")
             cfg.offset.sectionLeft = 0
             cfg.padding.section = 0
 
