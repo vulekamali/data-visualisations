@@ -36,7 +36,6 @@ function BubbleChart(config) {
 
             var centerX = containerDimensions.width
             var centerY = containerDimensions.height
-            container.append("circle").attr("r", 5).attr("cx", centerX / 2).attr("cy", centerY / 2).style("fill", "blue")
 
             var simulation = d3.forceSimulation()
                 .force("x", d3.forceX(centerX/2).strength(xForce))
@@ -372,7 +371,6 @@ function BubbleChart(config) {
 
     }
 
-
     function createCircles(container, labelsContainer, data, colScale) {
         bbox = getDimensions(container)
         containerDimensions = {
@@ -394,7 +392,7 @@ function BubbleChart(config) {
         var centerX = (containerDimensions.left + containerDimensions.right) / 2
         var centerY = (containerDimensions.bottom + containerDimensions.top) / 2
 
-        var totalValue = d3.sum(data, function(d) { return d["value.sum"]})
+        var totalValue = d3.sum(data, function(d) { return d[valueField]})
         var maxValue = d3.max(data, function(d) { return d[valueField]})
         var maxRatio = maxValue / totalValue
 
