@@ -34,12 +34,12 @@ function BubbleChart(config) {
                 bottom: height(),
             }
 
-            var centerX = containerDimensions.width
-            var centerY = containerDimensions.height
+            var centerX = containerDimensions.width / 2
+            var centerY = containerDimensions.height / 2
 
             var simulation = d3.forceSimulation()
-                .force("x", d3.forceX(centerX / 2).strength(xForce))
-                .force("y", d3.forceY(centerY / 2).strength(yForce))
+                .force("x", d3.forceX(centerX).strength(xForce))
+                .force("y", d3.forceY(centerY).strength(yForce))
                 .force("collide", d3.forceCollide(function(d) { return radiusScale(d[valueField])}))
 
             var circles = container
@@ -534,17 +534,20 @@ function legend() {
     }
 
     function createCircles(container, labelsContainer, data, colScale) {
-        bbox = getDimensions(container)
+        //bbox = getDimensions(container)
+        /*
         containerDimensions = {
-            left: cfg.offset.sectionLeft + cfg.padding.section,
-            right: cfg.viz.width,
+            left: 0,
+            right: cfg.offset.sectionRight,
+            //right: cfg.viz.width,
             top: 0,
             bottom: cfg.viz.height - cfg.saveButton.height,
-            width: cfg.viz.width - cfg.offset.sectionLeft - cfg.padding.section,
+            width: cfg.viz.width - cfg.offset.sectionLeft - cfg.padding.section - 50,
             height: (cfg.viz.height - cfg.saveButton.height) - bbox.y
         }
-        containerDimensions.x = containerDimensions.left
-        containerDimensions.y = containerDimensions.top
+        */
+
+        containerDimensions = getDimensions(container)
 
         var areaWidth = containerDimensions.width
         var areaHeight = containerDimensions.height
@@ -597,29 +600,59 @@ function legend() {
     }
 
     function createLayout(container, mobile) {
-    
+        var leftSection = {
+            x: 0, width: cfg.offset.sectionLeft,
+            y: 0, height: cfg.viz.height
+        }
+
+        var middleSectionDimensions = {
+            x: cfg.offset.sectionLeft + 24, width: 24,
+            y: 0, height: cfg.viz.height
+        }
+
+        if (!mobile) {
+            var rightSectionDimensions = {
+                x: cfg.offset.sectionLeft + 48, width: cfg.viz.width - cfg.offset.sectionLeft - 48,
+                y: 0, height: cfg.viz.height
+            }
+        } else {
+            var rightSectionDimensions = {
+                x: cfg.offset.sectionLeft + 48, width: cfg.viz.width,
+                y: 0, height: cfg.viz.height
+            }
+        }
+
         var leftSection = svg.append("g")
             .classed("left-section", true)
-            .call(stretch, {width: cfg.offset.sectionLeft, height: 20})
+            .call(stretch, {width: leftSection.width, height: leftSection.height})
 
-        var middleSection = svg.append("g").classed("middle-section", true)
+        var middleSection = svg.append("g")
+            .classed("middle-section", true)
+            .attr("transform", "translate(" + middleSectionDimensions.x + ", 0" + ")")
+            .call(stretch, middleSectionDimensions)
+
         var rightSection = svg.append("g").classed("right-section", true)
+            .attr("transform", "translate(" + rightSectionDimensions.x + ", 0" + ")")
+            .call(stretch, rightSectionDimensions)
 
         var legendContainer = leftSection.append("g").classed("legend-container", true);
-
         var mainLabel = createMainLabel(leftSection, "PROGRAMME");
+        var budgetLabel = createBudgetSection(rightSection);
 
-        budgetLabel = createBudgetSection(rightSection);
         bbox = getDimensions(budgetLabel);
 
         cfg.bubbleChart.top = bbox.y + bbox.height
         cfg.bubbleChart.height = cfg.viz.height - cfg.bubbleChart.top - cfg.saveButton.height;
 
+        bubbleChartDimensions = {
+            x: 0, width: rightSectionDimensions.width,
+            y: bbox.y + bbox.height, height: cfg.viz.height - bbox.y - bbox.height - cfg.saveButton.height
+        }
+
         var bubbleChart = rightSection
             .append("g").classed("bubble-chart", true)
-            .attr("transform", "translate(0, " + cfg.bubbleChart.top + ")")
-            .call(stretch, {width: 100, height: cfg.bubbleChart.height})
-
+            .call(stretch, bubbleChartDimensions)
+            bubbleChart.attr("transform", "translate(0, " + bubbleChartDimensions.y + ")")
 
         if (!mobile) {
             var bbox = getDimensions(mainLabel);
@@ -628,20 +661,15 @@ function legend() {
 
             var bbox = getDimensions(budgetLabel)
             middleSection
-                .attr("transform", "translate(" + (cfg.offset.sectionLeft + 24) + ", 0)")
                 .append("line")
                     .classed("label-separator", true)
-                    .attr("x1", 0)
-                    .attr("x2", 0)
                     .attr("y1", 0)
                     .attr("y2", bbox.height)
-
-            rightSection
-                .attr("transform", "translate(" + (cfg.offset.sectionLeft + 48) + ", 0)")
 
         } else {
             leftSection.style("display", "none")
             middleSection.style("display", "none")
+            rightSection.attr("transform", "")
             cfg.offset.sectionLeft = 0
             cfg.padding.section = 0
 
