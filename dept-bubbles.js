@@ -1,6 +1,6 @@
 var valueField = "value.sum"
 var viewport = getViewportDimensions();
-var econ4Ref = "econ4.econ4"
+var econ4Ref;
 
 function BubbleChart(config) {
     var width = constant(600),
@@ -376,6 +376,14 @@ function legend() {
     var margin = {top: 0, right: 0, bottom: 0, left: 0}
     var currentSelection = null;
 
+    var model = JSON.parse(container.attr("data-openspending-model"));
+    econ4Ref = getEconClass4Ref(model);
+    var progNameRef = getProgNameRef(model);
+    var subprogNameRef = getSubprogNameRef(model);
+    var subprogNameRef = getSubprogNameRef(model);
+    var bubbleChartTop, bubbleChartHeight;
+
+
     var cfg = {
         main: {
             url: container.attr("data-aggregate-url"),
@@ -422,11 +430,6 @@ function legend() {
         }
 
     }
-
-    var model = JSON.parse(container.attr("data-openspending-model"));
-    var progNameRef = getProgNameRef(model);
-    var subprogNameRef = getSubprogNameRef(model);
-    var bubbleChartTop, bubbleChartHeight;
 
 
     function createBudgetSection(container) {
