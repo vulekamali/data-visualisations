@@ -448,7 +448,7 @@ function legend() {
         classificationSection.append("text")
             .classed("economic-classification", true)
             .text("None Selected")
-            .attr("transform", "translate(6, 65)")
+            .attr("transform", "translate(6, 75)")
 
         classificationSection.append("text")
             .classed("budget-amount", true)
