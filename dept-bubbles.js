@@ -410,7 +410,8 @@ function legend() {
             offset: {
                 y: 32
             },
-            densityCoefficient: 0.7 
+            densityCoefficient: 0.7,
+            maxRatio: 0.4,
         },
         legend: {
             boxHeight: 15
@@ -555,6 +556,9 @@ function legend() {
         var totalValue = d3.sum(data, function(d) { return d[valueField]})
         var maxValue = d3.max(data, function(d) { return d[valueField]})
         var maxRatio = maxValue / totalValue
+        if (maxRatio > cfg.bubbleChart.maxRatio) {
+            maxRatio = cfg.bubbleChart.maxRatio
+        }
 
         var radiusScale = d3.scaleSqrt()
             .domain([0, maxValue])
