@@ -4,7 +4,7 @@ import { simpleBarChart } from './simple-bar-chart';
 
 export default { title: 'Simple Bar Chart' };
 
-export function generateData() {
+function generateData() {
   const items = [];
 
   for (let i = 0; i < 10; i++) {
@@ -18,6 +18,19 @@ export function generateData() {
 }
 
 export const Simple = () => {
+  const chartContainer = document.createElement("div");
+  chartContainer.classList.add("chartContainer");
+
+  const myChart = simpleBarChart();
+
+  select(chartContainer)
+    .datum(generateData())
+    .call(myChart);
+
+  return chartContainer;
+};
+
+export const Updating = () => {
   const container = document.createElement("div");
   container.classList.add("container");
 
