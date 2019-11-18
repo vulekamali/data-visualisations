@@ -18,15 +18,29 @@ export function generateData() {
 }
 
 export const Simple = () => {
-  // create container
   const container = document.createElement("div");
   container.classList.add("container");
+
+  const chartContainer = document.createElement("div");
+  chartContainer.classList.add("chartContainer");
+
+  const button = document.createElement("button");
+  button.innerHTML = "Update data";
+
+  container.appendChild(chartContainer);
+  container.appendChild(button);
 
   const myChart = simpleBarChart();
   myChart.height(50);
   myChart.width(500);
 
-  select(container)
+  button.addEventListener("click", () => {
+    select(chartContainer)
+      .datum(generateData())
+      .call(myChart);
+  });
+
+  select(chartContainer)
     .datum(generateData())
     .call(myChart);
 

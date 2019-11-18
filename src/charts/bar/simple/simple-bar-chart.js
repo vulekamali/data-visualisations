@@ -12,6 +12,7 @@ export function simpleBarChart(selection) {
   let y = null;
 
   function my(selection) {
+    // create scales and set ranges
     x = scaleBand()
       .range([0, width])
       .padding(0.1);
@@ -19,8 +20,9 @@ export function simpleBarChart(selection) {
       .range([height, 0]);
 
     selection.each(function(data) {
+
       // Select the svg element, if it exists.
-      const svg = select(this).append("svg").data([data]);
+      const svg = select(this).selectAll("svg").data([data]);
       // Otherwise, create the skeletal chart.
       const gEnter = svg.enter().append("svg").append("g");
 
@@ -28,15 +30,18 @@ export function simpleBarChart(selection) {
       svg.attr("width", width)
         .attr("height", height);
 
+      // update scale domains
       x.domain(data.map(function(d) { return d.label; }));
       y.domain([0, max(data, function(d) { return d.value; })]);
 
-      const bars = svg.selectAll(".bar").data(data, d => d.label);
+      const bars = svg.select("g").selectAll(".bar").data(data);
 
-      const barsEntering = bars.enter();
+      const barsEntering = bars.enter()
+            .append("rect")
+            .attr("class", "bar");
 
-      barsEntering.append("rect")
-        .attr("class", "bar")
+      // update bar sizes and positions
+      bars
         .attr("x", function(d) { return x(d.label); })
         .attr("width", x.bandwidth())
         .attr("y", function(d) { return y(d.value); })
