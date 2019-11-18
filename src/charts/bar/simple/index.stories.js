@@ -1,6 +1,6 @@
 import './stories.styles.css';
 import { select } from 'd3-selection';
-import { chart } from './simple-bar-chart';
+import { simpleBarChart } from './simple-bar-chart';
 
 export default { title: 'Simple Bar Chart' };
 
@@ -22,11 +22,13 @@ export const Simple = () => {
   const container = document.createElement("div");
   container.classList.add("container");
 
+  const myChart = simpleBarChart();
+  myChart.height(50);
+  myChart.width(500);
+
   select(container)
     .datum(generateData())
-    .call(chart);
-  //    .width(350)
-  //    .height(250);
+    .call(myChart);
 
   return container;
 };
