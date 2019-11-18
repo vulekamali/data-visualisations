@@ -6,5 +6,18 @@
   "repository": "git@github.com:vulekamali/data-visualisations.git",
   "author": "info@openup.org.za",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@storybook/html": "^5.2.6",
+    "babel-loader": "^8.0.6"
+  },
+  "scripts": {
+    "storybook": "start-storybook"
+  },
+  "dependencies": {
+    "d3-array": "^2.4.0",
+    "d3-scale": "^3.2.0",
+    "d3-selection": "^1.4.1"
+  }
 }
