@@ -24,8 +24,7 @@ export const Simple = () => {
   const myChart = reusableBarChart();
 
   select(chartContainer)
-    .datum(generateData())
-    .call(myChart);
+    .call(myChart.data(generateData()));
 
   return chartContainer;
 };
@@ -44,18 +43,15 @@ export const Updating = () => {
   container.appendChild(button);
 
   const myChart = reusableBarChart();
-  myChart.height(50);
-  myChart.width(500);
+  myChart.height(100);
+  myChart.width(800);
 
   button.addEventListener("click", () => {
-    select(chartContainer)
-      .datum(generateData())
-      .call(myChart);
+	  myChart.data(generateData())
   });
 
   select(chartContainer)
-    .datum(generateData())
-    .call(myChart);
+    .call(myChart.data(generateData()));
 
   return container;
 };
