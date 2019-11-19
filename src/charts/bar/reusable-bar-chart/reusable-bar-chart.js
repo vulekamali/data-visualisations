@@ -9,7 +9,7 @@ export function reusableBarChart(selection) {
         data: [],
         colorScale: d3.scaleOrdinal(d3.schemeSet3),
         tooltipFormatter: (data) => {
-            return `${data.name} ${data.value}`;
+            return `${data.label} ${data.value}`;
         }
     };
 
@@ -22,58 +22,64 @@ export function reusableBarChart(selection) {
 
 
     function chart(selection) {
-        // create scales and set ranges
-        const xScale = scaleBand()
-            .range([0, width])
-            .padding(0.1);
-
-        const yScale = scaleLinear()
-            .range([height, 0]);
-
         selection.each(function (data) {
-            // update scale domains
-            xScale.domain(data.map(function (d) {
-                return d.label;
-            }));
-            yScale.domain([0, max(data, function (d) {
-                return d.value;
-            })]);
+            const barChartSvg = selection.append('svg')
+                .attr('height', height)
+                .attr('width', width)
+                .attr("id", `${id}_svg`);
 
-            // Select the svg element, if it exists.
-            let svg = select(this).selectAll("svg").data([data]);
-            const svgEnter = svg.enter().append("svg");
-            const gEnter = svgEnter.append("g");
+            const xScale = scaleBand()
+                .range([0, width])
+                .domain(data.map(function (d) {
+                    return d.label;
+                }))
+                .padding(0.1);
 
-            // reselecting otherwise it only finds and resizes on the second call.
-            // why is this necessary? Is there a better way?
-            svg = select(this).selectAll("svg");
+            const yScale = scaleLinear()
+                .range([height, 0])
+                .domain([0, max(data, d => d.value)]);
 
-            // Update the outer dimensions.
-            svg.attr("width", width)
-                .attr("height", height);
+            // const tooltip = d3.tip()
+            //     .attr("class", "d3-tip")
+            //     .offset([-8, 0])
+            //     .html(tooltipFormatter);
+            //
+            // barChartSvg.call(tooltip);
 
-            let bars = svg.select("g").selectAll(".bar").data(data);
-
-            bars.enter()
+            barChartSvg.append("g")
+                .selectAll("rect")
+                .data(data)
+                .enter()
                 .append("rect")
-                .attr("class", "bar");
+                .attr('class', 'bar')
+                .attr("x", d => xScale(d.label))
+                .attr("y", d => yScale(d.value))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => height - yScale(d.value))
+                .attr("fill", (d,i) => colorScale(i))
+                .on("mouseover", function (d) {
+                    // tooltip.show(d);
+                })
+                .on("mouseout", function () {
+                    // tooltip.hide();
+                });
 
             // Reselecting otherwise it only draws them on the second call
             // why is this necessary? Is there a better way?
-            bars = svg.select("g").selectAll(".bar").data(data);
-
-            // update bar sizes and positions
-            bars
-                .attr("x", function (d) {
-                    return xScale(d.label);
-                })
-                .attr("width", xScale.bandwidth())
-                .attr("y", function (d) {
-                    return yScale(d.value);
-                })
-                .attr("height", function (d) {
-                    return height - yScale(d.value);
-                });
+            // bars = svg.select("g").selectAll(".bar").data(data);
+            //
+            // // update bar sizes and positions
+            // bars
+            //     .attr("x", function (d) {
+            //         return xScale(d.label);
+            //     })
+            //     .attr("width", xScale.bandwidth())
+            //     .attr("y", function (d) {
+            //         return yScale(d.value);
+            //     })
+            //     .attr("height", function (d) {
+            //         return height - yScale(d.value);
+            //     });
 
             updateData = function () {
                 // groupsScale.domain(getXDomainValues(data));
