@@ -8,8 +8,9 @@ export function reusableBarChart(selection) {
 	let initialConfiguration = {
 		width: 300,
 		height: 200,
+		padding: 5,
 		data: [],
-		colorScale: scaleLinear().range(['green', 'blue']),
+		colorScale: scaleLinear().range(['#dfecda', '#65b344']),
 		tooltipFormatter: (data) => {
 			return `${data.label}: ${data.value}`;
 		}
@@ -17,10 +18,11 @@ export function reusableBarChart(selection) {
 
 	let width = initialConfiguration.width,
 		height = initialConfiguration.height,
+		padding = initialConfiguration.padding,
 		data = initialConfiguration.data,
 		colorScale = initialConfiguration.colorScale,
 		tooltipFormatter = initialConfiguration.tooltipFormatter;
-	let updateData = null;
+	let updateData, xScale = null;
 
 
 	function chart(selection) {
@@ -29,10 +31,12 @@ export function reusableBarChart(selection) {
 				.attr('height', height)
 				.attr('width', width);
 
-			const xScale = scaleBand()
+			xScale = scaleBand()
 				.domain(data.map(d => d.label))
-				.range([0, width])
-				.padding(0.1);
+				.range([0, width]);
+
+			const xScalePadding = padding / xScale.bandwidth();
+			xScale.padding(xScalePadding);
 
 			const yScale = scaleLinear()
 				.domain([0, max(data, d => d.value)])
@@ -58,7 +62,7 @@ export function reusableBarChart(selection) {
 				.attr("y", 0)
 				.attr("width", xScale.bandwidth())
 				.attr("height", d => height)
-				.attr("fill", (d, i) => 'lightgrey')
+				.attr("fill", (d, i) => '#eaeaea')
 				.on("mouseover", function (d) {
 					tooltip.show(d, this);
 				})
@@ -73,7 +77,13 @@ export function reusableBarChart(selection) {
 				.attr("y", d => yScale(d.value))
 				.attr("width", xScale.bandwidth())
 				.attr("height", d => height - yScale(d.value))
-				.attr("fill", (d, i) => colorScale(i));
+				.attr("fill", (d, i) => colorScale(i))
+				.on("mouseover", function (d) {
+					tooltip.show(d, this);
+				})
+				.on("mouseout", function () {
+					tooltip.hide();
+				});
 
 
 			updateData = function () {
@@ -92,7 +102,7 @@ export function reusableBarChart(selection) {
 					.attr("y", 0)
 					.attr("width", xScale.bandwidth())
 					.attr("height", d => height)
-					.attr("fill", (d, i) => 'lightgrey')
+					.attr("fill", (d, i) => '#eaeaea')
 					.on("mouseover", function (d) {
 						tooltip.show(d, this);
 					})
@@ -123,7 +133,7 @@ export function reusableBarChart(selection) {
 					.attr("y", 0)
 					.attr("width", xScale.bandwidth())
 					.attr("height", d => height)
-					.attr("fill", (d, i) => 'lightgrey');
+					.attr("fill", (d, i) => '#eaeaea');
 
 				updatedBars
 					.transition()
@@ -163,9 +173,18 @@ export function reusableBarChart(selection) {
 		return chart;
 	};
 
-	chart.colorScale = function (value) {
+	chart.padding = function (value) {
+		if (!arguments.length) return padding;
+		padding = value;
+		const xScalePadding = padding / xScale.bandwidth();
+		xScale.padding(xScalePadding);
+		if (typeof updateData === 'function') updateData();
+		return chart;
+	};
+
+	chart.colors = function (value) {
 		if (!arguments.length) return colorScale;
-		colorScale = value;
+		colorScale.domain.range([value[0], value[1]]);
 		return chart;
 	};
 

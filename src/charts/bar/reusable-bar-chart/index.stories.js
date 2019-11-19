@@ -29,7 +29,7 @@ export const Simple = () => {
   return chartContainer;
 };
 
-export const Updating = () => {
+export const UpdatingData = () => {
   const container = document.createElement("div");
   container.classList.add("container");
 
