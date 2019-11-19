@@ -11,8 +11,8 @@ export function reusableBarChart(selection) {
 		padding: 5,
 		data: [],
 		colorScale: scaleLinear().range(['#dfecda', '#65b344']),
-		tooltipFormatter: (data) => {
-			return `${data.label}: ${data.value}`;
+		tooltipFormatter: (d) => {
+			return `${d.data.label}: ${d.data.value}`;
 		}
 	};
 
@@ -46,7 +46,9 @@ export function reusableBarChart(selection) {
 
 			const tooltip = d3Tip()
 				.attr("class", "d3-tip")
-				.offset([-8, 0])
+				.offset(function (d) {
+					return d.isArea ? [yScale(d.data.value) - 8, 0] : [-8, 0];
+				})
 				.html(tooltipFormatter);
 
 			barChartSvg.call(tooltip);
@@ -64,7 +66,7 @@ export function reusableBarChart(selection) {
 				.attr("height", d => height)
 				.attr("fill", (d, i) => '#eaeaea')
 				.on("mouseover", function (d) {
-					tooltip.show(d, this);
+					tooltip.show({data: d, isArea: true}, this);
 				})
 				.on("mouseout", function () {
 					tooltip.hide();
@@ -79,7 +81,7 @@ export function reusableBarChart(selection) {
 				.attr("height", d => height - yScale(d.value))
 				.attr("fill", (d, i) => colorScale(i))
 				.on("mouseover", function (d) {
-					tooltip.show(d, this);
+					tooltip.show({data: d, isArea: false}, this);
 				})
 				.on("mouseout", function () {
 					tooltip.hide();
@@ -104,7 +106,7 @@ export function reusableBarChart(selection) {
 					.attr("height", d => height)
 					.attr("fill", (d, i) => '#eaeaea')
 					.on("mouseover", function (d) {
-						tooltip.show(d, this);
+						tooltip.show({data: d, isArea: true}, this);
 					})
 					.on("mouseout", function () {
 						tooltip.hide();
@@ -119,7 +121,7 @@ export function reusableBarChart(selection) {
 					.attr("height", d => height - yScale(d.value))
 					.attr("fill", (d, i) => colorScale(i))
 					.on("mouseover", function (d) {
-						tooltip.show(d, this);
+						tooltip.show({data: d, isArea: false}, this);
 					})
 					.on("mouseout", function () {
 						tooltip.hide();
