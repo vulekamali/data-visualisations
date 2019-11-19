@@ -9,9 +9,9 @@ export function reusableBarChart(selection) {
 		width: 300,
 		height: 200,
 		data: [],
-		// colorScale: scaleOrdinal([]),
+		colorScale: scaleLinear().range(['green', 'blue']),
 		tooltipFormatter: (data) => {
-			return `${data.label} ${data.value}`;
+			return `${data.label}: ${data.value}`;
 		}
 	};
 
@@ -38,24 +38,27 @@ export function reusableBarChart(selection) {
 				.domain([0, max(data, d => d.value)])
 				.range([height, 0]);
 
+			colorScale.domain([0, data.length]);
+
 			const tooltip = d3Tip()
-			    .attr("class", "d3-tip")
-			    .offset([-8, 0])
-			    .html(tooltipFormatter);
+				.attr("class", "d3-tip")
+				.offset([-8, 0])
+				.html(tooltipFormatter);
 
 			barChartSvg.call(tooltip);
 
-			barChartSvg.append("g")
+			const bars = barChartSvg.append("g")
 				.selectAll("rect")
-				.data(data)
-				.enter()
+				.data(data);
+
+			bars.enter()
 				.append("rect")
-				.attr('class', 'bar')
+				.attr('class', 'bar-area')
 				.attr("x", d => xScale(d.label))
-				.attr("y", d => yScale(d.value))
+				.attr("y", 0)
 				.attr("width", xScale.bandwidth())
-				.attr("height", d => height - yScale(d.value))
-				// .attr("fill", (d, i) => colorScale(i))
+				.attr("height", d => height)
+				.attr("fill", (d, i) => 'lightgrey')
 				.on("mouseover", function (d) {
 					tooltip.show(d, this);
 				})
@@ -63,29 +66,39 @@ export function reusableBarChart(selection) {
 					tooltip.hide();
 				});
 
-			// Reselecting otherwise it only draws them on the second call
-			// why is this necessary? Is there a better way?
-			// bars = svg.select("g").selectAll(".bar").data(data);
-			//
-			// // update bar sizes and positions
-			// bars
-			//     .attr("x", function (d) {
-			//         return xScale(d.label);
-			//     })
-			//     .attr("width", xScale.bandwidth())
-			//     .attr("y", function (d) {
-			//         return yScale(d.value);
-			//     })
-			//     .attr("height", function (d) {
-			//         return height - yScale(d.value);
-			//     });
+			bars.enter()
+				.append("rect")
+				.attr('class', 'bar')
+				.attr("x", d => xScale(d.label))
+				.attr("y", d => yScale(d.value))
+				.attr("width", xScale.bandwidth())
+				.attr("height", d => height - yScale(d.value))
+				.attr("fill", (d, i) => colorScale(i));
+
 
 			updateData = function () {
 
 				xScale.domain(data.map(d => d.label));
 				yScale.domain([0, max(data, d => d.value)]);
+				colorScale.domain([0, data.length]);
 
 				const updatedBars = barChartSvg.selectAll('.bar').data(data);
+				const updatedBarAreas = barChartSvg.selectAll('.bar-area').data(data);
+
+				updatedBarAreas
+					.enter().append("rect")
+					.attr('class', 'bar-area')
+					.attr("x", d => xScale(d.label))
+					.attr("y", 0)
+					.attr("width", xScale.bandwidth())
+					.attr("height", d => height)
+					.attr("fill", (d, i) => 'lightgrey')
+					.on("mouseover", function (d) {
+						tooltip.show(d, this);
+					})
+					.on("mouseout", function () {
+						tooltip.hide();
+					});
 
 				updatedBars
 					.enter().append("rect")
@@ -102,6 +115,16 @@ export function reusableBarChart(selection) {
 						tooltip.hide();
 					});
 
+				updatedBarAreas
+					.transition()
+					.ease(easeLinear)
+					.duration(750)
+					.attr("x", d => xScale(d.label))
+					.attr("y", 0)
+					.attr("width", xScale.bandwidth())
+					.attr("height", d => height)
+					.attr("fill", (d, i) => 'lightgrey');
+
 				updatedBars
 					.transition()
 					.ease(easeLinear)
@@ -109,8 +132,14 @@ export function reusableBarChart(selection) {
 					.attr("x", d => xScale(d.label))
 					.attr("y", d => yScale(d.value))
 					.attr("width", xScale.bandwidth())
-					.attr("height", d => height - yScale(d.value));
-				// .attr("fill", (d, i) => colorScale(i));
+					.attr("height", d => height - yScale(d.value))
+					.attr("fill", (d, i) => colorScale(i));
+
+				updatedBarAreas.exit()
+					.transition()
+					.ease(easeLinear)
+					.duration(100)
+					.remove();
 
 				updatedBars.exit()
 					.transition()
