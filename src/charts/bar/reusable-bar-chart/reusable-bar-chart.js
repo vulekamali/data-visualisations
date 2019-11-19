@@ -1,4 +1,3 @@
-import {select} from 'd3-selection';
 import {scaleBand, scaleLinear} from 'd3-scale';
 import {max} from 'd3-array';
 
@@ -29,15 +28,13 @@ export function reusableBarChart(selection) {
                 .attr("id", `${id}_svg`);
 
             const xScale = scaleBand()
+                .domain(data.map(d => d.label))
                 .range([0, width])
-                .domain(data.map(function (d) {
-                    return d.label;
-                }))
                 .padding(0.1);
 
             const yScale = scaleLinear()
-                .range([height, 0])
-                .domain([0, max(data, d => d.value)]);
+                .domain([0, max(data, d => d.value)])
+                .range([height, 0]);
 
             // const tooltip = d3.tip()
             //     .attr("class", "d3-tip")
@@ -56,7 +53,7 @@ export function reusableBarChart(selection) {
                 .attr("y", d => yScale(d.value))
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => height - yScale(d.value))
-                .attr("fill", (d,i) => colorScale(i))
+                .attr("fill", (d, i) => colorScale(i))
                 .on("mouseover", function (d) {
                     // tooltip.show(d);
                 })
@@ -82,67 +79,42 @@ export function reusableBarChart(selection) {
             //     });
 
             updateData = function () {
-                // groupsScale.domain(getXDomainValues(data));
-                // xAxis.scale(groupsScale);
-                //
-                // innerGroupScale
-                //     .domain([...new Set(data.map(v => v.groupKey))])
-                //     .rangeRound([0, groupsScale.bandwidth()]);
-                //
-                // yDomainValues = getYDomainValues(data);
-                // yScale.domain([d3.min(yDomainValues), d3.max(yDomainValues)]);
-                //
-                // yAxis.scale(yScale);
-                //
-                // const t = d3.transition()
-                //     .duration(750);
-                //
-                // gXAxis.transition(t)
-                //     .call(xAxis);
-                //
-                // gYAxis.transition(t)
-                //     .call(yAxis);
-                //
-                // Utils.applyAxisStyle(gXAxis);
-                // Utils.applyAxisStyle(gYAxis);
-                //
-                // const updatedBars = barChartSvg.selectAll('.bar').data(data);
-                //
-                // updatedBars
-                //     .enter().append("rect")
-                //     .attr('class', 'bar')
-                //     .attr("x", d => innerGroupScale(d.groupKey) + groupsScale(d.key))
-                //     .attr("y", d => yScale(d.value))
-                //     .attr("width", innerGroupScale.bandwidth())
-                //     .attr("height", d => height - yScale(d.value) - margin.bottom)
-                //     .attr("fill", d => colorScale(d.groupKey))
-                //     .on("mouseover", function (d) {
-                //         tooltip.show(d);
-                //
-                //     })
-                //     .on("mouseout", function () {
-                //         tooltip.hide();
-                //     });
-                //
-                // updatedBars
-                //     .transition()
-                //     .ease(d3.easeLinear)
-                //     .duration(750)
-                //     .attr("x", d => innerGroupScale(d.groupKey) + groupsScale(d.key))
-                //     .attr("y", d => yScale(d.value))
-                //     .attr("width", innerGroupScale.bandwidth())
-                //     .attr("height", d => height - yScale(d.value) - margin.bottom)
-                //     .attr("fill", d => colorScale(d.groupKey));
-                //
-                // updatedBars.exit()
-                //     .transition()
-                //     .ease(d3.easeLinear)
-                //     .duration(100)
-                //     .remove();
-                //
-                // // svg.select('.title').text(`${yAxisLabel} vs ${xAxisLabel}`);
-                // barChartSvg.select('.x.axis.label').text(xAxisLabel);
-                // barChartSvg.select('.y.axis.label').text(yAxisLabel);
+
+                xScale.domain(data.map(d => d.label));
+                yScale.domain([0, max(data, d => d.value)]);
+
+                const updatedBars = barChartSvg.selectAll('.bar').data(data);
+
+                updatedBars
+                    .enter().append("rect")
+                    .attr('class', 'bar')
+                    .attr("x", d => xScale(d.label))
+                    .attr("y", d => yScale(d.value))
+                    .attr("width", xScale.bandwidth())
+                    .attr("height", d => height - yScale(d.value))
+                    .attr("fill", (d, i) => colorScale(i))
+                    .on("mouseover", function (d) {
+                        // tooltip.show(d);
+                    })
+                    .on("mouseout", function () {
+                        // tooltip.hide();
+                    });
+
+                updatedBars
+                    .transition()
+                    .ease(d3.easeLinear)
+                    .duration(750)
+                    .attr("x", d => xScale(d.label))
+                    .attr("y", d => yScale(d.value))
+                    .attr("width", xScale.bandwidth())
+                    .attr("height", d => height - yScale(d.value))
+                    .attr("fill", (d, i) => colorScale(i));
+
+                updatedBars.exit()
+                    .transition()
+                    .ease(d3.easeLinear)
+                    .duration(100)
+                    .remove();
             };
         });
 
