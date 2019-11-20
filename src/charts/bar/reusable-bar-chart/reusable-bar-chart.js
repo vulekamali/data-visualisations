@@ -1,6 +1,5 @@
 import {scaleBand, scaleLinear} from 'd3-scale';
 import {max} from 'd3-array';
-import {transition} from 'd3-transition';
 import {easeLinear} from 'd3-ease';
 import d3Tip from "d3-tip";
 
@@ -46,8 +45,11 @@ export function reusableBarChart(selection) {
 
             const tooltip = d3Tip()
                 .attr("class", "d3-tip")
+                .direction(function (d) {
+                    return d.isArea ? 's' : 'n';
+                })
                 .offset(function (d) {
-                    return d.isArea ? [yScale(d.data.value) - 8, 0] : [-8, 0];
+                    return d.isArea ? [8, 0] : [-8, 0];
                 })
                 .html(tooltipFormatter);
 
@@ -63,7 +65,7 @@ export function reusableBarChart(selection) {
                 .attr("x", d => xScale(d.label))
                 .attr("y", 0)
                 .attr("width", xScale.bandwidth())
-                .attr("height", d => height)
+                .attr("height", d => yScale(d.value))
                 .attr("fill", (d, i) => '#eaeaea')
                 .on("mouseover", function (d) {
                     tooltip.show({data: d, isArea: true}, this);
@@ -103,7 +105,7 @@ export function reusableBarChart(selection) {
                     .attr("x", d => xScale(d.label))
                     .attr("y", 0)
                     .attr("width", xScale.bandwidth())
-                    .attr("height", d => height)
+                    .attr("height", d => yScale(d.value))
                     .attr("fill", (d, i) => '#eaeaea')
                     .on("mouseover", function (d) {
                         tooltip.show({data: d, isArea: true}, this);
@@ -134,7 +136,7 @@ export function reusableBarChart(selection) {
                     .attr("x", d => xScale(d.label))
                     .attr("y", 0)
                     .attr("width", xScale.bandwidth())
-                    .attr("height", d => height)
+                    .attr("height", d => yScale(d.value))
                     .attr("fill", (d, i) => '#eaeaea');
 
                 updatedBars

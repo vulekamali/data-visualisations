@@ -19,8 +19,8 @@
     pointer-events: none;
 }
 
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after {
+/* Style northward tooltips specifically */
+.d3-tip.n:after {
     box-sizing: border-box;
     display: inline;
     font-size: 10px;
@@ -30,11 +30,25 @@
     content: "\25BC";
     position: absolute;
     text-align: center;
-}
 
-/* Style northward tooltips specifically */
-.d3-tip.n:after {
     margin: -2px 0 0 0;
     top: 100%;
+    left: 0;
+}
+
+/* Style southward tooltips specifically */
+.d3-tip.s:before {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25B2";
+    position: absolute;
+    text-align: center;
+
+    margin: 0 0 -2px 0;
+    bottom: 100%;
     left: 0;
 }
