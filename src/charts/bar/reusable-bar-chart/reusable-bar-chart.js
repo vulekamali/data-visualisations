@@ -36,7 +36,7 @@ export function reusableBarChart(selection) {
                 .range([0, width]);
 
             const xScalePadding = padding / xScale.bandwidth();
-            xScale.padding(xScalePadding);
+            xScale.paddingInner(xScalePadding);
 
             const yScale = scaleLinear()
                 .domain([0, max(data, d => d.value)])
@@ -179,7 +179,7 @@ export function reusableBarChart(selection) {
         if (!arguments.length) return padding;
         padding = value;
         const xScalePadding = padding / xScale.bandwidth();
-        xScale.padding(xScalePadding);
+        xScale.paddingInner(xScalePadding);
         if (typeof updateData === 'function') updateData();
         return chart;
     };
