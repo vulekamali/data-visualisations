@@ -18,8 +18,13 @@ function generateData() {
 }
 
 export const Simple = () => {
+    const container = document.createElement("div");
+    container.classList.add("container");
+
     const chartContainer = document.createElement("div");
     chartContainer.classList.add("chartContainer");
+
+    container.appendChild(chartContainer);
 
     const myChart = reusableBarChart();
 
@@ -113,6 +118,7 @@ export const UpdatePadding = () => {
     button.innerHTML = "Update padding";
 
     container.appendChild(chartContainer);
+    container.appendChild(button);
 
     const myChart = reusableBarChart();
     myChart.height(100);

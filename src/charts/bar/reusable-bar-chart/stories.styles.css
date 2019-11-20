@@ -5,6 +5,13 @@
     margin-top: 50px;
     margin-left: 50px;
 }
+.chartContainer {
+    border: 1px solid black;
+    width: 800px;
+    height: 100px;
+    margin-top: 50px;
+    margin-left: 50px;
+}
 
 .bar {
 }

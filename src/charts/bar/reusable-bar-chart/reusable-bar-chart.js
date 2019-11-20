@@ -6,7 +6,7 @@ import d3Tip from "d3-tip";
 export function reusableBarChart(selection) {
     let initialConfiguration = {
         width: 300,
-        height: 200,
+        height: 50,
         padding: 5,
         data: [],
         colorScale: scaleLinear().range(['#dfecda', '#65b344']),
