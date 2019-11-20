@@ -45,9 +45,10 @@ export function reusableBarChart(selection) {
 
             const tooltip = d3Tip()
                 .attr("class", "d3-tip")
-                .offset(function (d) {
-                    return d.isArea ? [yScale(d.data.value) - 8, 0] : [-8, 0];
-                })
+                // .offset(function (d) {
+                //     return d.isArea ? [yScale(d.data.value) - 8, 0] : [-8, 0];
+                // })
+                .offset([-8, 0])
                 .direction(function (d) {
                     return d.isArea ? 's' : 'n';
                 })
