@@ -1,5 +1,6 @@
 import {scaleBand, scaleLinear} from 'd3-scale';
 import {max} from 'd3-array';
+import {transition} from 'd3-transition';
 import {easeLinear} from 'd3-ease';
 import d3Tip from "d3-tip";
 
@@ -45,12 +46,8 @@ export function reusableBarChart(selection) {
 
             const tooltip = d3Tip()
                 .attr("class", "d3-tip")
-                // .offset(function (d) {
-                //     return d.isArea ? [yScale(d.data.value) - 8, 0] : [-8, 0];
-                // })
-                .offset([-8, 0])
-                .direction(function (d) {
-                    return d.isArea ? 's' : 'n';
+                .offset(function (d) {
+                    return d.isArea ? [yScale(d.data.value) - 8, 0] : [-8, 0];
                 })
                 .html(tooltipFormatter);
 

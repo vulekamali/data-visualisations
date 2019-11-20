@@ -21,17 +21,12 @@ export const Simple = () => {
     const container = document.createElement("div");
     container.classList.add("container");
 
-    const chartContainer = document.createElement("div");
-    chartContainer.classList.add("chartContainer");
-
-    container.appendChild(chartContainer);
-
     const myChart = reusableBarChart();
 
-    select(chartContainer)
+    select(container)
         .call(myChart.data(generateData()));
 
-    return chartContainer;
+    return container;
 };
 
 export const UpdatingData = () => {
@@ -89,10 +84,8 @@ export const UpdatingColor = () => {
 };
 
 export const TooltipFormatter = () => {
-    const chartContainer = document.createElement("div");
-    chartContainer.classList.add("chartContainer");
-
-    container.appendChild(chartContainer);
+    const container = document.createElement("div");
+    container.classList.add("container");
 
     const myChart = reusableBarChart();
     myChart.height(100);
@@ -101,7 +94,7 @@ export const TooltipFormatter = () => {
         return `Label: ${d.data.label} </br> Value: ${d.data.value}`;
     });
 
-    select(chartContainer)
+    select(container)
         .call(myChart.data(generateData()));
 
     return container;
