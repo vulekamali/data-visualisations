@@ -82,3 +82,28 @@ export const UpdatingColor = () => {
 
 	return container;
 };
+
+export const TooltipFormatter = () => {
+	const container = document.createElement("div");
+	container.classList.add("container");
+
+	const chartContainer = document.createElement("div");
+	chartContainer.classList.add("chartContainer");
+
+	const button = document.createElement("button");
+	button.innerHTML = "Update color";
+
+	container.appendChild(chartContainer);
+
+	const myChart = reusableBarChart();
+	myChart.height(100);
+	myChart.width(800);
+	myChart.tooltipFormatter((d) =>{
+		return `Label: ${d.data.label} </br> Value: ${d.data.value}`;
+	});
+
+	select(chartContainer)
+		.call(myChart.data(generateData()));
+
+	return container;
+};
