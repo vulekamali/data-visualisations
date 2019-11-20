@@ -186,7 +186,8 @@ export function reusableBarChart(selection) {
 
 	chart.colors = function (value) {
 		if (!arguments.length) return colorScale;
-		colorScale.domain.range([value[0], value[1]]);
+		colorScale.range([value[0], value[1]]);
+		if (typeof updateData === 'function') updateData();
 		return chart;
 	};
 

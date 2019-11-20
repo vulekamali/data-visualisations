@@ -1,8 +1,9 @@
 .container {
     border: 1px solid black;
-    width: 400px;
+    width: 800px;
     height: 100px;
     margin-top: 50px;
+    margin-left: 50px;
 }
 
 .bar {
