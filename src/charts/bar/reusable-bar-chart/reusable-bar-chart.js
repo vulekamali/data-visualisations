@@ -1,6 +1,6 @@
 import {scaleBand, scaleLinear} from 'd3-scale';
 import {max} from 'd3-array';
-import {transition} from 'd3-transition';
+import 'd3-transition';
 import {easeLinear} from 'd3-ease';
 import d3Tip from "d3-tip";
 
