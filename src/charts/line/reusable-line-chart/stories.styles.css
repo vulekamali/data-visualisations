@@ -52,3 +52,17 @@
     bottom: 100%;
     left: 0;
 }
+
+.axis-tick-label,
+.axis-tick-year-label {
+    font-size: 14px;
+}
+
+.y.axis > .tick text {
+    font-size: 14px;
+}
+
+.spent-line-circle:hover {
+    fill: rgb(0, 137, 123);
+    cursor: pointer;
+}
