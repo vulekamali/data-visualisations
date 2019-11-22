@@ -1,8 +1,10 @@
 import 'd3-transition';
+import {transition} from 'd3-transition';
 import {scaleLinear, scaleTime} from 'd3-scale';
 import {axisBottom, axisLeft} from 'd3-axis';
+import {easeLinear} from 'd3-ease';
 import {max, min} from 'd3-array';
-import {formatPrefix} from 'd3-format';
+import {format} from 'd3-format';
 import {line} from 'd3-shape';
 import d3Tip from "d3-tip";
 
@@ -16,39 +18,46 @@ Object.defineProperty(Array.prototype, 'flat', {
 	}
 });
 
-export function reusableLineChart(selection) {
+function processRawData(data) {
+	return data.map(d => {
+		return Object.assign(d, {
+			date: new Date(d.date)
+		})
+	})
+}
+
+export function reusableLineChart() {
 
 	let initialConfiguration = {
 		width: 1000,
 		height: 600,
-		tooltipFormatter: (d) => {
-			return `Tooltip!`;
+		spentCircleTooltipFormatter: (d) => {
+			return `<span class="tooltip-label">Total spent:</span> &nbsp;&nbsp;<span class="tooltip-value">R${format(",d")(d.total_spent_to_date)}</span></br>
+					<span class="tooltip-label">Spent in quarter:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.total_spent_in_quarter ? "R" + format(",d")(d.total_spent_in_quarter) : 0}</span>`;
 		}
 	};
 
 	let width = initialConfiguration.width,
 		height = initialConfiguration.height,
 		data = [],
-		tooltipFormatter = initialConfiguration.tooltipFormatter;
+		spentCircleTooltipFormatter = initialConfiguration.spentCircleTooltipFormatter;
 	let updateData = null;
 
 	function chart(selection) {
 		selection.each(function () {
 			let xDomainValues = getXDomainValues(data);
+			let minimalXDomainValue = min(xDomainValues);
+			let newMinXDomainValue = new Date(minimalXDomainValue).setMonth(minimalXDomainValue.getMonth() - 3);
 			let yDomainValues = getYDomainValues(data);
+			const xScaleLength = width - margin.right - margin.left;
+			const yScaleLength = height - margin.bottom - margin.top;
 
 			const xScale = scaleTime()
-				.domain([
-					min(xDomainValues),
-					max(xDomainValues)
-				])
+				.domain([newMinXDomainValue, max(xDomainValues)])
 				.range([margin.left, width - margin.right]);
 
 			const yScale = scaleLinear()
-				.domain([
-					0,
-					max(yDomainValues)
-				])
+				.domain([0, max(yDomainValues)])
 				.range([height - margin.bottom, margin.top]);
 
 			const svg = selection.append("svg")
@@ -59,20 +68,45 @@ export function reusableLineChart(selection) {
 			const tooltip = d3Tip()
 				.attr("class", "d3-tip")
 				.offset([-8, 0])
-				.html(tooltipFormatter);
+				.html(spentCircleTooltipFormatter);
 
 			svg.call(tooltip);
+
+			const backgroundRectanglesGroup = svg.append("g")
+				.attr("class", "background-rectangles");
+
+			backgroundRectanglesGroup.selectAll("rect")
+				.data(data)
+				.enter()
+				.append("rect")
+				.attr("class", "background-rectangle")
+				.attr("x", (datum) => xScale(datum.date) - xScaleLength / data.length)
+				.attr("y", yScale.range()[1])
+				.attr("width", xScaleLength / data.length)
+				.attr("height", () => yScaleLength)
+				.attr("fill", 'none')
+				.on("mouseover", function (d) {
+					const correspondingCircle = spentLineElementsGroup.selectAll('circle')
+						.filter(function (circleData) {
+							return d.date === circleData.date;
+						}).nodes()[0];
+					tooltip.show(d, correspondingCircle)
+				})
+				.on("mouseout", function () {
+					tooltip.hide();
+				});
 
 			const spentLineElementsGroup = svg.append("g")
 				.attr("class", "spent-line-elements");
 
-			spentLineElementsGroup
+			spentLineElementsGroup.selectAll("path")
+				.data([data])
+				.enter()
 				.append("path")
-				.datum(data)
 				.attr("class", "spent-line-path")
 				.attr("d", line()
-					.x((d) => xScale(new Date(d.date)))
-					.y((d) => yScale(new Date(d.total_spent_to_date)))
+					.x((d) => xScale(d.date))
+					.y((d) => yScale(d.total_spent_to_date))
 				)
 				.attr("stroke", 'black')
 				.style("stroke-width", 2)
@@ -83,7 +117,7 @@ export function reusableLineChart(selection) {
 				.enter()
 				.append("circle")
 				.attr("class", "spent-line-circle")
-				.attr("cx", (datum) => xScale(new Date(datum.date)))
+				.attr("cx", (datum) => xScale(datum.date))
 				.attr("cy", (datum) => yScale(datum.total_spent_to_date))
 				.attr("r", 6)
 				.attr("fill", '#333333')
@@ -97,8 +131,8 @@ export function reusableLineChart(selection) {
 
 			const xAxis = axisBottom(xScale)
 				.tickValues(xDomainValues)
-				.tickFormat(d => '')
-				.tickSize(5);
+				.tickFormat('')
+				.tickSize(7);
 
 			const gXAxis = svg.append("g")
 				.attr("class", "x axis")
@@ -106,29 +140,27 @@ export function reusableLineChart(selection) {
 				.call(xAxis);
 			applyAxisStyle(gXAxis);
 
-			gXAxis.append('g')
-				.selectAll('.axis-tick-label')
+			gXAxis.selectAll('.axis-tick-label')
 				.data(data)
 				.enter()
 				.append("text")
 				.attr("class", "axis-tick-label")
 				.attr("fill", "black")
-				.attr("transform", d => `translate(${xScale(new Date(d.date))},20)`)
+				.attr("transform", d => `translate(${xScale(d.date)},20)`)
 				.text(d => d.quarter_label);
 
-			gXAxis.append('g')
-				.selectAll('.axis-tick-year-label')
+			gXAxis.selectAll('.axis-tick-year-label')
 				.data(data)
 				.enter()
 				.append("text")
 				.attr("class", "axis-tick-year-label")
 				.attr("fill", "#bcbcbc")
-				.attr("transform", d => `translate(${xScale(new Date(d.date))},40)`)
+				.attr("transform", d => `translate(${xScale(d.date)},40)`)
 				.text(d => d.financial_year_label);
 
 			const yAxis = axisLeft(yScale)
 				.ticks(4)
-				.tickFormat(d => d !== 0 ? `R${formatPrefix(".1", 1e6)(d)}` : '')
+				.tickFormat(d => d !== 0 ? `R${format('~s')(d)}` : '')
 				.tickSize(-width + margin.left + margin.right)
 				.tickSizeOuter(5);
 
@@ -139,7 +171,11 @@ export function reusableLineChart(selection) {
 			applyAxisStyle(gYAxis);
 
 			function getXDomainValues(data) {
-				return data.map(group => new Date(group.date)).sort((a, b) => a - b);
+				if (data && data.length > 0) {
+					return data.map(group => new Date(group.date)).sort((a, b) => a - b);
+				} else {
+					return [new Date(), new Date()]
+				}
 			}
 
 			function getYDomainValues(data) {
@@ -155,21 +191,21 @@ export function reusableLineChart(selection) {
 
 				gAxis.select('path')
 					.style('fill', 'none')
-					.style('stroke', 'rgba(0, 0, 0, 0.1)')
+					.style('stroke', 'black')
+					.style('stroke-width', '2')
 					.style('shape-rendering', 'crispEdges');
 			}
 
 			updateData = function () {
 				xDomainValues = getXDomainValues(data);
+				let minimalXDomainValue = min(xDomainValues);
+				let newMinXDomainValue = new Date(minimalXDomainValue).setMonth(minimalXDomainValue.getMonth() - 3);
 
-				xScale.domain(getXDomainValues(data));
-				xAxis.scale(xScale);
+				xScale.domain([newMinXDomainValue, max(xDomainValues)]);
+				xAxis.scale(xScale).tickValues(xDomainValues);
 
 				yDomainValues = getYDomainValues(data);
-				yScale.domain([
-					0,
-					max(yDomainValues)
-				]);
+				yScale.domain([0, max(yDomainValues)]);
 				yAxis.scale(yScale);
 
 				const t = transition()
@@ -186,20 +222,22 @@ export function reusableLineChart(selection) {
 
 				const updatedCircles = spentLineElementsGroup.selectAll('circle').data(data);
 				const updatedAxisLabels = gXAxis.selectAll('.axis-tick-label').data(data);
-				const updatedSpentLine = spentLineElementsGroup.select(".spent-line-path").data(data);
+				const updatedAxisYearLabels = gXAxis.selectAll('.axis-tick-year-label').data(data);
+				const updatedSpentLine = spentLineElementsGroup.selectAll(".spent-line-path").data([data]);
+				const updatedBackgroundRectangles = backgroundRectanglesGroup.selectAll(".background-rectangle").data(data);
 
 				updatedSpentLine
 					.transition()
 					.duration(1000)
 					.attr("d", line()
-						.x((d) => xScale(new Date(d.date)))
-						.y((d) => yScale(new Date(d.total_spent_to_date)))
+						.x((d) => xScale(d.date))
+						.y((d) => yScale(d.total_spent_to_date))
 					);
 
 				updatedCircles.enter()
 					.append("circle")
 					.attr("class", "spent-line-circle")
-					.attr("cx", (datum) => xScale(new Date(datum.date)))
+					.attr("cx", (datum) => xScale(datum.date))
 					.attr("cy", (datum) => yScale(datum.total_spent_to_date))
 					.attr("r", 6)
 					.attr("fill", '#333333')
@@ -227,13 +265,13 @@ export function reusableLineChart(selection) {
 					.append("text")
 					.attr("class", "axis-tick-label")
 					.attr("fill", "black")
-					.attr("transform", d => `translate(${xScale(new Date(d.date))},20)`)
+					.attr("transform", d => `translate(${xScale(d.date)},20)`)
 					.text(d => d.quarter_label);
 
 				updatedAxisLabels
 					.transition()
 					.ease(easeLinear)
-					.attr("transform", d => `translate(${xScale(new Date(d.date))},20)`)
+					.attr("transform", d => `translate(${xScale(d.date)},20)`)
 					.duration(750)
 					.text(d => d.quarter_label);
 
@@ -242,6 +280,62 @@ export function reusableLineChart(selection) {
 					.ease(easeLinear)
 					.duration(100)
 					.remove();
+
+				updatedAxisYearLabels.enter()
+					.append("text")
+					.attr("class", "axis-tick-year-label")
+					.attr("fill", "#bcbcbc")
+					.attr("transform", d => `translate(${xScale(d.date)},40)`)
+					.text(d => d.financial_year_label);
+
+				updatedAxisYearLabels
+					.transition()
+					.ease(easeLinear)
+					.attr("transform", d => `translate(${xScale(d.date)},40)`)
+					.duration(750)
+					.text(d => d.financial_year_label);
+
+				updatedAxisYearLabels.exit()
+					.transition()
+					.ease(easeLinear)
+					.duration(100)
+					.remove();
+
+				updatedBackgroundRectangles
+					.enter()
+					.append("rect")
+					.attr("class", "background-rectangle")
+					.attr("x", (datum) => xScale(datum.date) - xScaleLength / data.length)
+					.attr("y", yScale.range()[1])
+					.attr("width", xScaleLength / data.length)
+					.attr("height", () => yScaleLength)
+					.attr("fill", 'none')
+					.on("mouseover", function (d) {
+						const correspondingCircle = spentLineElementsGroup.selectAll('circle')
+							.filter(function (circleData) {
+								return d.date === circleData.date;
+							}).nodes()[0];
+						tooltip.show(d, correspondingCircle)
+					})
+					.on("mouseout", function () {
+						tooltip.hide();
+					});
+
+				updatedBackgroundRectangles
+					.transition()
+					.ease(easeLinear)
+					.duration(750)
+					.attr("x", (datum) => xScale(datum.date) - xScaleLength / data.length)
+					.attr("y", yScale.range()[1])
+					.attr("width", xScaleLength / data.length)
+					.attr("height", () => yScaleLength);
+
+				updatedBackgroundRectangles.exit()
+					.transition()
+					.ease(easeLinear)
+					.duration(100)
+					.remove();
+
 			};
 
 		})
@@ -261,7 +355,7 @@ export function reusableLineChart(selection) {
 
 	chart.data = function (value) {
 		if (!arguments.length) return data;
-		data = value;
+		data = processRawData(value);
 		if (typeof updateData === 'function') updateData();
 		return chart;
 	};

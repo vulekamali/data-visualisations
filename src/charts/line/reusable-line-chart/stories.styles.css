@@ -12,11 +12,14 @@
 .d3-tip {
     line-height: 1;
     padding: 8px;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    border: 1px solid black;
+    background: white;
+    color: black;
     border-radius: 4px;
-    font-size: 16px;
-    pointer-events: none;
+    font-size: 14px;
+    pointer-events: none !important;
+    text-transform: uppercase;
+    font-family: sans-serif;
 }
 
 /* Style northward tooltips specifically */
@@ -31,7 +34,7 @@
     position: absolute;
     text-align: center;
 
-    margin: -2px 0 0 0;
+    margin: -1px 0 0 0;
     top: 100%;
     left: 0;
 }
@@ -58,11 +61,35 @@
     font-size: 14px;
 }
 
+.axis,
+.spent-line-path {
+    pointer-events: none;
+}
+
 .y.axis > .tick text {
     font-size: 14px;
+}
+
+.x.axis > .tick line {
+    stroke: black !important;
 }
 
 .spent-line-circle:hover {
     fill: rgb(0, 137, 123);
     cursor: pointer;
 }
+
+.background-rectangle {
+    pointer-events: all;
+}
+
+.background-rectangle:hover {
+    fill: black;
+    fill-opacity: 0.04;
+}
+
+.tooltip-value {
+    float: right;
+    font-weight: bold;
+}
+

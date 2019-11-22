@@ -4,7 +4,7 @@ import 'd3-transition';
 import {easeLinear} from 'd3-ease';
 import d3Tip from "d3-tip";
 
-export function reusableBarChart(selection) {
+export function reusableBarChart() {
     let initialConfiguration = {
         width: 300,
         height: 50,
