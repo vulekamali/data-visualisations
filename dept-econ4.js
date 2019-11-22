@@ -37,10 +37,10 @@
             height: 40,
         },
         leftSection: {
-            width: isMobile ? viewport.width * 1/2 : viewport.width * 2/5 
+            width: isMobile ? viewport.width * 1/2 : viewport.width * 2/5
         },
         rightSection: {
-            width: isMobile ? viewport.width * 1/2 : viewport.width * 3/5 
+            width: isMobile ? viewport.width * 1/2 : viewport.width * 3/5
         },
         bars: {
             heightOffset: 0,
@@ -100,7 +100,7 @@
     bbox = getDimensions(container)
 
     var saveButtonContainer = createSaveButton(
-        svg, 
+        svg,
         {width: cfg.saveButton.width, height: cfg.saveButton.height},
         {width: cfg.saveButton.config.width, height: cfg.saveButton.config.height},
         cfg.saveButton.config

@@ -23,7 +23,7 @@ text.spend-value , text.spend-value tspan {
 }
 
 .bar-rect {
-    fill: url(#bar-gradient)
+    fill: grey;
 }
 
 defs .bar-gradient  stop {
