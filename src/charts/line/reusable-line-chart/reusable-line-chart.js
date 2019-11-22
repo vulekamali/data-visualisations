@@ -32,7 +32,7 @@ export function reusableLineChart() {
 		width: 1000,
 		height: 600,
 		spentCircleTooltipFormatter: (d) => {
-			return `<span class="tooltip-label">Total spent:</span> &nbsp;&nbsp;<span class="tooltip-value">R${format(",d")(d.total_spent_to_date)}</span></br>
+			return `<span class="tooltip-label">Total spent:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.total_spent_to_date ? "R" + format(",d")(d.total_spent_to_date) : 0}</span></br>
 					<span class="tooltip-label">Spent in quarter:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.total_spent_in_quarter ? "R" + format(",d")(d.total_spent_in_quarter) : 0}</span>`;
 		}
 	};
@@ -100,7 +100,7 @@ export function reusableLineChart() {
 				.attr("class", "spent-line-elements");
 
 			spentLineElementsGroup.selectAll("path")
-				.data([data])
+				.data(getTotalSpentLineData(data))
 				.enter()
 				.append("path")
 				.attr("class", "spent-line-path")
@@ -183,6 +183,20 @@ export function reusableLineChart() {
 					.sort((a, b) => a - b);
 			}
 
+			function getTotalSpentLineData(data) {
+				const result = [];
+				if (data && data.length > 0) {
+					for (let i = 0; i < data.length - 1; i++) {
+						if (data[i + 1].total_spent_to_date) {
+							result.push([data[i], data[i + 1]]);
+						}
+					}
+					return result;
+				} else {
+					return [];
+				}
+			}
+
 			function applyAxisStyle(gAxis) {
 				gAxis.selectAll('line')
 					.style('fill', 'none')
@@ -223,8 +237,21 @@ export function reusableLineChart() {
 				const updatedCircles = spentLineElementsGroup.selectAll('circle').data(data);
 				const updatedAxisLabels = gXAxis.selectAll('.axis-tick-label').data(data);
 				const updatedAxisYearLabels = gXAxis.selectAll('.axis-tick-year-label').data(data);
-				const updatedSpentLine = spentLineElementsGroup.selectAll(".spent-line-path").data([data]);
+				const updatedSpentLine = spentLineElementsGroup.selectAll(".spent-line-path").data(getTotalSpentLineData(data));
 				const updatedBackgroundRectangles = backgroundRectanglesGroup.selectAll(".background-rectangle").data(data);
+
+
+				updatedSpentLine
+					.enter()
+					.append("path")
+					.attr("class", "spent-line-path")
+					.attr("d", line()
+						.x((d) => xScale(d.date))
+						.y((d) => yScale(d.total_spent_to_date))
+					)
+					.attr("stroke", 'black')
+					.style("stroke-width", 2)
+					.style("fill", "none");
 
 				updatedSpentLine
 					.transition()
@@ -233,6 +260,12 @@ export function reusableLineChart() {
 						.x((d) => xScale(d.date))
 						.y((d) => yScale(d.total_spent_to_date))
 					);
+
+				updatedSpentLine.exit()
+					.transition()
+					.ease(easeLinear)
+					.duration(100)
+					.remove();
 
 				updatedCircles.enter()
 					.append("circle")
