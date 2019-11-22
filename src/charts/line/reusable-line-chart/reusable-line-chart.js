@@ -58,7 +58,8 @@ export function reusableLineChart() {
 
 			const yScale = scaleLinear()
 				.domain([0, max(yDomainValues)])
-				.range([height - margin.bottom, margin.top]);
+				.range([height - margin.bottom, margin.top])
+				.nice();
 
 			const svg = selection.append("svg")
 				.attr("width", width)
@@ -219,7 +220,7 @@ export function reusableLineChart() {
 				xAxis.scale(xScale).tickValues(xDomainValues);
 
 				yDomainValues = getYDomainValues(data);
-				yScale.domain([0, max(yDomainValues)]);
+				yScale.domain([0, max(yDomainValues)]).nice();
 				yAxis.scale(yScale);
 
 				const t = transition()
