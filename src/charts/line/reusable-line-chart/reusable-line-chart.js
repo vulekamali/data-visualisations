@@ -36,7 +36,7 @@ export function reusableLineChart() {
 					<span class="tooltip-label">Spent in quarter:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.total_spent_in_quarter ? "R" + format(",d")(d.total_spent_in_quarter) : 0}</span>`;
 		},
 		totalCostCircleTooltipFormatter: (d) => {
-			return `<span class="tooltip-label">Total project cost:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.total_estimated_project_cost ? "R" + format('.2s')(d.total_estimated_project_cost) : 0}</span>`;
+			return `<span class="tooltip-label">Total project cost:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.total_estimated_project_cost ? "R" + format('.3s')(d.total_estimated_project_cost) : 0}</span>`;
 		}
 	};
 
@@ -126,7 +126,7 @@ export function reusableLineChart() {
 					.y((d) => yScale(d.total_spent_to_date))
 				)
 				.attr("stroke", 'black')
-				.style("stroke-width", 2)
+				.style("stroke-width", 1)
 				.style("fill", "none");
 
 			spentLineElementsGroup.selectAll("circle")
@@ -136,7 +136,7 @@ export function reusableLineChart() {
 				.attr("class", "spent-line-circle")
 				.attr("cx", (datum) => xScale(datum.date))
 				.attr("cy", (datum) => yScale(datum.total_spent_to_date))
-				.attr("r", 6)
+				.attr("r", 5)
 				.attr("fill", '#333333')
 				.on("mouseover", function (d) {
 					spentCircleTooltip.show(d, this);
@@ -156,7 +156,7 @@ export function reusableLineChart() {
 				.attr("class", "total-cost-line-circle")
 				.attr("cx", (datum) => xScale(datum.date))
 				.attr("cy", (datum) => yScale(datum.total_estimated_project_cost))
-				.attr("r", 6)
+				.attr("r", 5)
 				.attr("fill", 'none')
 				.on("mouseover", function (d) {
 					totalCostCircleTooltip.show(d, this);
@@ -164,6 +164,21 @@ export function reusableLineChart() {
 				.on("mouseout", function () {
 					totalCostCircleTooltip.hide();
 				});
+
+			totalCostElementsGroup.selectAll("path")
+				.data(getTotalСostLineData(data))
+				.enter()
+				.append("path")
+				.attr("class", "total-cost-line-path")
+				.attr("d", line()
+					.x((d) => xScale(d.date))
+					.y((d) => yScale(d.total_estimated_project_cost))
+				)
+				.attr("stroke", 'black')
+				.style("stroke-width", 1)
+				.style("stroke-dasharray", "4 5")
+				.style("stroke-miterlimit", 16)
+				.style("fill", "none");
 
 			const xAxis = axisBottom(xScale)
 				.tickValues(xDomainValues)
@@ -233,6 +248,32 @@ export function reusableLineChart() {
 				}
 			}
 
+			function getTotalСostLineData(data) {
+				const result = [];
+				if (data && data.length > 0) {
+					const firstPoint = {
+						date: xScale.domain()[0],
+						total_estimated_project_cost: data[0].total_estimated_project_cost
+					};
+					result.push([firstPoint, data[0]]);
+					for (let i = 0; i < data.length - 1; i++) {
+						if (data[i + 1].total_estimated_project_cost !== data[i].total_estimated_project_cost) {
+							const middlePoint = {
+								date: data[i].date,
+								total_estimated_project_cost: data[i + 1].total_estimated_project_cost
+							};
+							result.push([data[i], middlePoint]);
+							result.push([middlePoint, data[i + 1]]);
+						} else {
+							result.push([data[i], data[i + 1]]);
+						}
+					}
+					return result;
+				} else {
+					return [];
+				}
+			}
+
 			function applyAxisStyle(gAxis) {
 				gAxis.selectAll('line')
 					.style('fill', 'none')
@@ -275,8 +316,8 @@ export function reusableLineChart() {
 				const updatedAxisLabels = gXAxis.selectAll('.axis-tick-label').data(data);
 				const updatedAxisYearLabels = gXAxis.selectAll('.axis-tick-year-label').data(data);
 				const updatedSpentLine = spentLineElementsGroup.selectAll(".spent-line-path").data(getTotalSpentLineData(data));
+				const updatedTotalCostLine = totalCostElementsGroup.selectAll(".total-cost-line-path").data(getTotalСostLineData(data));
 				const updatedBackgroundRectangles = backgroundRectanglesGroup.selectAll(".background-rectangle").data(data);
-
 
 				updatedSpentLine
 					.enter()
@@ -287,7 +328,7 @@ export function reusableLineChart() {
 						.y((d) => yScale(d.total_spent_to_date))
 					)
 					.attr("stroke", 'black')
-					.style("stroke-width", 2)
+					.style("stroke-width", 1)
 					.style("fill", "none");
 
 				updatedSpentLine
@@ -304,12 +345,40 @@ export function reusableLineChart() {
 					.duration(100)
 					.remove();
 
+				updatedTotalCostLine
+					.enter()
+					.append("path")
+					.attr("class", "total-cost-line-path")
+					.attr("d", line()
+						.x((d) => xScale(d.date))
+						.y((d) => yScale(d.total_estimated_project_cost))
+					)
+					.attr("stroke", 'black')
+					.style("stroke-width", 1)
+					.style("stroke-dasharray", "4 5")
+					.style("stroke-miterlimit", 16)
+					.style("fill", "none");
+
+				updatedTotalCostLine
+					.transition()
+					.duration(1000)
+					.attr("d", line()
+						.x((d) => xScale(d.date))
+						.y((d) => yScale(d.total_estimated_project_cost))
+					);
+
+				updatedTotalCostLine.exit()
+					.transition()
+					.ease(easeLinear)
+					.duration(100)
+					.remove();
+
 				updatedSpentLineCircles.enter()
 					.append("circle")
 					.attr("class", "spent-line-circle")
 					.attr("cx", (datum) => xScale(datum.date))
 					.attr("cy", (datum) => yScale(datum.total_spent_to_date))
-					.attr("r", 6)
+					.attr("r", 5)
 					.attr("fill", '#333333')
 					.on("mouseover", function (d) {
 						spentCircleTooltip.show(d, this);
@@ -336,7 +405,7 @@ export function reusableLineChart() {
 					.attr("class", "total-cost-line-circle")
 					.attr("cx", (datum) => xScale(datum.date))
 					.attr("cy", (datum) => yScale(datum.total_estimated_project_cost))
-					.attr("r", 6)
+					.attr("r", 5)
 					.attr("fill", 'none')
 					.on("mouseover", function (d) {
 						totalCostCircleTooltip.show(d, this);
