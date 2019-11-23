@@ -103,21 +103,31 @@ export function reusableLineChart() {
 						.filter(function (circleData) {
 							return d.date === circleData.date;
 						}).nodes()[0];
-					select(correspondingSpentLineCircle).attr('fill', 'rgb(0, 137, 123)');
 					correspondingTotalCostCircle = totalCostElementsGroup.selectAll('circle')
 						.filter(function (circleData) {
 							return d.date === circleData.date;
 						}).nodes()[0];
-					select(correspondingTotalCostCircle).attr('fill', 'rgb(0, 137, 123)');
 
-					spentCircleTooltip.show(d, correspondingSpentLineCircle);
-					totalCostCircleTooltip.show(d, correspondingTotalCostCircle);
+					if (correspondingSpentLineCircle) {
+						select(correspondingSpentLineCircle).attr('fill', 'rgb(0, 137, 123)');
+						spentCircleTooltip.show(d, correspondingSpentLineCircle);
+					}
+					if (correspondingTotalCostCircle) {
+						select(correspondingTotalCostCircle).attr('fill', 'rgb(0, 137, 123)');
+						totalCostCircleTooltip.show(d, correspondingTotalCostCircle);
+					}
 				})
 				.on("mouseout", function () {
-					spentCircleTooltip.hide();
-					totalCostCircleTooltip.hide();
-					select(correspondingSpentLineCircle).attr('fill', '#333333');
-					select(correspondingTotalCostCircle).attr("fill", 'none');
+					if (correspondingSpentLineCircle) {
+						select(correspondingSpentLineCircle).attr('fill', '#333333');
+						spentCircleTooltip.hide();
+					}
+					if (correspondingTotalCostCircle) {
+						totalCostCircleTooltip.hide();
+						select(correspondingTotalCostCircle).attr("fill", 'none');
+					}
+					correspondingSpentLineCircle = null;
+					correspondingTotalCostCircle = null;
 				});
 
 			const spentLineElementsGroup = svg.append("g")
@@ -137,7 +147,7 @@ export function reusableLineChart() {
 				.style("fill", "none");
 
 			spentLineElementsGroup.selectAll("circle")
-				.data(data)
+				.data(getTotalSpentCircleData(data))
 				.enter()
 				.append("circle")
 				.attr("class", "spent-line-circle")
@@ -244,7 +254,7 @@ export function reusableLineChart() {
 				const result = [];
 				if (data && data.length > 0) {
 					for (let i = 0; i < data.length - 1; i++) {
-						if (data[i + 1].total_spent_to_date) {
+						if (data[i].total_spent_to_date && data[i + 1].total_spent_to_date) {
 							result.push([data[i], data[i + 1]]);
 						}
 					}
@@ -252,6 +262,10 @@ export function reusableLineChart() {
 				} else {
 					return [];
 				}
+			}
+
+			function getTotalSpentCircleData(data) {
+				return data.filter(d => d.total_spent_to_date !== null);
 			}
 
 			function getTotalСostLineData(data) {
@@ -317,7 +331,7 @@ export function reusableLineChart() {
 				applyAxisStyle(gXAxis);
 				applyAxisStyle(gYAxis);
 
-				const updatedSpentLineCircles = spentLineElementsGroup.selectAll('circle').data(data);
+				const updatedSpentLineCircles = spentLineElementsGroup.selectAll('circle').data(getTotalSpentCircleData(data));
 				const updatedTotalCostCircles = totalCostElementsGroup.selectAll('circle').data(data);
 				const updatedAxisLabels = gXAxis.selectAll('.axis-tick-label').data(data);
 				const updatedAxisYearLabels = gXAxis.selectAll('.axis-tick-year-label').data(data);
@@ -487,21 +501,30 @@ export function reusableLineChart() {
 							.filter(function (circleData) {
 								return d.date === circleData.date;
 							}).nodes()[0];
-						select(correspondingSpentLineCircle).attr('fill', 'rgb(0, 137, 123)');
 						correspondingTotalCostCircle = totalCostElementsGroup.selectAll('circle')
 							.filter(function (circleData) {
 								return d.date === circleData.date;
 							}).nodes()[0];
-						select(correspondingTotalCostCircle).attr('fill', 'rgb(0, 137, 123)');
-
-						spentCircleTooltip.show(d, correspondingSpentLineCircle);
-						totalCostCircleTooltip.show(d, correspondingTotalCostCircle);
+						if (correspondingSpentLineCircle) {
+							select(correspondingSpentLineCircle).attr('fill', 'rgb(0, 137, 123)');
+							spentCircleTooltip.show(d, correspondingSpentLineCircle);
+						}
+						if (correspondingTotalCostCircle) {
+							select(correspondingTotalCostCircle).attr('fill', 'rgb(0, 137, 123)');
+							totalCostCircleTooltip.show(d, correspondingTotalCostCircle);
+						}
 					})
 					.on("mouseout", function () {
-						spentCircleTooltip.hide();
-						totalCostCircleTooltip.hide();
-						select(correspondingSpentLineCircle).attr('fill', '#333333');
-						select(correspondingTotalCostCircle).attr("fill", 'none');
+						if (correspondingSpentLineCircle) {
+							select(correspondingSpentLineCircle).attr('fill', '#333333');
+							spentCircleTooltip.hide();
+						}
+						if (correspondingTotalCostCircle) {
+							totalCostCircleTooltip.hide();
+							select(correspondingTotalCostCircle).attr("fill", 'none');
+						}
+						correspondingSpentLineCircle = null;
+						correspondingTotalCostCircle = null;
 					});
 
 				updatedBackgroundRectangles

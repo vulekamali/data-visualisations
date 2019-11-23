@@ -91,7 +91,19 @@ const secondData = [
 	}
 ];
 
-export const Simple = () => {
+export const MockupData = () => {
+	const container = document.createElement("div");
+	container.classList.add("container");
+
+	const myChart = reusableLineChart();
+
+	select(container)
+		.call(myChart.data(firstData));
+
+	return container;
+};
+
+export const MissingData = () => {
 	const container = document.createElement("div");
 	container.classList.add("container");
 
@@ -100,9 +112,17 @@ export const Simple = () => {
 	select(container)
 		.call(myChart.data(secondData));
 
-	setTimeout(() => {
-		myChart.data(firstData);
-	}, 2000);
+	return container;
+};
+
+export const SinglePointData = () => {
+	const container = document.createElement("div");
+	container.classList.add("container");
+
+	const myChart = reusableLineChart();
+
+	select(container)
+		.call(myChart.data([firstData[0]]));
 
 	return container;
 };
