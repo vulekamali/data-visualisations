@@ -74,7 +74,8 @@
     stroke: black !important;
 }
 
-.spent-line-circle:hover {
+.spent-line-circle:hover,
+.total-cost-line-circle:hover {
     fill: rgb(0, 137, 123);
     cursor: pointer;
 }
