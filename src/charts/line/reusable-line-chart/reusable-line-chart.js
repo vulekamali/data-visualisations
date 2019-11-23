@@ -4,6 +4,7 @@ import {scaleLinear, scaleTime} from 'd3-scale';
 import {axisBottom, axisLeft} from 'd3-axis';
 import {easeLinear} from 'd3-ease';
 import {max, min} from 'd3-array';
+import {select} from 'd3-selection';
 import {format} from 'd3-format';
 import {line} from 'd3-shape';
 import d3Tip from "d3-tip";
@@ -46,6 +47,7 @@ export function reusableLineChart() {
 		spentCircleTooltipFormatter = initialConfiguration.spentCircleTooltipFormatter,
 		totalCostCircleTooltipFormatter = initialConfiguration.totalCostCircleTooltipFormatter;
 	let updateData = null;
+	let correspondingSpentLineCircle, correspondingTotalCostCircle = null;
 
 	function chart(selection) {
 		selection.each(function () {
@@ -97,20 +99,25 @@ export function reusableLineChart() {
 				.attr("height", () => yScaleLength)
 				.attr("fill", 'none')
 				.on("mouseover", function (d) {
-					const correspondingSpentLineCircle = spentLineElementsGroup.selectAll('circle')
+					correspondingSpentLineCircle = spentLineElementsGroup.selectAll('circle')
 						.filter(function (circleData) {
 							return d.date === circleData.date;
 						}).nodes()[0];
-					const correspondingTotalCostCircle = totalCostElementsGroup.selectAll('circle')
+					select(correspondingSpentLineCircle).attr('fill', 'rgb(0, 137, 123)');
+					correspondingTotalCostCircle = totalCostElementsGroup.selectAll('circle')
 						.filter(function (circleData) {
 							return d.date === circleData.date;
 						}).nodes()[0];
+					select(correspondingTotalCostCircle).attr('fill', 'rgb(0, 137, 123)');
+
 					spentCircleTooltip.show(d, correspondingSpentLineCircle);
 					totalCostCircleTooltip.show(d, correspondingTotalCostCircle);
 				})
 				.on("mouseout", function () {
 					spentCircleTooltip.hide();
 					totalCostCircleTooltip.hide();
+					select(correspondingSpentLineCircle).attr('fill', '#333333');
+					select(correspondingTotalCostCircle).attr("fill", 'none');
 				});
 
 			const spentLineElementsGroup = svg.append("g")
@@ -145,9 +152,23 @@ export function reusableLineChart() {
 					spentCircleTooltip.hide();
 				});
 
-
 			const totalCostElementsGroup = svg.append("g")
 				.attr("class", "total-cost-line-elements");
+
+			totalCostElementsGroup.selectAll("path")
+				.data(getTotalСostLineData(data))
+				.enter()
+				.append("path")
+				.attr("class", "total-cost-line-path")
+				.attr("d", line()
+					.x((d) => xScale(d.date))
+					.y((d) => yScale(d.total_estimated_project_cost))
+				)
+				.attr("stroke", 'black')
+				.style("stroke-width", 1)
+				.style("stroke-dasharray", "4 5")
+				.style("stroke-miterlimit", 16)
+				.style("fill", "none");
 
 			totalCostElementsGroup.selectAll("circle")
 				.data(data)
@@ -164,21 +185,6 @@ export function reusableLineChart() {
 				.on("mouseout", function () {
 					totalCostCircleTooltip.hide();
 				});
-
-			totalCostElementsGroup.selectAll("path")
-				.data(getTotalСostLineData(data))
-				.enter()
-				.append("path")
-				.attr("class", "total-cost-line-path")
-				.attr("d", line()
-					.x((d) => xScale(d.date))
-					.y((d) => yScale(d.total_estimated_project_cost))
-				)
-				.attr("stroke", 'black')
-				.style("stroke-width", 1)
-				.style("stroke-dasharray", "4 5")
-				.style("stroke-miterlimit", 16)
-				.style("fill", "none");
 
 			const xAxis = axisBottom(xScale)
 				.tickValues(xDomainValues)
@@ -477,20 +483,25 @@ export function reusableLineChart() {
 					.attr("height", () => yScaleLength)
 					.attr("fill", 'none')
 					.on("mouseover", function (d) {
-						const correspondingSpentLineCircle = spentLineElementsGroup.selectAll('circle')
+						correspondingSpentLineCircle = spentLineElementsGroup.selectAll('circle')
 							.filter(function (circleData) {
 								return d.date === circleData.date;
 							}).nodes()[0];
-						const correspondingTotalCostCircle = totalCostElementsGroup.selectAll('circle')
+						select(correspondingSpentLineCircle).attr('fill', 'rgb(0, 137, 123)');
+						correspondingTotalCostCircle = totalCostElementsGroup.selectAll('circle')
 							.filter(function (circleData) {
 								return d.date === circleData.date;
 							}).nodes()[0];
+						select(correspondingTotalCostCircle).attr('fill', 'rgb(0, 137, 123)');
+
 						spentCircleTooltip.show(d, correspondingSpentLineCircle);
 						totalCostCircleTooltip.show(d, correspondingTotalCostCircle);
 					})
 					.on("mouseout", function () {
 						spentCircleTooltip.hide();
 						totalCostCircleTooltip.hide();
+						select(correspondingSpentLineCircle).attr('fill', '#333333');
+						select(correspondingTotalCostCircle).attr("fill", 'none');
 					});
 
 				updatedBackgroundRectangles
