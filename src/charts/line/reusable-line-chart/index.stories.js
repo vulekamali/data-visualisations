@@ -91,6 +91,40 @@ const secondData = [
 	}
 ];
 
+const minifiedData = [{
+	"date": "2018-09-30",
+	"quarter_label": "END Q2",
+	"financial_year_label": "2018-19",
+	"total_spent_to_date": 90000,
+	"total_spent_in_quarter": 35000,
+	"total_estimated_project_cost": 320000,
+	"status": "Feasibility"
+}, {
+	"date": "2018-12-31",
+	"quarter_label": "END Q3",
+	"financial_year_label": "",
+	"total_spent_to_date": 166900,
+	"total_spent_in_quarter": 68900,
+	"total_estimated_project_cost": 365000,
+	"status": "Feasibility"
+}, {
+	"date": "2019-03-31",
+	"quarter_label": "END Q4",
+	"financial_year_label": "",
+	"total_spent_to_date": 166900,
+	"total_spent_in_quarter": 0,
+	"total_estimated_project_cost": 350000,
+	"status": "Tender"
+}, {
+	"date": "2019-06-30",
+	"quarter_label": "END Q1",
+	"financial_year_label": "2019-20",
+	"total_spent_to_date": 276900,
+	"total_spent_in_quarter": 110000,
+	"total_estimated_project_cost": 365000,
+	"status": null
+}];
+
 export const MockupData = () => {
 	const container = document.createElement("div");
 	container.classList.add("container");
@@ -123,6 +157,18 @@ export const SinglePointData = () => {
 
 	select(container)
 		.call(myChart.data([firstData[0]]));
+
+	return container;
+};
+
+export const HundredThousandsData = () => {
+	const container = document.createElement("div");
+	container.classList.add("container");
+
+	const myChart = reusableLineChart();
+
+	select(container)
+		.call(myChart.data(minifiedData));
 
 	return container;
 };

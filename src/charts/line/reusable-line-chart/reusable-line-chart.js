@@ -9,7 +9,7 @@ import {format} from 'd3-format';
 import {line} from 'd3-shape';
 import d3Tip from "d3-tip";
 
-const margin = {top: 50, right: 50, bottom: 50, left: 50};
+const margin = {top: 50, right: 50, bottom: 50, left: 70};
 
 Object.defineProperty(Array.prototype, 'flat', {
 	value: function (depth = 1) {
@@ -199,7 +199,8 @@ export function reusableLineChart() {
 			const xAxis = axisBottom(xScale)
 				.tickValues(xDomainValues)
 				.tickFormat('')
-				.tickSize(7);
+				.tickSize(7)
+				.tickSizeOuter(0);
 
 			const gXAxis = svg.append("g")
 				.attr("class", "x axis")
@@ -225,17 +226,29 @@ export function reusableLineChart() {
 				.attr("transform", d => `translate(${xScale(d.date)},40)`)
 				.text(d => d.financial_year_label);
 
+			const yAxisGrid = axisLeft(yScale)
+				.ticks(4)
+				.tickFormat('')
+				.tickSize(-width + margin.left + margin.right);
+
 			const yAxis = axisLeft(yScale)
 				.ticks(4)
 				.tickFormat(d => d !== 0 ? `R${format('~s')(d)}` : '')
-				.tickSize(-width + margin.left + margin.right)
-				.tickSizeOuter(5);
+				.tickSizeInner(5)
+				.tickSizeOuter(0);
+
+			const gYAxisGrid = svg.append("g")
+				.attr("class", "grid")
+				.attr("transform", `translate(${margin.left},0)`)
+				.call(yAxisGrid);
 
 			const gYAxis = svg.append("g")
 				.attr("class", "y axis")
 				.attr("transform", `translate(${margin.left},0)`)
 				.call(yAxis);
-			applyAxisStyle(gYAxis);
+
+			applyGridStyle(gYAxisGrid);
+			applyAxisStyle(gYAxis, true);
 
 			function getXDomainValues(data) {
 				if (data && data.length > 0) {
@@ -294,17 +307,33 @@ export function reusableLineChart() {
 				}
 			}
 
-			function applyAxisStyle(gAxis) {
+			function applyAxisStyle(gAxis, yAxis) {
 				gAxis.selectAll('line')
 					.style('fill', 'none')
-					.style('stroke', 'rgba(0, 0, 0, 0.1)')
+					.style('stroke-width', '1')
+					.style('stroke', yAxis ? 'black' : 'rgba(0, 0, 0, 0.1)')
 					.style('shape-rendering', 'crispEdges');
 
 				gAxis.select('path')
 					.style('fill', 'none')
 					.style('stroke', 'black')
-					.style('stroke-width', '2')
+					.style('stroke-width', '1')
 					.style('shape-rendering', 'crispEdges');
+				if (yAxis) {
+					select(gYAxis.selectAll(".tick").nodes()[0]).attr("visibility", "hidden");
+				}
+			}
+
+			function applyGridStyle(gAxis) {
+				gAxis.selectAll('line')
+					.style('fill', 'none')
+					.style('stroke-width', '1')
+					.style('stroke', 'rgba(0, 0, 0, 0.1)')
+					.style('shape-rendering', 'crispEdges');
+
+				gAxis.select('path')
+					.style('fill', 'none')
+					.style('color', 'transparent');
 			}
 
 			updateData = function () {
@@ -328,8 +357,12 @@ export function reusableLineChart() {
 				gYAxis.transition(t)
 					.call(yAxis);
 
+				gYAxisGrid.transition(t)
+					.call(yAxis);
+
 				applyAxisStyle(gXAxis);
-				applyAxisStyle(gYAxis);
+				applyAxisStyle(gYAxis, true);
+				applyGridStyle(gYAxisGrid);
 
 				const updatedSpentLineCircles = spentLineElementsGroup.selectAll('circle').data(getTotalSpentCircleData(data));
 				const updatedTotalCostCircles = totalCostElementsGroup.selectAll('circle').data(data);
