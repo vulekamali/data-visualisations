@@ -9,7 +9,7 @@ import {format} from 'd3-format';
 import {line} from 'd3-shape';
 import d3Tip from "d3-tip";
 
-const margin = {top: 50, right: 50, bottom: 50, left: 60};
+const margin = {top: 50, right: 50, bottom: 80, left: 60};
 
 Object.defineProperty(Array.prototype, 'flat', {
 	value: function (depth = 1) {
@@ -234,6 +234,42 @@ export function reusableLineChart() {
 
 			applyGridStyle(gYAxisGrid);
 			applyAxisStyle(gYAxis, true);
+
+			const legend = svg
+				.selectAll("legend")
+				.data([
+					{label: 'actual quaterly spend', 'stroke-dasharray': '4 5'},
+					{label: 'total estimated project cost'}
+				])
+				.enter()
+				.append('g')
+				.attr("class", "legend")
+				.attr("transform", (d, i) => `translate(${i * 200 + 60},${height - 30})`);
+
+			legend.call(appendLegendItem);
+
+
+			function appendLegendItem(selection) {
+				selection.append('rect')
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("width", 20)
+					.attr("height", 20);
+
+				selection.append('line')
+					.attr('x1', 0)
+					.attr('y1', 10)
+					.attr('x2', 20)
+					.attr('y2', 10)
+					.attr('stroke-dasharray', d => d['stroke-dasharray'] ? d['stroke-dasharray'] : null);
+
+				selection.append('text')
+					.attr("x", 25)
+					.attr("y", 15)
+					.text(d => d.label)
+					.style("text-anchor", "start");
+
+			}
 
 			function getXDomainValues(data) {
 				if (data && data.length > 0) {
