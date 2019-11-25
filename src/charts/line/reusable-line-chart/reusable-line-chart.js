@@ -33,11 +33,11 @@ export function reusableLineChart() {
 		width: 850,
 		height: 450,
 		spentCircleTooltipFormatter: (d) => {
-			return `<span class="tooltip-label">Total spent:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.data.total_spent_to_date ? "R" + format(",d")(d.data.total_spent_to_date) : 0}</span></br>
-					<span class="tooltip-label">Spent in quarter:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.data.total_spent_in_quarter ? "R" + format(",d")(d.data.total_spent_in_quarter) : 0}</span>`;
+			return `<div><span class="tooltip-label">Total spent:</span>&nbsp;&nbsp;<span class="tooltip-value">${d.data.total_spent_to_date ? "R" + format(",d")(d.data.total_spent_to_date) : 0}</span></div>
+					<div><span class="tooltip-label">Spent in quarter:</span>&nbsp;&nbsp;<span class="tooltip-value">${d.data.total_spent_in_quarter ? "R" + format(",d")(d.data.total_spent_in_quarter) : 0}</span></div>`;
 		},
 		totalCostCircleTooltipFormatter: (d) => {
-			return `<span class="tooltip-label">Total project cost:</span> &nbsp;&nbsp;<span class="tooltip-value">${d.data.total_estimated_project_cost ? "R" + format('.3s')(d.data.total_estimated_project_cost) : 0}</span>`;
+			return `<div><span class="tooltip-label">Total project cost:</span>&nbsp;<span class="tooltip-value">${d.data.total_estimated_project_cost ? "R" + format('.3s')(d.data.total_estimated_project_cost) : 0}</span></div>`;
 		}
 	};
 

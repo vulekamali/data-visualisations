@@ -1,13 +1,13 @@
 .container {
     border: 1px solid black;
-    width: fit-content;
-    height: fit-content;
+    width: 850px;
+    height: 450px;
     margin-top: 50px;
     margin-left: 50px;
 }
 
 .d3-tip {
-    line-height: 1;
+    white-space: nowrap;
     padding: 8px;
     border: 1px solid black;
     background: white;
@@ -17,6 +17,13 @@
     pointer-events: none !important;
     text-transform: uppercase;
     font-family: sans-serif;
+    display: flex;
+    flex-direction: column
+}
+
+.d3-tip > div {
+    display: flex;
+    justify-content: space-between;
 }
 
 /* Style northward tooltips specifically */
@@ -87,7 +94,7 @@
 }
 
 .tooltip-value {
-    float: right;
+    /*float: right;*/
     font-weight: bold;
 }
 
