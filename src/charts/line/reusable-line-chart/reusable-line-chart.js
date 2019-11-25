@@ -181,7 +181,7 @@ export function reusableLineChart() {
 				.style("fill", "none");
 
 			totalCostElementsGroup.selectAll("circle")
-				.data(data)
+				.data(getTotalСostCircleData(data))
 				.enter()
 				.append("circle")
 				.attr("class", "total-cost-line-circle")
@@ -281,24 +281,31 @@ export function reusableLineChart() {
 				return data.filter(d => d.total_spent_to_date !== null);
 			}
 
+			function getTotalСostCircleData(data) {
+				return data.filter(d => d.total_estimated_project_cost !== null);
+			}
+
 			function getTotalСostLineData(data) {
 				const result = [];
 				if (data && data.length > 0) {
+					const firstNonNullPointIndex = data.findIndex(d => d.total_estimated_project_cost !== null);
 					const firstPoint = {
 						date: xScale.domain()[0],
-						total_estimated_project_cost: data[0].total_estimated_project_cost
+						total_estimated_project_cost: data[firstNonNullPointIndex].total_estimated_project_cost
 					};
-					result.push([firstPoint, data[0]]);
-					for (let i = 0; i < data.length - 1; i++) {
-						if (data[i + 1].total_estimated_project_cost !== data[i].total_estimated_project_cost) {
-							const middlePoint = {
-								date: data[i].date,
-								total_estimated_project_cost: data[i + 1].total_estimated_project_cost
-							};
-							result.push([data[i], middlePoint]);
-							result.push([middlePoint, data[i + 1]]);
-						} else {
-							result.push([data[i], data[i + 1]]);
+					result.push([firstPoint, data[firstNonNullPointIndex]]);
+					for (let i = firstNonNullPointIndex; i < data.length - 1; i++) {
+						if (data[i + 1].total_estimated_project_cost !== null) {
+							if (data[i + 1].total_estimated_project_cost !== data[i].total_estimated_project_cost) {
+								const middlePoint = {
+									date: data[i].date,
+									total_estimated_project_cost: data[i + 1].total_estimated_project_cost
+								};
+								result.push([data[i], middlePoint]);
+								result.push([middlePoint, data[i + 1]]);
+							} else {
+								result.push([data[i], data[i + 1]]);
+							}
 						}
 					}
 					return result;
@@ -365,7 +372,7 @@ export function reusableLineChart() {
 				applyGridStyle(gYAxisGrid);
 
 				const updatedSpentLineCircles = spentLineElementsGroup.selectAll('circle').data(getTotalSpentCircleData(data));
-				const updatedTotalCostCircles = totalCostElementsGroup.selectAll('circle').data(data);
+				const updatedTotalCostCircles = totalCostElementsGroup.selectAll('circle').data(getTotalСostCircleData(data));
 				const updatedAxisLabels = gXAxis.selectAll('.axis-tick-label').data(data);
 				const updatedAxisYearLabels = gXAxis.selectAll('.axis-tick-year-label').data(data);
 				const updatedSpentLine = spentLineElementsGroup.selectAll(".spent-line-path").data(getTotalSpentLineData(data));
