@@ -9,7 +9,7 @@ import {format} from 'd3-format';
 import {line} from 'd3-shape';
 import d3Tip from "d3-tip";
 
-const margin = {top: 50, right: 50, bottom: 50, left: 70};
+const margin = {top: 50, right: 50, bottom: 50, left: 60};
 
 Object.defineProperty(Array.prototype, 'flat', {
 	value: function (depth = 1) {

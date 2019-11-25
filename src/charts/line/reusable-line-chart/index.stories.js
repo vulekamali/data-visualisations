@@ -173,4 +173,16 @@ export const HundredThousandsData = () => {
 	return container;
 };
 
+export const SmallWidthHeight = () => {
+	const container = document.createElement("div");
+	container.classList.add("container");
+
+	const myChart = reusableLineChart().width(320).height(450);
+
+	select(container)
+		.call(myChart.data(firstData));
+
+	return container;
+};
+
 
