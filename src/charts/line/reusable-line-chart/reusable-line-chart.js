@@ -10,6 +10,7 @@ import {line} from 'd3-shape';
 import d3Tip from "d3-tip";
 
 const margin = {top: 50, right: 50, bottom: 80, left: 60};
+const SYMBOL_WIDTH = 7.5;
 
 function processRawData(data) {
 	return data.map(d => {
@@ -30,6 +31,9 @@ export function reusableLineChart() {
 		},
 		totalCostCircleTooltipFormatter: (d) => {
 			return `<div><span class="tooltip-label">Total project cost:</span>&nbsp;<span class="tooltip-value">${d.data.total_estimated_project_cost ? "R" + format('.3s')(d.data.total_estimated_project_cost) : 0}</span></div>`;
+		},
+		statusLabelTooltipFormatter: (d) => {
+			return `<div class="status-tooltip">${d.label}</div>`;
 		}
 	};
 
@@ -37,7 +41,8 @@ export function reusableLineChart() {
 		height = initialConfiguration.height,
 		data = [],
 		spentCircleTooltipFormatter = initialConfiguration.spentCircleTooltipFormatter,
-		totalCostCircleTooltipFormatter = initialConfiguration.totalCostCircleTooltipFormatter;
+		totalCostCircleTooltipFormatter = initialConfiguration.totalCostCircleTooltipFormatter,
+		statusLabelTooltipFormatter = initialConfiguration.statusLabelTooltipFormatter;
 	let updateData = null;
 	let correspondingSpentLineCircle, correspondingTotalCostCircle = null;
 
@@ -84,8 +89,14 @@ export function reusableLineChart() {
 				})
 				.html(totalCostCircleTooltipFormatter);
 
+			const statusLabelTooltip = d3Tip()
+				.attr("class", "d3-tip")
+				.offset([-8, 0])
+				.html(statusLabelTooltipFormatter);
+
 			svg.call(spentCircleTooltip);
 			svg.call(totalCostCircleTooltip);
+			svg.call(statusLabelTooltip);
 
 			const backgroundRectanglesGroup = svg.append("g")
 				.attr("class", "background-rectangles");
@@ -105,6 +116,41 @@ export function reusableLineChart() {
 				})
 				.on("mouseout", function () {
 					hideTooltip();
+				});
+
+			const statusLineElementsGroup = svg.append("g")
+				.attr("class", "status-line-elements");
+
+			statusLineElementsGroup.selectAll("path")
+				.data(getStatusLineData(data))
+				.enter()
+				.append("path")
+				.attr("class", "status-line-path")
+				.attr("d", line()
+					.x((d) => d.start && !d.dotted || d.end && d.dotted ? xScale(d.date) + 20 : xScale(d.date))
+					.y((d) => d.end && !d.dotted ? 25 : 10)
+				)
+				.attr("stroke", 'black')
+				.style("stroke-width", 1)
+				.style("stroke-dasharray", d => d[0].dotted ? 2 : null)
+				.style("fill", "none");
+
+			statusLineElementsGroup.selectAll('text')
+				.data(getStatusLabelsData(data))
+				.enter()
+				.append("text")
+				.attr("class", "status-line-label")
+				.attr("fill", "black")
+				.attr("text-anchor", "middle")
+				.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2 + 10},22)`)
+				.text(d => getStatusLabelText(d))
+				.on("mouseover", function (d) {
+					if (isStatusLabelTruncated(d)) {
+						statusLabelTooltip.show(d, this);
+					}
+				})
+				.on("mouseout", function () {
+					statusLabelTooltip.hide();
 				});
 
 			const spentLineElementsGroup = svg.append("g")
@@ -290,6 +336,85 @@ export function reusableLineChart() {
 				}
 			}
 
+			function getStatusLineData(data) {
+				let result = [];
+				if (data && data.length > 0) {
+					const allStatuses = data.filter(d => !!d.status).map(d => d.status);
+					const uniqueStatuses = [];
+					allStatuses.forEach(status => {
+						if (uniqueStatuses.indexOf(status) === -1) {
+							uniqueStatuses.push(status);
+						}
+					});
+					uniqueStatuses.forEach(status => {
+						const currentStatusPoints = data.filter(d => d.status === status);
+						result.push([
+							{
+								date: new Date(currentStatusPoints[0].date).setMonth(currentStatusPoints[0].date.getMonth() - 3),
+								dotted: true,
+								start: true
+							},
+							{
+								date: new Date(currentStatusPoints[0].date).setMonth(currentStatusPoints[0].date.getMonth() - 3),
+								dotted: true,
+								end: true
+							}
+						]);
+						result.push([
+							{
+								date: new Date(currentStatusPoints[0].date).setMonth(currentStatusPoints[0].date.getMonth() - 3),
+								start: true
+							},
+							{
+								date: currentStatusPoints[currentStatusPoints.length - 1].date,
+							},
+							{
+								date: currentStatusPoints[currentStatusPoints.length - 1].date,
+								end: true
+							}
+						]);
+					});
+					return result;
+				} else {
+					return [];
+				}
+			}
+
+			function getStatusLabelsData(data) {
+				let result = [];
+				if (data && data.length > 0) {
+					const allStatuses = data.filter(d => !!d.status).map(d => d.status);
+					const uniqueStatuses = [];
+					allStatuses.forEach(status => {
+						if (uniqueStatuses.indexOf(status) === -1) {
+							uniqueStatuses.push(status);
+						}
+					});
+					uniqueStatuses.forEach(status => {
+						const currentStatusPoints = data.filter(d => d.status === status);
+						result.push({
+							startDate: new Date(currentStatusPoints[0].date).setMonth(currentStatusPoints[0].date.getMonth() - 3),
+							endDate: currentStatusPoints[currentStatusPoints.length - 1].date,
+							label: status
+						});
+					});
+					return result;
+				} else {
+					return [];
+				}
+			}
+
+			function getStatusLabelText(d) {
+				const placeholderLength = xScale(d.endDate) - xScale(d.startDate) - 20;
+				return placeholderLength > d.label.length * SYMBOL_WIDTH
+					? d.label
+					: `${d.label.slice(0, placeholderLength / SYMBOL_WIDTH)}...`
+			}
+
+			function isStatusLabelTruncated(d) {
+				return xScale(d.endDate) - xScale(d.startDate) - 20 < d.label.length * SYMBOL_WIDTH;
+			}
+
 			function getTotalSpentCircleData(data) {
 				return data.filter(d => d.total_spent_to_date !== null);
 			}
@@ -420,6 +545,7 @@ export function reusableLineChart() {
 				yDomainValues = getYDomainValues(data);
 				yScale.domain([0, max(yDomainValues)]).nice();
 				yAxis.scale(yScale);
+				yAxisGrid.scale(yScale);
 
 				const t = transition()
 					.duration(750);
@@ -431,7 +557,7 @@ export function reusableLineChart() {
 					.call(yAxis);
 
 				gYAxisGrid.transition(t)
-					.call(yAxis);
+					.call(yAxisGrid);
 
 				applyAxisStyle(gXAxis);
 				applyAxisStyle(gYAxis, true);
@@ -443,6 +569,8 @@ export function reusableLineChart() {
 				const updatedAxisYearLabels = gXAxis.selectAll('.axis-tick-year-label').data(data);
 				const updatedSpentLine = spentLineElementsGroup.selectAll(".spent-line-path").data(getTotalSpentLineData(data));
 				const updatedTotalCostLine = totalCostElementsGroup.selectAll(".total-cost-line-path").data(getTotalСostLineData(data));
+				const updatedStatusLine = statusLineElementsGroup.selectAll(".status-line-path").data(getStatusLineData(data));
+				const updatedStatusLabels = statusLineElementsGroup.selectAll(".status-line-label").data(getStatusLabelsData(data));
 				const updatedBackgroundRectangles = backgroundRectanglesGroup.selectAll(".background-rectangle").data(data);
 
 				updatedSpentLine
@@ -494,6 +622,63 @@ export function reusableLineChart() {
 					);
 
 				updatedTotalCostLine.exit()
+					.transition()
+					.ease(easeLinear)
+					.duration(100)
+					.remove();
+
+				updatedStatusLine
+					.enter()
+					.append("path")
+					.attr("class", "status-line-path")
+					.attr("d", line()
+						.x((d) => d.start && !d.dotted || d.end && d.dotted ? xScale(d.date) + 20 : xScale(d.date))
+						.y((d) => d.end && !d.dotted ? 25 : 10)
+					)
+					.attr("stroke", 'black')
+					.style("stroke-width", 1)
+					.style("stroke-dasharray", d => d[0].dotted ? 2 : null)
+					.style("fill", "none");
+
+				updatedStatusLine
+					.transition()
+					.duration(1000)
+					.attr("d", line()
+						.x((d) => d.start && !d.dotted || d.end && d.dotted ? xScale(d.date) + 20 : xScale(d.date))
+						.y((d) => d.end && !d.dotted ? 25 : 10)
+					)
+					.style("stroke-dasharray", d => d[0].dotted ? 2 : null);
+
+				updatedStatusLine.exit()
+					.transition()
+					.ease(easeLinear)
+					.duration(100)
+					.remove();
+
+				updatedStatusLabels
+					.enter()
+					.append("text")
+					.attr("class", "status-line-label")
+					.attr("fill", "black")
+					.attr("text-anchor", "middle")
+					.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2 + 10},22)`)
+					.text(d => getStatusLabelText(d))
+					.on("mouseover", function (d) {
+						if (isStatusLabelTruncated(d)) {
+							statusLabelTooltip.show(d, this);
+						}
+					})
+					.on("mouseout", function () {
+						statusLabelTooltip.hide();
+					});
+
+				updatedStatusLabels
+					.transition()
+					.duration(1000)
+					.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2 + 10},22)`)
+					.text(d => getStatusLabelText(d));
+
+				updatedStatusLabels.exit()
 					.transition()
 					.ease(easeLinear)
 					.duration(100)
