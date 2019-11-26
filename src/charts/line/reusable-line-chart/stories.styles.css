@@ -1,0 +1,116 @@
+.container {
+    border: 1px solid black;
+    width: 850px;
+    height: 450px;
+    margin-top: 50px;
+    margin-left: 50px;
+}
+
+.d3-tip {
+    white-space: nowrap;
+    padding: 8px;
+    border: 1px solid black;
+    background: white;
+    color: black;
+    border-radius: 4px;
+    font-size: 14px;
+    pointer-events: none !important;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column
+}
+
+.d3-tip > div {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Style northward tooltips specifically */
+.d3-tip.n:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+}
+
+/* Style southward tooltips specifically */
+.d3-tip.s:before {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25B2";
+    position: absolute;
+    text-align: center;
+
+    margin: 0 0 -2px 0;
+    bottom: 100%;
+    left: 0;
+}
+
+.axis-tick-label,
+.axis-tick-year-label {
+    font-size: 14px;
+}
+
+.axis,
+.spent-line-path {
+    pointer-events: none;
+}
+
+.y.axis > .tick text {
+    font-size: 14px;
+}
+
+.x.axis > .tick line {
+    stroke: black !important;
+}
+
+.spent-line-circle:hover,
+.total-cost-line-circle:hover {
+    fill: rgb(0, 137, 123);
+    cursor: pointer;
+}
+
+.background-rectangle {
+    pointer-events: all;
+}
+
+.background-rectangle:hover {
+    fill: black;
+    fill-opacity: 0.04;
+}
+
+.tooltip-value {
+    font-weight: bold;
+}
+
+.legend > text{
+    font-size:11px;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    color: black;
+    opacity: 0.3;
+}
+
+.legend > rect{
+    fill: black;
+    fill-opacity: 0.1;
+}
+
+.legend > line{
+    stroke: black;
+    stroke-width: 1px;
+}
