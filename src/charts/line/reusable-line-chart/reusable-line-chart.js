@@ -10,7 +10,7 @@ import {line} from 'd3-shape';
 import d3Tip from "d3-tip";
 
 const margin = {top: 50, right: 50, bottom: 80, left: 60};
-const SYMBOL_WIDTH = 8;
+const SYMBOL_WIDTH = 7.5;
 
 function processRawData(data) {
 	return data.map(d => {
@@ -31,6 +31,9 @@ export function reusableLineChart() {
 		},
 		totalCostCircleTooltipFormatter: (d) => {
 			return `<div><span class="tooltip-label">Total project cost:</span>&nbsp;<span class="tooltip-value">${d.data.total_estimated_project_cost ? "R" + format('.3s')(d.data.total_estimated_project_cost) : 0}</span></div>`;
+		},
+		statusLabelTooltipFormatter: (d) => {
+			return `<div class="status-tooltip">${d.label}</div>`;
 		}
 	};
 
@@ -38,7 +41,8 @@ export function reusableLineChart() {
 		height = initialConfiguration.height,
 		data = [],
 		spentCircleTooltipFormatter = initialConfiguration.spentCircleTooltipFormatter,
-		totalCostCircleTooltipFormatter = initialConfiguration.totalCostCircleTooltipFormatter;
+		totalCostCircleTooltipFormatter = initialConfiguration.totalCostCircleTooltipFormatter,
+		statusLabelTooltipFormatter = initialConfiguration.statusLabelTooltipFormatter;
 	let updateData = null;
 	let correspondingSpentLineCircle, correspondingTotalCostCircle = null;
 
@@ -85,8 +89,14 @@ export function reusableLineChart() {
 				})
 				.html(totalCostCircleTooltipFormatter);
 
+			const statusLabelTooltip = d3Tip()
+				.attr("class", "d3-tip")
+				.offset([-8, 0])
+				.html(statusLabelTooltipFormatter);
+
 			svg.call(spentCircleTooltip);
 			svg.call(totalCostCircleTooltip);
+			svg.call(statusLabelTooltip);
 
 			const backgroundRectanglesGroup = svg.append("g")
 				.attr("class", "background-rectangles");
@@ -132,8 +142,16 @@ export function reusableLineChart() {
 				.attr("class", "status-line-label")
 				.attr("fill", "black")
 				.attr("text-anchor", "middle")
-				.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2},22)`)
-				.text(d => d.label);
+				.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2 + 10},22)`)
+				.text(d => getStatusLabelText(d))
+				.on("mouseover", function (d) {
+					if (isStatusLabelTruncated(d)) {
+						statusLabelTooltip.show(d, this);
+					}
+				})
+				.on("mouseout", function () {
+					statusLabelTooltip.hide();
+				});
 
 			const spentLineElementsGroup = svg.append("g")
 				.attr("class", "spent-line-elements");
@@ -386,6 +404,17 @@ export function reusableLineChart() {
 				}
 			}
 
+			function getStatusLabelText(d) {
+				const placeholderLength = xScale(d.endDate) - xScale(d.startDate) - 20;
+				return placeholderLength > d.label.length * SYMBOL_WIDTH
+					? d.label
+					: `${d.label.slice(0, placeholderLength / SYMBOL_WIDTH)}...`
+			}
+
+			function isStatusLabelTruncated(d) {
+				return xScale(d.endDate) - xScale(d.startDate) - 20 < d.label.length * SYMBOL_WIDTH;
+			}
+
 			function getTotalSpentCircleData(data) {
 				return data.filter(d => d.total_spent_to_date !== null);
 			}
@@ -632,14 +661,22 @@ export function reusableLineChart() {
 					.attr("class", "status-line-label")
 					.attr("fill", "black")
 					.attr("text-anchor", "middle")
-					.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2},22)`)
-					.text(d => d.label);
+					.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2 + 10},22)`)
+					.text(d => getStatusLabelText(d))
+					.on("mouseover", function (d) {
+						if (isStatusLabelTruncated(d)) {
+							statusLabelTooltip.show(d, this);
+						}
+					})
+					.on("mouseout", function () {
+						statusLabelTooltip.hide();
+					});
 
 				updatedStatusLabels
 					.transition()
 					.duration(1000)
-					.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2},22)`)
-					.text(d => d.label);
+					.attr("transform", d => `translate(${(xScale(d.startDate) + xScale(d.endDate)) / 2 + 10},22)`)
+					.text(d => getStatusLabelText(d));
 
 				updatedStatusLabels.exit()
 					.transition()

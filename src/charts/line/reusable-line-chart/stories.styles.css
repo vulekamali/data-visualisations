@@ -25,6 +25,11 @@
     display: flex;
     justify-content: space-between;
 }
+.d3-tip > .status-tooltip {
+    /*text-transform: uppercase;*/
+    /*font-family: sans-serif;*/
+    font-size:11px;
+}
 
 /* Style northward tooltips specifically */
 .d3-tip.n:after {

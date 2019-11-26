@@ -87,7 +87,7 @@ const secondData = [
 		"total_spent_to_date": 2769000,
 		"total_spent_in_quarter": 0,
 		"total_estimated_project_cost": 3650000,
-		"status": "Tender"
+		"status": "Other - Packaged Ongoing Project"
 	}
 ];
 
