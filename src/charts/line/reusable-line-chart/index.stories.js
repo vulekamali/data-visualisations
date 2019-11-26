@@ -30,7 +30,7 @@ const firstData = [
 		"total_spent_to_date": 1669000,
 		"total_spent_in_quarter": 0,
 		"total_estimated_project_cost": 3500000,
-		"status": "Tender"
+		"status": "Site Handed - Over to Contractor"
 	},
 	{
 		"date": "2019-06-30",
