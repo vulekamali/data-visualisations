@@ -11,14 +11,6 @@ import d3Tip from "d3-tip";
 
 const margin = {top: 50, right: 50, bottom: 80, left: 60};
 
-Object.defineProperty(Array.prototype, 'flat', {
-	value: function (depth = 1) {
-		return this.reduce(function (flat, toFlatten) {
-			return flat.concat((Array.isArray(toFlatten) && (depth - 1)) ? toFlatten.flat(depth - 1) : toFlatten);
-		}, []);
-	}
-});
-
 function processRawData(data) {
 	return data.map(d => {
 		return Object.assign(d, {
