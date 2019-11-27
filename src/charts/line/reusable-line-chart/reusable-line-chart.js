@@ -12,6 +12,14 @@ import d3Tip from "d3-tip";
 const margin = {top: 50, right: 50, bottom: 180, left: 60};
 const SYMBOL_WIDTH = 7.5;
 
+const LabelToSymbolMap = {
+	'project start date': '\uf04b',
+	'estimated construction start date': '~ \uf6e3 \uf04b',
+	'estimated project completion date': '~ \uf6e3 \uf0c8',
+	'contracted construction end date': '\uf304 \uf6e3 \uf0c8',
+	'estimated construction end date': '~ \uf6e3 \uf0c8',
+};
+
 function transformStringDatesToObjects(data) {
 	return data.map(d => {
 		return Object.assign(d, {
@@ -107,6 +115,7 @@ export function reusableLineChart() {
 			svg.call(spentCircleTooltip);
 			svg.call(totalCostCircleTooltip);
 			svg.call(statusLabelTooltip);
+			svg.call(eventTooltip);
 
 			const backgroundRectanglesGroup = svg.append("g")
 				.attr("class", "background-rectangles");
@@ -254,8 +263,10 @@ export function reusableLineChart() {
 				.attr("height", d => 20)
 				.attr("fill", (d, i) => 'rgb(51, 51, 51)')
 				.on("mouseover", function (d) {
+					eventTooltip.show(d, this);
 				})
 				.on("mouseout", function () {
+					eventTooltip.hide();
 				});
 
 			eventsElementsGroups.selectAll('text')
@@ -266,16 +277,8 @@ export function reusableLineChart() {
 				.attr("x", 30)
 				.attr("y", 15)
 				.attr('text-anchor', 'middle')
-				.attr("color", (d, i) => 'white')
-				.text(function (d) {
-					return '~ \uf04b \uf6e3 \uf0c8 \uf304'
-				})
+				.text(d => LabelToSymbolMap[d.label.toLowerCase()])
 				.style("font-weight", 900);
-
-			// .on("mouseover", function (d) {
-			// })
-			// .on("mouseout", function () {
-			// });
 
 			const xAxis = axisBottom(xScale)
 				.tickValues(xDomainValues)
