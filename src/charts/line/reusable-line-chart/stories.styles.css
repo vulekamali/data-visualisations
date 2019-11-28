@@ -1,7 +1,7 @@
 .container {
     border: 1px solid black;
     width: 850px;
-    height: 450px;
+    height: fit-content;
     margin-top: 50px;
     margin-left: 50px;
 }
@@ -132,3 +132,11 @@
     fill:white;
     pointer-events: none;
 }
+
+
+.event-elements-group > line{
+    stroke: rgba(0, 0, 0, 0.3);
+    stroke-width: 1px;
+    stroke-dasharray: 3;
+}
+
