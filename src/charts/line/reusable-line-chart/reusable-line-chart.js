@@ -157,16 +157,7 @@ export function reusableLineChart() {
                 .style("font-weight", 900);
 
             eventsElements.selectAll('.event-elements-group').each(function (d) {
-                const event = select(this);
-                const allEventsOnTheLeft = eventsElements.selectAll('.event-elements-group')
-                    .filter(function (eventData) {
-                        return d.date > eventData.date;
-                    });
-                while (isOverlapping(allEventsOnTheLeft, event)) {
-                    const currentEventTransformation = getTransformation(event.node());
-                    event.attr("transform", (d) => `translate(${currentEventTransformation.translateX},${currentEventTransformation.translateY + 21})`)
-                    margin.extraBottom = Math.max(margin.extraBottom, EVENTS_ROW_HEIGHT + currentEventTransformation.translateY + 21);
-                }
+                resolveEventOverlappin();
             });
 
             eventsElementsGroups.selectAll('line')
@@ -413,6 +404,21 @@ export function reusableLineChart() {
                 return result;
             }
 
+            function resolveEventOverlappin() {
+                eventsElements.selectAll('.event-elements-group').each(function (d) {
+                    const event = select(this);
+                    const allEventsOnTheLeft = eventsElements.selectAll('.event-elements-group')
+                        .filter(function (eventData) {
+                            return d.date >= eventData.date && d.label !== eventData.label;
+                        });
+                    while (isOverlapping(allEventsOnTheLeft, event)) {
+                        const currentEventTransformation = getTransformation(event.node());
+                        event.attr("transform", (d) => `translate(${currentEventTransformation.translateX},${currentEventTransformation.translateY + 21})`)
+                        margin.extraBottom = Math.max(margin.extraBottom, EVENTS_ROW_HEIGHT + currentEventTransformation.translateY + 21);
+                    }
+                });
+            }
+
             function getTransformation(node) {
                 const matrix = node.transform.baseVal.consolidate().matrix;
                 return {
@@ -653,6 +659,94 @@ export function reusableLineChart() {
 
                 xScale.domain([newMinXDomainValue, max(xDomainValues)]);
                 xAxis.scale(xScale).tickValues(xDomainValues);
+
+
+                if (events && events.length > 0) {
+                    margin.extraBottom = EVENTS_ROW_HEIGHT;
+                } else {
+                    margin.extraBottom = 0;
+                }
+
+                const eventsElementsGroups = eventsElements.selectAll('.event-elements-group').data(events);
+
+                eventsElementsGroups
+                    .enter()
+                    .append("g")
+                    .attr("transform", (d) => `translate(${xScale(d.date)},0)`)
+                    .attr('class', 'event-elements-group');
+
+                eventsElementsGroups
+                    .attr("transform", (d) => `translate(${xScale(d.date)},0)`);
+
+                eventsElementsGroups.exit()
+                    .remove();
+
+                const eventsRectangles = eventsElements.selectAll('.event-elements-group').selectAll('rect').data(d => [d]);
+
+                eventsRectangles.enter()
+                    .append('rect')
+                    .attr('class', 'event-rect')
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("rx", 5)
+                    .attr("ry", 5)
+                    .attr("width", 60)
+                    .attr("height", d => 20)
+                    .attr("fill", (d, i) => 'rgb(51, 51, 51)')
+                    .on("mouseover", function (d) {
+                        eventTooltip.show(d, this);
+                    })
+                    .on("mouseout", function () {
+                        eventTooltip.hide();
+                    });
+                eventsRectangles.exit()
+                    .remove();
+
+                const eventsText = eventsElements.selectAll('.event-elements-group').selectAll('text').data(d => [d]);
+
+                eventsText.enter()
+                    .append('text')
+                    .attr('class', 'event-text')
+                    .attr("x", 30)
+                    .attr("y", 15)
+                    .attr('text-anchor', 'middle')
+                    .text(d => LabelToSymbolMap[d.label.toLowerCase()])
+                    .style("font-weight", 900);
+
+                eventsText
+                    .text(d => LabelToSymbolMap[d.label.toLowerCase()]);
+
+                eventsText.exit()
+                    .remove();
+
+                eventsElements.selectAll('.event-elements-group').each(function (d) {
+                    resolveEventOverlappin();
+                });
+
+                const eventsLine = eventsElements.selectAll('.event-elements-group').selectAll('line').data(d => [d]);
+
+                eventsLine.enter()
+                    .append('line')
+                    .attr('x1', 30)
+                    .attr('y1', 0)
+                    .attr('x2', 30)
+                    .attr('y2', function () {
+                        const gTransformation = getTransformation(select(this).node().parentNode);
+                        return -(height - margin.bottom + 50 - margin.top + gTransformation.translateY);
+                    });
+
+                eventsLine
+                    .attr('y2', function () {
+                        const gTransformation = getTransformation(select(this).node().parentNode);
+                        return -(height - margin.bottom + 50 - margin.top + gTransformation.translateY);
+                    });
+
+                eventsLine.exit()
+                    .remove();
+
+                eventsElements.attr("transform", `translate(0,${(height - margin.bottom + 50)})`);
+                svg.attr("height", height + margin.extraBottom);
+                legend.attr("transform", (d, i) => `translate(${i * 200 + 60},${height + margin.extraBottom - 20})`);
 
                 yDomainValues = getYDomainValues(data);
                 yScale.domain([0, max(yDomainValues)]).nice();
