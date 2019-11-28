@@ -53,11 +53,11 @@ const firstData = {
             "label": "Estimated Construction Start Date"
         },
         {
-            "date": "2018-10-01",
+            "date": "2018-10-10",
             "label": "Estimated Project Completion Date"
         },
         {
-            "date": "2018-10-19",
+            "date": "2018-10-30",
             "label": "Contracted Construction End Date"
         },
         {
