@@ -1041,6 +1041,19 @@ export function reusableLineChart() {
         return chart;
     };
 
+    chart.eventTooltipFormatter = function (value) {
+        if (!arguments.length) {
+            return eventTooltipFormatter
+        } else {
+            if (value == null) {
+                eventTooltipFormatter = initialConfiguration.eventTooltipFormatter;
+            } else {
+                eventTooltipFormatter = value;
+            }
+            return chart;
+        }
+    };
+
     return chart;
 }
 

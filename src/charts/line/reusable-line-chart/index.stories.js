@@ -282,7 +282,9 @@ export const MissingSpentData = () => {
     const myChart = reusableLineChart();
 
     select(container)
-        .call(myChart.data(secondData));
+        .call(myChart
+            .data(secondData)
+            .eventTooltipFormatter(d => `<div class="status-tooltip">Event: ${d.label}</div>`));
 
     return container;
 };
