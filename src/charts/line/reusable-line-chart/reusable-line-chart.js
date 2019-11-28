@@ -31,7 +31,7 @@ export function reusableLineChart() {
 
     let initialConfiguration = {
         width: 850,
-        height: 550,
+        height: 450,
         spentCircleTooltipFormatter: (d) => {
             return `<div><span class="tooltip-label">Total spent:</span>&nbsp;&nbsp;<span class="tooltip-value">${d.data.total_spent_to_date ? "R" + format(",d")(d.data.total_spent_to_date) : 0}</span></div>
 					<div><span class="tooltip-label">Spent in quarter:</span>&nbsp;&nbsp;<span class="tooltip-value">${d.data.total_spent_in_quarter ? "R" + format(",d")(d.data.total_spent_in_quarter) : 0}</span></div>`;
@@ -65,8 +65,6 @@ export function reusableLineChart() {
             let minimalXDomainValue = min(xDomainValues);
             let newMinXDomainValue = new Date(minimalXDomainValue).setMonth(minimalXDomainValue.getMonth() - 3);
             let yDomainValues = getYDomainValues(data);
-            const xScaleLength = width - margin.right - margin.left;
-            const yScaleLength = height - margin.bottom - margin.extraBottom - margin.top;
 
             const xScale = scaleTime()
                 .domain([newMinXDomainValue, max(xDomainValues)])
@@ -75,7 +73,6 @@ export function reusableLineChart() {
             const svg = selection.append("svg")
                 .attr("width", width)
                 .attr("height", height)
-                .append("g");
 
             const spentCircleTooltip = d3Tip()
                 .attr("class", "d3-tip")
@@ -114,7 +111,7 @@ export function reusableLineChart() {
 
             const eventsElements = svg.append("g")
                 .attr("class", "events-elements")
-                .attr("transform", `translate(0,${(height - margin.bottom + 50)})`);
+                .attr("transform", `translate(0,${(height - 30)})`);
 
             const eventsElementsGroups = eventsElements
                 .selectAll("g")
@@ -179,12 +176,15 @@ export function reusableLineChart() {
                     return -(height - margin.bottom + 50 - margin.top + gTransformation.translateY);
                 });
 
-            eventsElements.attr("transform", `translate(0,${(height - margin.bottom - margin.extraBottom + 50)})`);
+            eventsElements.attr("transform", `translate(0,${(height - margin.bottom + 50)})`);
+            svg.attr("height", height + margin.extraBottom);
 
             const yScale = scaleLinear()
                 .domain([0, max(yDomainValues)])
-                .range([height - margin.bottom - margin.extraBottom, margin.top])
+                .range([height - margin.bottom, margin.top])
                 .nice();
+            const xScaleLength = width - margin.right - margin.left;
+            const yScaleLength = height - margin.bottom - margin.top;
 
             const backgroundRectanglesGroup = svg.append("g")
                 .attr("class", "background-rectangles");
@@ -315,7 +315,7 @@ export function reusableLineChart() {
 
             const gXAxis = svg.append("g")
                 .attr("class", "x axis")
-                .attr("transform", `translate(0,${(height - margin.bottom - margin.extraBottom)})`)
+                .attr("transform", `translate(0,${(height - margin.bottom)})`)
                 .call(xAxis);
             applyAxisStyle(gXAxis);
 
@@ -370,7 +370,7 @@ export function reusableLineChart() {
                 .enter()
                 .append('g')
                 .attr("class", "legend")
-                .attr("transform", (d, i) => `translate(${i * 200 + 60},${height - 20})`);
+                .attr("transform", (d, i) => `translate(${i * 200 + 60},${height + margin.extraBottom - 20})`);
 
             legend.call(appendLegendItem);
 
@@ -394,7 +394,6 @@ export function reusableLineChart() {
                     .attr("y", 15)
                     .text(d => d.label)
                     .style("text-anchor", "start");
-
             }
 
             function isOverlapping(allEventsOnTheLeft, currentEvent) {
