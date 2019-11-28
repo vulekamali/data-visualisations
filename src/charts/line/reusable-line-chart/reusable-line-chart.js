@@ -11,6 +11,8 @@ import d3Tip from "d3-tip";
 
 const SYMBOL_WIDTH = 7.5;
 
+const EVENTS_ROW_HEIGHT = 25;
+
 const LabelToSymbolMap = {
     'project start date': '\uf04b',
     'estimated construction start date': '~ \uf6e3 \uf04b',
@@ -57,7 +59,7 @@ export function reusableLineChart() {
         eventTooltipFormatter = initialConfiguration.eventTooltipFormatter;
     let updateData = null;
     let correspondingSpentLineCircle, correspondingTotalCostCircle = null;
-    const margin = {top: 50, right: 50, bottom: 100, left: 60, extraBottom: 0};
+    const margin = {top: 50, right: 50, bottom: 70, left: 60, extraBottom: 0};
 
     function chart(selection) {
         selection.each(function () {
@@ -72,7 +74,7 @@ export function reusableLineChart() {
 
             const svg = selection.append("svg")
                 .attr("width", width)
-                .attr("height", height)
+                .attr("height", height);
 
             const spentCircleTooltip = d3Tip()
                 .attr("class", "d3-tip")
@@ -109,6 +111,9 @@ export function reusableLineChart() {
             svg.call(statusLabelTooltip);
             svg.call(eventTooltip);
 
+            if (events && events.length > 0) {
+                margin.extraBottom = EVENTS_ROW_HEIGHT;
+            }
             const eventsElements = svg.append("g")
                 .attr("class", "events-elements")
                 .attr("transform", `translate(0,${(height - 30)})`);
@@ -160,7 +165,7 @@ export function reusableLineChart() {
                 while (isOverlapping(allEventsOnTheLeft, event)) {
                     const currentEventTransformation = getTransformation(event.node());
                     event.attr("transform", (d) => `translate(${currentEventTransformation.translateX},${currentEventTransformation.translateY + 21})`)
-                    margin.extraBottom = Math.max(margin.extraBottom, currentEventTransformation.translateY + 21);
+                    margin.extraBottom = Math.max(margin.extraBottom, EVENTS_ROW_HEIGHT + currentEventTransformation.translateY + 21);
                 }
             });
 
@@ -373,7 +378,6 @@ export function reusableLineChart() {
                 .attr("transform", (d, i) => `translate(${i * 200 + 60},${height + margin.extraBottom - 20})`);
 
             legend.call(appendLegendItem);
-
 
             function appendLegendItem(selection) {
                 selection.append('rect')
@@ -652,8 +656,7 @@ export function reusableLineChart() {
 
                 yDomainValues = getYDomainValues(data);
                 yScale.domain([0, max(yDomainValues)]).nice();
-                console.log(margin.extraBottom);
-                yScale.range([height - margin.bottom - margin.extraBottom, margin.top]);
+                yScale.range([height - margin.bottom, margin.top]);
                 yAxis.scale(yScale);
                 yAxisGrid.scale(yScale);
 
