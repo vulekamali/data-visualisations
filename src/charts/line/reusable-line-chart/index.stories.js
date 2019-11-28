@@ -114,6 +114,28 @@ const secondData = {
 			"total_estimated_project_cost": 3650000,
 			"status": "Other - Packaged Ongoing Project"
 		}
+	],
+	events: [
+		{
+			"date": "2018-07-20",
+			"label": "Project Start Date"
+		},
+		{
+			"date": "2018-10-20",
+			"label": "Estimated Construction Start Date"
+		},
+		{
+			"date": "2018-12-21",
+			"label": "Estimated Project Completion Date"
+		},
+		{
+			"date": "2019-03-19",
+			"label": "Contracted Construction End Date"
+		},
+		{
+			"date": "2019-05-15",
+			"label": "Estimated Construction End Date"
+		}
 	]
 };
 

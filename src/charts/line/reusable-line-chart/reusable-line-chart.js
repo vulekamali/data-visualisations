@@ -9,7 +9,6 @@ import {format} from 'd3-format';
 import {line} from 'd3-shape';
 import d3Tip from "d3-tip";
 
-const margin = {top: 50, right: 50, bottom: 180, left: 60};
 const SYMBOL_WIDTH = 7.5;
 
 const LabelToSymbolMap = {
@@ -58,6 +57,7 @@ export function reusableLineChart() {
         eventTooltipFormatter = initialConfiguration.eventTooltipFormatter;
     let updateData = null;
     let correspondingSpentLineCircle, correspondingTotalCostCircle = null;
+    const margin = {top: 50, right: 50, bottom: 100, left: 60, extraBottom: 0};
 
     function chart(selection) {
         selection.each(function () {
@@ -66,16 +66,11 @@ export function reusableLineChart() {
             let newMinXDomainValue = new Date(minimalXDomainValue).setMonth(minimalXDomainValue.getMonth() - 3);
             let yDomainValues = getYDomainValues(data);
             const xScaleLength = width - margin.right - margin.left;
-            const yScaleLength = height - margin.bottom - margin.top;
+            const yScaleLength = height - margin.bottom - margin.extraBottom - margin.top;
 
             const xScale = scaleTime()
                 .domain([newMinXDomainValue, max(xDomainValues)])
                 .range([margin.left, width - margin.right]);
-
-            const yScale = scaleLinear()
-                .domain([0, max(yDomainValues)])
-                .range([height - margin.bottom, margin.top])
-                .nice();
 
             const svg = selection.append("svg")
                 .attr("width", width)
@@ -116,6 +111,80 @@ export function reusableLineChart() {
             svg.call(totalCostCircleTooltip);
             svg.call(statusLabelTooltip);
             svg.call(eventTooltip);
+
+            const eventsElements = svg.append("g")
+                .attr("class", "events-elements")
+                .attr("transform", `translate(0,${(height - margin.bottom + 50)})`);
+
+            const eventsElementsGroups = eventsElements
+                .selectAll("g")
+                .data(events)
+                .enter()
+                .append("g")
+                .attr("transform", (d) => `translate(${xScale(d.date)},0)`)
+                .attr('class', 'event-elements-group');
+
+            eventsElementsGroups.selectAll('rect')
+                .data(d => [d])
+                .enter()
+                .append('rect')
+                .attr('class', 'event-rect')
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("rx", 5)
+                .attr("ry", 5)
+                .attr("width", 60)
+                .attr("height", d => 20)
+                .attr("fill", (d, i) => 'rgb(51, 51, 51)')
+                .on("mouseover", function (d) {
+                    eventTooltip.show(d, this);
+                })
+                .on("mouseout", function () {
+                    eventTooltip.hide();
+                });
+
+            eventsElementsGroups.selectAll('text')
+                .data(d => [d])
+                .enter()
+                .append('text')
+                .attr('class', 'event-text')
+                .attr("x", 30)
+                .attr("y", 15)
+                .attr('text-anchor', 'middle')
+                .text(d => LabelToSymbolMap[d.label.toLowerCase()])
+                .style("font-weight", 900);
+
+            eventsElements.selectAll('.event-elements-group').each(function (d) {
+                const event = select(this);
+                const allEventsOnTheLeft = eventsElements.selectAll('.event-elements-group')
+                    .filter(function (eventData) {
+                        return d.date > eventData.date;
+                    });
+                while (isOverlapping(allEventsOnTheLeft, event)) {
+                    const currentEventTransformation = getTransformation(event.node());
+                    event.attr("transform", (d) => `translate(${currentEventTransformation.translateX},${currentEventTransformation.translateY + 21})`)
+                    margin.extraBottom = Math.max(margin.extraBottom, currentEventTransformation.translateY + 21);
+                }
+            });
+
+            eventsElementsGroups.selectAll('line')
+                .data(d => [d])
+                .enter()
+                .append('line')
+                .attr('x1', 30)
+                .attr('y1', 0)
+                .attr('x2', 30)
+                .attr('y2', function () {
+                    const gTransformation = getTransformation(select(this).node().parentNode);
+                    return -(height - margin.bottom + 50 - margin.top + gTransformation.translateY);
+                });
+
+            eventsElements.attr("transform", `translate(0,${(height - margin.bottom - margin.extraBottom + 50)})`);
+
+            const yScale = scaleLinear()
+                .domain([0, max(yDomainValues)])
+                .range([height - margin.bottom - margin.extraBottom, margin.top])
+                .nice();
 
             const backgroundRectanglesGroup = svg.append("g")
                 .attr("class", "background-rectangles");
@@ -238,72 +307,6 @@ export function reusableLineChart() {
                     totalCostCircleTooltip.hide();
                 });
 
-            const eventsElements = svg.append("g")
-                .attr("class", "events-elements")
-                .attr("transform", `translate(0,${(height - margin.bottom + 50)})`);
-
-            const eventsElementsGroups = eventsElements
-                .selectAll("g")
-                .data(events)
-                .enter()
-                .append("g")
-                .attr("transform", (d) => `translate(${xScale(d.date)},0)`)
-                .attr('class', 'event-elements-group');
-
-            eventsElementsGroups.selectAll('rect')
-                .data(d => [d])
-                .enter()
-                .append('rect')
-                .attr('class', 'event-rect')
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("rx", 5)
-                .attr("ry", 5)
-                .attr("width", 60)
-                .attr("height", d => 20)
-                .attr("fill", (d, i) => 'rgb(51, 51, 51)')
-                .on("mouseover", function (d) {
-                    eventTooltip.show(d, this);
-                })
-                .on("mouseout", function () {
-                    eventTooltip.hide();
-                });
-
-            eventsElementsGroups.selectAll('text')
-                .data(d => [d])
-                .enter()
-                .append('text')
-                .attr('class', 'event-text')
-                .attr("x", 30)
-                .attr("y", 15)
-                .attr('text-anchor', 'middle')
-                .text(d => LabelToSymbolMap[d.label.toLowerCase()])
-                .style("font-weight", 900);
-
-            eventsElements.selectAll('.event-elements-group').each(function (d) {
-                const event = select(this);
-                const allEventsOnTheLeft = eventsElements.selectAll('.event-elements-group')
-                    .filter(function (eventData) {
-                        return d.date > eventData.date;
-                    });
-                while (isOverlapping(allEventsOnTheLeft, event)) {
-                    const currentEventTransformation = getTransformation(event.node());
-                    event.attr("transform", (d) => `translate(${currentEventTransformation.translateX},${currentEventTransformation.translateY + 21})`)
-                }
-            });
-
-            eventsElementsGroups.selectAll('line')
-                .data(d => [d])
-                .enter()
-                .append('line')
-                .attr('x1', 30)
-                .attr('y1', 0)
-                .attr('x2', 30)
-                .attr('y2', function(){
-                    const gTransformation = getTransformation(select(this).node().parentNode);
-                    return -(height - margin.bottom + 50-margin.top + gTransformation.translateY);
-                });
-
             const xAxis = axisBottom(xScale)
                 .tickValues(xDomainValues)
                 .tickFormat('')
@@ -312,7 +315,7 @@ export function reusableLineChart() {
 
             const gXAxis = svg.append("g")
                 .attr("class", "x axis")
-                .attr("transform", `translate(0,${(height - margin.bottom)})`)
+                .attr("transform", `translate(0,${(height - margin.bottom - margin.extraBottom)})`)
                 .call(xAxis);
             applyAxisStyle(gXAxis);
 
@@ -367,7 +370,7 @@ export function reusableLineChart() {
                 .enter()
                 .append('g')
                 .attr("class", "legend")
-                .attr("transform", (d, i) => `translate(${i * 200 + 60},${height - 50})`);
+                .attr("transform", (d, i) => `translate(${i * 200 + 60},${height - 20})`);
 
             legend.call(appendLegendItem);
 
@@ -650,6 +653,8 @@ export function reusableLineChart() {
 
                 yDomainValues = getYDomainValues(data);
                 yScale.domain([0, max(yDomainValues)]).nice();
+                console.log(margin.extraBottom);
+                yScale.range([height - margin.bottom - margin.extraBottom, margin.top]);
                 yAxis.scale(yScale);
                 yAxisGrid.scale(yScale);
 
