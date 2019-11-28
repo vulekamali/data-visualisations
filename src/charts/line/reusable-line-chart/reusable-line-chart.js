@@ -280,6 +280,18 @@ export function reusableLineChart() {
 				.text(d => LabelToSymbolMap[d.label.toLowerCase()])
 				.style("font-weight", 900);
 
+			eventsElements.selectAll('.event-elements-group').each(function (d) {
+				const event = select(this);
+				const allEventsOnTheLeft = eventsElements.selectAll('.event-elements-group')
+					.filter(function (eventData) {
+						return d.date > eventData.date;
+					});
+				while (isOverlapping(allEventsOnTheLeft, event)) {
+					const currentEventTransformation = getTransformation(event.node());
+					event.attr("transform", (d) => `translate(${currentEventTransformation.translateX},${currentEventTransformation.translateY + 21})`)
+				}
+			});
+
 			const xAxis = axisBottom(xScale)
 				.tickValues(xDomainValues)
 				.tickFormat('')
@@ -368,6 +380,27 @@ export function reusableLineChart() {
 					.text(d => d.label)
 					.style("text-anchor", "start");
 
+			}
+
+			function isOverlapping(allEventsOnTheLeft, currentEvent) {
+				let result = false;
+				allEventsOnTheLeft.each(function (filteredEventData) {
+					const currentEventTransformation = getTransformation(currentEvent.node());
+					const leftEventTransformation = getTransformation(select(this).node());
+					if (currentEventTransformation.translateY === leftEventTransformation.translateY
+						&& currentEventTransformation.translateX - leftEventTransformation.translateX < 60) {
+						result = true;
+					}
+				});
+				return result;
+			}
+
+			function getTransformation(node) {
+				const matrix = node.transform.baseVal.consolidate().matrix;
+				return {
+					translateX: matrix.e,
+					translateY: matrix.f,
+				};
 			}
 
 			function getXDomainValues(data) {
