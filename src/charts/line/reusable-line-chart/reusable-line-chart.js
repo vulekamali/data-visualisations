@@ -26,7 +26,7 @@ export function reusableLineChart() {
     width: 850,
     height: 450,
     spentCircleTooltipFormatter: (d) => `<div>\
-<span class="tooltip-label">\Total spent:</span>&nbsp;&nbsp;\
+<span class="tooltip-label">Total spent:</span>&nbsp;&nbsp;\
 <span class="tooltip-value">${humaniseRand(d.data.total_spent_to_date)}</span>\
 </div>
 <div>\
