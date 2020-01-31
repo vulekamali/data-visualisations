@@ -12,11 +12,16 @@
     "@babel/core": "^7.7.2",
     "@babel/preset-env": "^7.7.1",
     "@storybook/html": "^5.2.6",
-    "babel-loader": "^8.0.6"
+    "babel-loader": "^8.0.6",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
   },
   "scripts": {
     "storybook": "start-storybook",
-    "build-storybook": "build-storybook -c .storybook"
+    "build-storybook": "build-storybook -c .storybook",
+    "lint": "eslint --ext .js src",
+    "lint-fix": "eslint --fix --ext .js src"
   },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
