@@ -1,0 +1,7 @@
+language: node_js
+node_js:
+  - 12
+
+script:
+  - yarn build-storybook
+  - yarn lint; exit 0 # Just log for now, don't fail builds yet.

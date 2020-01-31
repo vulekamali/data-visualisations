@@ -1,2 +1,4 @@
 \.*.sw[a-z]
 node_modules
+storybook-static/
+yarn-error.log

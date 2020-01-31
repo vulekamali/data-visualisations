@@ -9,32 +9,41 @@ The production storybook version can be seen at https://vulekamali-viz.netlify.c
 
 See the checks section in pull requests for links to Deploy Previews which show storybook builds for that branch. This is what we use to verify things still work before approving pull requests.
 
+
 Required browser support:
 
-```
     "last 12 chrome versions",
     "last 12 firefox versions",
     "last 6 safari versions",
     "explorer >= 11",
     "edge > 0"
-```
+
+
+Style guide: [Airbnb](https://github.com/airbnb/javascript)
 
 Keep `yarn.lock` updated in version control to ensure we're testing and dev-ing on the same dependency versions.
 
+
 Installing dependencies:
 
-```
-yarn
-```
+    yarn
+
 
 Running storybook locally for development:
 
-```
-yarn storybook
-```
+    yarn storybook
+
 
 Producing a static build, e.g. what's used for netlify deploy previews:
 
-```
-yarn build-storybook
-```
+    yarn build-storybook
+
+
+Linting
+
+    yarn lint
+
+
+Fixing linting errors
+
+    yarn lint-fix
