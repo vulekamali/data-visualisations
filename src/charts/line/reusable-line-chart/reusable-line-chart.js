@@ -1,5 +1,4 @@
 import { transition } from 'd3-transition';
-
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { easeLinear } from 'd3-ease';
@@ -8,6 +7,8 @@ import { select } from 'd3-selection';
 import { format } from 'd3-format';
 import { line } from 'd3-shape';
 import d3Tip from 'd3-tip';
+import { humaniseRand } from '../../../util';
+
 
 const margin = {
   top: 50, right: 50, bottom: 80, left: 60,
@@ -24,9 +25,18 @@ export function reusableLineChart() {
   const initialConfiguration = {
     width: 850,
     height: 450,
-    spentCircleTooltipFormatter: (d) => `<div><span class="tooltip-label">Total spent:</span>&nbsp;&nbsp;<span class="tooltip-value">${d.data.total_spent_to_date ? `R${format(',d')(d.data.total_spent_to_date)}` : 0}</span></div>
-					<div><span class="tooltip-label">Spent in quarter:</span>&nbsp;&nbsp;<span class="tooltip-value">${d.data.total_spent_in_quarter ? `R${format(',d')(d.data.total_spent_in_quarter)}` : 0}</span></div>`,
-    totalCostCircleTooltipFormatter: (d) => `<div><span class="tooltip-label">Total project cost:</span>&nbsp;<span class="tooltip-value">${d.data.total_estimated_project_cost ? `R${format('.3s')(d.data.total_estimated_project_cost)}` : 0}</span></div>`,
+    spentCircleTooltipFormatter: (d) => `<div>\
+<span class="tooltip-label">Total spent:</span>&nbsp;&nbsp;\
+<span class="tooltip-value">${humaniseRand(d.data.total_spent_to_date)}</span>\
+</div>
+<div>\
+<span class="tooltip-label">Spent in quarter:</span>&nbsp;&nbsp;\
+<span class="tooltip-value">${humaniseRand(d.data.total_spent_in_quarter)}</span>\
+</div>`,
+    totalCostCircleTooltipFormatter: (d) => `<div>\
+<span class="tooltip-label">Total project cost:</span>&nbsp;\
+<span class="tooltip-value">${humaniseRand(d.data.total_estimated_project_cost)}</span>\
+</div>`,
     statusLabelTooltipFormatter: (d) => `<div class="status-tooltip">${d.label}</div>`,
   };
 
@@ -239,7 +249,7 @@ export function reusableLineChart() {
 
       const yAxis = axisLeft(yScale)
         .ticks(4)
-        .tickFormat((d) => (d !== 0 ? `R${format('~s')(d)}` : ''))
+        .tickFormat((d) => (d !== 0 ? `${humaniseRand(d, false)}` : ''))
         .tickSizeInner(5)
         .tickSizeOuter(0);
 
