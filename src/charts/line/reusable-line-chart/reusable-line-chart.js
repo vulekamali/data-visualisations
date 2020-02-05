@@ -270,12 +270,12 @@ export function reusableLineChart() {
         .selectAll('legend')
         .data([
           { label: 'Estimated total project cost', 'stroke-dasharray': '4 5' },
-          { label: 'Actual quarterly spend' },
+          { label: 'Quarterly actual spend' },
         ])
         .enter()
         .append('g')
         .attr('class', 'legend')
-        .attr('transform', (d, i) => `translate(${i * 200 + 60},${height - 30})`);
+        .attr('transform', (d, i) => `translate(${i * 230 + 60},${height - 30})`);
 
       legend.call(appendLegendItem);
 
