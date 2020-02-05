@@ -269,8 +269,8 @@ export function reusableLineChart() {
       const legend = svg
         .selectAll('legend')
         .data([
-          { label: 'actual quaterly spend', 'stroke-dasharray': '4 5' },
-          { label: 'total estimated project cost' },
+          { label: 'Estimated total project cost', 'stroke-dasharray': '4 5' },
+          { label: 'Actual quarterly spend' },
         ])
         .enter()
         .append('g')
