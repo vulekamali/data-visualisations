@@ -270,7 +270,7 @@ export function reusableLineChart() {
         .selectAll('legend')
         .data([
           { label: 'Estimated total project cost', 'stroke-dasharray': '4 5' },
-          { label: 'Actual quaterly spend' },
+          { label: 'Actual quarterly spend' },
         ])
         .enter()
         .append('g')
