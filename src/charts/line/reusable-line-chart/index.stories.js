@@ -204,61 +204,61 @@ const minifiedData = [{
   status: null,
 }];
 
-const offTheChartData =  [
+const offTheChartData = [
   {
-    "date": "2018-06-30",
-    "financial_year_label": "2018-19",
-    "quarter_label": "END Q1",
-    "status": null,
-    "total_estimated_project_cost": null,
-    "total_spent_in_quarter": "9432644.00",
-    "total_spent_to_date": "333179874.00"
+    date: '2018-06-30',
+    financial_year_label: '2018-19',
+    quarter_label: 'END Q1',
+    status: null,
+    total_estimated_project_cost: null,
+    total_spent_in_quarter: '9432644.00',
+    total_spent_to_date: '333179874.00',
   },
   {
-    "date": "2018-09-30",
-    "financial_year_label": "",
-    "quarter_label": "END Q2",
-    "status": null,
-    "total_estimated_project_cost": null,
-    "total_spent_in_quarter": "5157829.00",
-    "total_spent_to_date": "338337703.00"
+    date: '2018-09-30',
+    financial_year_label: '',
+    quarter_label: 'END Q2',
+    status: null,
+    total_estimated_project_cost: null,
+    total_spent_in_quarter: '5157829.00',
+    total_spent_to_date: '338337703.00',
   },
   {
-    "date": "2018-12-31",
-    "financial_year_label": "",
-    "quarter_label": "END Q3",
-    "status": null,
-    "total_estimated_project_cost": null,
-    "total_spent_in_quarter": "12848327.00",
-    "total_spent_to_date": "351186030.00"
+    date: '2018-12-31',
+    financial_year_label: '',
+    quarter_label: 'END Q3',
+    status: null,
+    total_estimated_project_cost: null,
+    total_spent_in_quarter: '12848327.00',
+    total_spent_to_date: '351186030.00',
   },
   {
-    "date": "2019-03-31",
-    "financial_year_label": "",
-    "quarter_label": "END Q4",
-    "status": "Construction 26% - 50%",
-    "total_estimated_project_cost": "3016689000.00",
-    "total_spent_in_quarter": "-5658287.00",
-    "total_spent_to_date": "345527743.00"
+    date: '2019-03-31',
+    financial_year_label: '',
+    quarter_label: 'END Q4',
+    status: 'Construction 26% - 50%',
+    total_estimated_project_cost: '3016689000.00',
+    total_spent_in_quarter: '-5658287.00',
+    total_spent_to_date: '345527743.00',
   },
   {
-    "date": "2019-06-30",
-    "financial_year_label": "2019-20",
-    "quarter_label": "END Q1",
-    "status": "Construction 26% - 50%",
-    "total_estimated_project_cost": "3016689000.00",
-    "total_spent_in_quarter": "633809.00",
-    "total_spent_to_date": "346161552.00"
+    date: '2019-06-30',
+    financial_year_label: '2019-20',
+    quarter_label: 'END Q1',
+    status: 'Construction 26% - 50%',
+    total_estimated_project_cost: '3016689000.00',
+    total_spent_in_quarter: '633809.00',
+    total_spent_to_date: '346161552.00',
   },
   {
-    "date": "2019-09-30",
-    "financial_year_label": "",
-    "quarter_label": "END Q2",
-    "status": "Construction 26% - 50%",
-    "total_estimated_project_cost": "3016689000.00",
-    "total_spent_in_quarter": "26351489.00",
-    "total_spent_to_date": "372513041.00"
-  }
+    date: '2019-09-30',
+    financial_year_label: '',
+    quarter_label: 'END Q2',
+    status: 'Construction 26% - 50%',
+    total_estimated_project_cost: '3016689000.00',
+    total_spent_in_quarter: '26351489.00',
+    total_spent_to_date: '372513041.00',
+  },
 ];
 
 export const MockupData = () => {

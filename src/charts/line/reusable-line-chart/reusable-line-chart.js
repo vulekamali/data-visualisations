@@ -62,7 +62,6 @@ export function reusableLineChart() {
       const xScale = scaleTime()
         .domain([newMinXDomainValue, max(xDomainValues)])
         .range([margin.left, width - margin.right]);
-
       const yScale = scaleLinear()
         .domain([0, max(yDomainValues)])
         .range([height - margin.bottom, margin.top])
@@ -309,7 +308,10 @@ export function reusableLineChart() {
       }
 
       function getYDomainValues(data) {
-        return data.map((group) => [group.total_spent_to_date, group.total_estimated_project_cost]).flat()
+        return data.map((group) => [
+          parseFloat(group.total_spent_to_date),
+          parseFloat(group.total_estimated_project_cost),
+        ]).flat()
           .sort((a, b) => a - b);
       }
 
