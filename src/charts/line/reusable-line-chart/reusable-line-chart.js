@@ -415,8 +415,8 @@ export function reusableLineChart() {
 
       function getTotalСostLineData(data) {
         const result = [];
-        if (data && data.length > 0) {
-          const firstNonNullPointIndex = data.findIndex((d) => d.total_estimated_project_cost !== null);
+        const firstNonNullPointIndex = data.findIndex((d) => d.total_estimated_project_cost !== null);
+        if (data && data.length > 0 && firstNonNullPointIndex >= 0) {
           const firstPoint = {
             date: xScale.domain()[0],
             total_estimated_project_cost: data[firstNonNullPointIndex].total_estimated_project_cost,

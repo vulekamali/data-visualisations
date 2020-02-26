@@ -261,6 +261,45 @@ const offTheChartData = [
   },
 ];
 
+const noTotalProjectCostData = [
+  {
+    date: '2018-09-30',
+    quarter_label: 'END Q2',
+    financial_year_label: '2018-19',
+    total_spent_to_date: 900000,
+    total_spent_in_quarter: 350000,
+    total_estimated_project_cost: null,
+    status: 'Feasibility',
+  },
+  {
+    date: '2018-12-31',
+    quarter_label: 'END Q3',
+    financial_year_label: '',
+    total_spent_to_date: 1669000,
+    total_spent_in_quarter: 689000,
+    total_estimated_project_cost: null,
+    status: 'Feasibility',
+  },
+  {
+    date: '2019-03-31',
+    quarter_label: 'END Q4',
+    financial_year_label: '',
+    total_spent_to_date: 1669000,
+    total_spent_in_quarter: 0,
+    total_estimated_project_cost: null,
+    status: 'Site Handed - Over to Contractor',
+  },
+  {
+    date: '2019-06-30',
+    quarter_label: 'END Q1',
+    financial_year_label: '2019-20',
+    total_spent_to_date: 2769000,
+    total_spent_in_quarter: 1100000,
+    total_estimated_project_cost: null,
+    status: null,
+  },
+];
+
 export const MockupData = () => {
   const container = document.createElement('div');
   container.classList.add('container');
@@ -357,5 +396,17 @@ export const OffTheChart = () => {
     .call(myChart.data(offTheChartData));
 
   myChart.width(600).height(450);
+  return container;
+};
+
+export const NoTotalProjectCost = () => {
+  const container = document.createElement('div');
+  container.classList.add('container');
+
+  const myChart = reusableLineChart();
+
+  select(container)
+    .call(myChart.data(noTotalProjectCostData));
+
   return container;
 };
