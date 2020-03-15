@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <title>D3 Horizonal Bar Chart</title>
+        <link rel="stylesheet" href="horizontal-bar-chart.css">
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script src="horizontal-bar-chart.js"></script>
+        <style>
+            html, body{
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+            }
+            #chart{
+                position: relative;
+                margin: 50px auto;
+                width: 40%;
+                height: auto;
+                font-family:'Courier New', Courier, monospace;
+            }
+        </style>
+    </head>
+    <body>
+       <div id="chart"></div>
+       <script>
+           var data = [
+                { country: "Italy", city: "Milano", name: "Option E", value: 1560000000, more_url:"https://municipalmoney.gov.za/profiles/municipality-NMA"},
+                { country: "Italy", city: "Rome", name: "Option A", value: 1070000000},
+                { country: "United States", city: "New York", name: "Option B", value: 3100000000},
+                { country: "United States", city: "Washington", name: "Option C", value: 6350000000},
+                { country: "Italy", city: "Milano", name: "Option D", value: 2380000000 }
+           ];
+           /*
+            width: 500,
+            marginLeft: 100,
+            barHeight: 20,
+            barSpace: 5,
+            groupSpace: 30,
+            ticks: 5,
+            filterKey: undefined,
+            groupKey: undefined, 
+            nameKey: undefined,
+            valuekey: undefined,
+            urlkey: undefined,
+            filterLabel: "Choose a Filter Item:",
+            fontFace: 'auto',
+            fontSize: 12
+            minValue: 0,
+            maxValue: 100,  // default = max(data)
+            barUnit: undefined, // 'K' 'M', 'B'
+            xAxisUnit: undefined, // 'K' 'M', 'B'
+            colors:undefined // example: ['#111','#222','#333']
+          */  
+           /*
+           new HorizonalBarChart("chart", data, {
+               filterLabel:"Choose a Country :",
+               filterKey:"country",
+               groupKey: "city",
+               nameKey: "name",
+               valueKey: "value",
+               urlKey: "more_url",
+               minValue: 0,
+               maxValue: 10000000000,
+               barUnit: 'M',
+               xAxisUnit: 'B',
+               colors:['green', 'red']
+           });
+           */
+
+          var chart =  new HorizontalBarChart()
+                           .select('chart')
+                           .data(data)
+                           .nameKey('name')
+                           .valueKey('value')
+                           .filterKey('country')
+                           .groupKey('city')
+                           .urlKey('more_url')
+                           .minValue(0)
+                           .maxValue(10000000000)
+                           .xAxisUnit('B')
+                           .barUnit('M')
+                           .filterLabel('Choose a country :')
+                           .fontFace(`'Courier New', Courier, monospace`)
+                           .colors(['#7bb344','#57802f'])
+       </script>
+    </body>
+</html>
