@@ -127,6 +127,7 @@ class HorizontalBarChart{
                 this.drawChart(this._data);
             }
         }
+        return this;
     }
 
     drawFilterChart(filter_value){
