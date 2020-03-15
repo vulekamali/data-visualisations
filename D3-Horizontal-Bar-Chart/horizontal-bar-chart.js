@@ -1,5 +1,6 @@
 /*======================================
 var options = {
+    width: undefined,
     marginLeft: undefined,
     barHeight: 20,
     barSpace: 5,
@@ -34,7 +35,7 @@ class HorizontalBarChart{
         this._barHeight = options.barHeight || 20;
         this._barSpace = options.barSpace || 5;
         this._groupSpace = options.groupSpace || 30;
-        this._width = undefined;
+        this._width = options.width || undefined;
         this._marginLeft = options.marginLeft || undefined;
         this.margin = { top: 0, right: 30, bottom: 20, left: this._marginLeft };
         this._filterLabel = options.filterLabel || 'Choose a Filter Item:';
@@ -70,9 +71,12 @@ class HorizontalBarChart{
         if(this._selector && this._data && this._nameKey && this._valueKey){
             //var container = d3.select(this._selector);
             var container = document.getElementById(this._selector);
-            this._width = container.offsetWidth;
+            if(!this._width){
+                this._width = container.offsetWidth;
+            }else{
+                container.style.width = this._width + 'px';
+            }
             if(!this._marginLeft){
-                //this._marginLeft = parseInt(this._width/5);
                 this.margin.left = parseInt(this._width/5);
             }
             //container.style.width = this._width + 'px';
@@ -157,7 +161,7 @@ class HorizontalBarChart{
         group_keys.sort((a,b)=>d3.ascending(a, b));
         var group_count= group_keys.length; 
         var height = chart_data.length * (this._barHeight +this._barSpace) + group_count * this._groupSpace + 10 + this.margin.top + this.margin.bottom;
-        var chart_container = d3.select('.chart-content');
+        var chart_container = d3.select('#' + this._selector + ' .chart-content');
         chart_container.selectAll("*").remove();
         var chart = chart_container.append('svg')
           .style('width', '100%')
@@ -265,7 +269,7 @@ class HorizontalBarChart{
         chart_data.sort((a,b)=>d3.ascending(a[this._nameKey], b[this._nameKey]));
 
         var height = chart_data.length * (this._barHeight +this._barSpace) + 10 + this.margin.top + this.margin.bottom;
-        var chart_container = d3.select('.chart-content');
+        var chart_container = d3.select('#' + this._selector + ' .chart-content');
         chart_container.selectAll("*").remove();
         var chart = chart_container.append('svg')
           .style('width', '100%')
@@ -529,7 +533,10 @@ class HorizontalBarChart{
         this._colors = newValue;
         return this;
     }
-    
+    width(newValue){
+        this._width = newValue;
+        return this;
+    }
     marginLeft(newValue){
         this._marginLeft = newValue;
         this.margin.left = newValue;

@@ -14,16 +14,24 @@
                 margin:0;
                 padding:0;
             }
-            #chart{
+            #chart1{
                 position: relative;
                 margin: 50px auto;
-                width: 600px;
+                /*width: 100%;*/
+            }
+            #chart2{
+                position: relative;
+                margin: 50px auto;
+                /*width: 100%;*/
             }
         </style>
     </head>
     
     <body>
-       <div id="chart"></div>
+       <h1>width = 600px</h1>
+       <div id="chart1"></div>
+       <h1>width = 300px</h1>
+       <div id="chart2"></div>
        <script>
            var data = [
                 { country: "Italy", city: "Milano", name: "Option E", value: 1560000000, more_url:"https://municipalmoney.gov.za/profiles/municipality-NMA"},
@@ -48,9 +56,11 @@
                colors:['#7bb344','#57802f']
            });
            */
-          var chart = new HorizontalBarChart()
-                           .select('chart')
+        var chart1 = new HorizontalBarChart()
+                           .select('chart1')
                            .data(data)
+                           .width(600)  // if you don't set width, select div(chart1 div) width is same as parent width
+                           //.marginLeft(100)  // item width can set
                            .nameKey('name')
                            .valueKey('value')
                            .filterKey('country')
@@ -63,15 +73,35 @@
                            .filterLabel('Choose a country :')
                            .fontFace(`'Courier New', Courier, monospace`)
                            .colors(['#7bb344','#57802f'])
-                           //.marginLeft(100)  // item width can set
-                           .reDraw()
+                           .reDraw();
         
-        /* please add if container width is not static (%)
+        var chart2 = new HorizontalBarChart()
+                           .select('chart2')
+                           .data(data)
+                           .width(300)
+                           .marginLeft(80)  // item width can set
+                           .nameKey('name')
+                           .valueKey('value')
+                           .filterKey('country')
+                           .groupKey('city')
+                           .urlKey('more_url')
+                           .minValue(0)
+                           .maxValue(10000000000)
+                           .xAxisUnit('B')
+                           .barUnit('M')
+                           .filterLabel('Choose a country :')
+                           .fontFace(`'Courier New', Courier, monospace`)
+                           .colors(['#7bb344','#57802f'])
+                           .reDraw();
+        
+        /*
+	// if you want responsive page, no need to set chart width. In that case, chart width will be same as parent width.
+        //please add if select div is not static width (width: 60%;)
         window.addEventListener('resize', function(){
-            chart.reDraw();
+            chart1.reDraw();
+            chart2.reDraw();
         });     
-        */ 
-
+        */
        </script>
     </body>
 </html>
