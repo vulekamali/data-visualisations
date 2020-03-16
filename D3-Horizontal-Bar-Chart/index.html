@@ -17,12 +17,12 @@
             #chart1{
                 position: relative;
                 margin: 50px auto;
-                /*width: 100%;*/
+                /*width: 80%;*/
             }
             #chart2{
                 position: relative;
                 margin: 50px auto;
-                /*width: 100%;*/
+                /*width: 60%;*/
             }
         </style>
     </head>
@@ -56,11 +56,11 @@
                colors:['#7bb344','#57802f']
            });
            */
+        
         var chart1 = new HorizontalBarChart()
                            .select('chart1')
                            .data(data)
-                           .width(600)  // if you don't set width, select div(chart1 div) width is same as parent width
-                           //.marginLeft(100)  // item width can set
+                           .width(600)  // if you don't set width, chart width is same as parent(select chart1 div) width
                            .nameKey('name')
                            .valueKey('value')
                            .filterKey('country')
@@ -79,7 +79,7 @@
                            .select('chart2')
                            .data(data)
                            .width(300)
-                           .marginLeft(80)  // item width can set
+                           .marginLeft(80)  // left(item labels) width can set
                            .nameKey('name')
                            .valueKey('value')
                            .filterKey('country')
@@ -94,9 +94,9 @@
                            .colors(['#7bb344','#57802f'])
                            .reDraw();
         
-        /*
-	// if you want responsive page, no need to set chart width. In that case, chart width will be same as parent width.
+        
         //please add if select div is not static width (width: 60%;)
+        /*
         window.addEventListener('resize', function(){
             chart1.reDraw();
             chart2.reDraw();

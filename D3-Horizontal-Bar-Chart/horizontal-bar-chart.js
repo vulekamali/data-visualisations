@@ -36,8 +36,9 @@ class HorizontalBarChart{
         this._barSpace = options.barSpace || 5;
         this._groupSpace = options.groupSpace || 30;
         this._width = options.width || undefined;
+        this.__width = this._width;
         this._marginLeft = options.marginLeft || undefined;
-        this.margin = { top: 0, right: 30, bottom: 20, left: this._marginLeft };
+        this.margin = { top: 0, right: 30, bottom: 30, left: this._marginLeft };
         this._filterLabel = options.filterLabel || 'Choose a Filter Item:';
         this._fontFace = options.fontFace || 'auto';
         this._fontSize = options.fontSize || 12;
@@ -61,9 +62,11 @@ class HorizontalBarChart{
         this._colors = options.colors || undefined;
         this.tooltip = d3.select("body").append("div")
                                         .attr("class", "toolTip")
-                                        .attr("id","custom-toolTip")
                                         .style('font-family', this._fontFace)
-                                        //.style('font-size', this._fontSize + 'px');
+                                        .style('font-size', this._fontSize + 'px');
+        if(this._selector){
+            this.tooltip.attr("id", this._selector + "-tooltip");
+        }                                        
         this.reDraw();
     }
     
@@ -72,14 +75,13 @@ class HorizontalBarChart{
             //var container = d3.select(this._selector);
             var container = document.getElementById(this._selector);
             if(!this._width){
-                this._width = container.offsetWidth;
+                this.__width = container.offsetWidth;
             }else{
                 container.style.width = this._width + 'px';
             }
             if(!this._marginLeft){
-                this.margin.left = parseInt(this._width/5);
+                this.margin.left = parseInt(this.__width/5);
             }
-            //container.style.width = this._width + 'px';
             container.innerHTML = '';
 
             if(this._filterKey){
@@ -92,7 +94,7 @@ class HorizontalBarChart{
                     filter_label.setAttribute("class", "filter-label");
                     filter_label.style.fontFamily = this._fontFace;
                     filter_label.style.color = this._fontColor;
-                    //filter_label.style.fontSize = this._fontSize + 'px';
+                    filter_label.style.fontSize = this._fontSize + 'px';
 
                     filter_label.innerHTML = this._filterLabel;
                     chart_header_div.append(filter_label);
@@ -101,7 +103,7 @@ class HorizontalBarChart{
                     selectElement.setAttribute("class", "select-list");
                     selectElement.style.fontFamily = this._fontFace;
                     selectElement.style.color = this._fontColor;
-                    //selectElement.style.fontSize = this._fontSize + 'px';
+                    selectElement.style.fontSize = this._fontSize + 'px';
 
                     filter_items.forEach((item)=>{
                         var option = document.createElement("option");
@@ -165,9 +167,9 @@ class HorizontalBarChart{
         chart_container.selectAll("*").remove();
         var chart = chart_container.append('svg')
           .style('width', '100%')
-          .attr('viewBox', `0 0 ${this._width} ${height}`);
+          .attr('viewBox', `0 0 ${this.__width} ${height}`);
         var xScale = d3.scaleLinear()
-          .range([0, this._width - this.margin.left - this.margin.right])
+          .range([0, this.__width - this.margin.left - this.margin.right])
           .domain([this._minValue, this._maxValue]);
          // add the x Axis
          var xAxis = chart.append("g")
@@ -273,9 +275,9 @@ class HorizontalBarChart{
         chart_container.selectAll("*").remove();
         var chart = chart_container.append('svg')
           .style('width', '100%')
-          .attr('viewBox', `0 0 ${this._width} ${height}`);
+          .attr('viewBox', `0 0 ${this.__width} ${height}`);
         var xScale = d3.scaleLinear()
-          .range([0, this._width - this.margin.left - this.margin.right])
+          .range([0, this.__width - this.margin.left - this.margin.right])
           .domain([this._minValue, this._maxValue]);
         var yScale = d3.scaleBand()
           .range([0, height - 10 - this.margin.top - this.margin.bottom])
@@ -443,8 +445,8 @@ class HorizontalBarChart{
         tooltip_html.push('</tbody></table>');
         this.tooltip.html(tooltip_html.join(''))
                     .style("display", "inline-block")
-                    .style("left", d3.event.pageX - document.getElementById('custom-toolTip').offsetWidth/2 + "px")
-                    .style("top", d3.event.pageY - document.getElementById('custom-toolTip').offsetHeight - 30 + "px");
+                    .style("left", d3.event.pageX - document.getElementById(this._selector + '-tooltip').offsetWidth/2 + "px")
+                    .style("top", d3.event.pageY - document.getElementById(this._selector + '-tooltip').offsetHeight - 30 + "px");
     }
     onMouseClick(d){
         if(this._urlKey){
@@ -466,6 +468,7 @@ class HorizontalBarChart{
 
     select(newValue){
         this._selector = newValue;
+        this.tooltip.attr("id", this._selector + "-tooltip");
         return this;
     }
     
@@ -535,6 +538,7 @@ class HorizontalBarChart{
     }
     width(newValue){
         this._width = newValue;
+        this.__width = this._width;
         return this;
     }
     marginLeft(newValue){
@@ -560,11 +564,12 @@ class HorizontalBarChart{
     }
     fontFace(newValue){
         this._fontFace = newValue;
-        document.getElementById("custom-toolTip").style.fontFamily = this._fontFace;
+        document.getElementById(this._selector + "-tooltip").style.fontFamily = this._fontFace;
         return this;
     }
     fontSize(newValue){
         this._fontSize = newValue;
+        document.getElementById(this._selector + "-tooltip").style.fontSize = this._fontSize + 'px';
         return this;
     }
     fontColor(newValue){
