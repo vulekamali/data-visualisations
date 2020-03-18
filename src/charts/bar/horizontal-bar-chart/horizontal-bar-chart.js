@@ -1,3 +1,10 @@
+import { max, ascending, sum } from 'd3-array';
+import { select, event } from 'd3-selection';
+import { scaleLinear, scaleOrdinal, scaleBand } from 'd3-scale';
+import { axisBottom, axisLeft } from 'd3-axis';
+import { schemeCategory10 } from 'd3-scale-chromatic';
+
+
 /*======================================
 var options = {
     width: undefined,
@@ -7,7 +14,7 @@ var options = {
     groupSpace: 30,
     ticks: 5,
     filterKey: undefined,
-    groupKey: undefined, 
+    groupKey: undefined,
     nameKey: undefined,
     valuekey: undefined,
     urlkey: undefined,
@@ -25,12 +32,12 @@ var options = {
 
 //var horizontalBarChart = (selector, data, options) => new HorizontalBarChart(selector, data, options);
 
-class HorizontalBarChart{
-   
+export class HorizontalBarChart{
+
     constructor(selector, data, options){
-        
+
         var options = options || {};
-        this._selector = selector || undefined;          
+        this._selector = selector || undefined;
         this._data = data || undefined;
         this._barHeight = options.barHeight || 20;
         this._barSpace = options.barSpace || 5;
@@ -53,26 +60,26 @@ class HorizontalBarChart{
         this._maxValue = options.maxValue;
         if(this._data && this._valueKey){
             if(!this._maxValue){
-                this._maxValue = 1.5 * d3.max(this._data, d => d[this._valueKey]);
+                this._maxValue = 1.5 * max(this._data, d => d[this._valueKey]);
             }
             this.sum = this.getSum(this._data, this._valueKey);
         }
         this._barUnit = options.barUnit || undefined;
         this._xAxisUnit = options.xAxisUnit || undefined;
         this._colors = options.colors || undefined;
-        this.tooltip = d3.select("body").append("div")
+        this.tooltip = select("body").append("div")
                                         .attr("class", "toolTip")
                                         .style('font-family', this._fontFace)
                                         .style('font-size', this._fontSize + 'px');
         if(this._selector){
             this.tooltip.attr("id", this._selector + "-tooltip");
-        }                                        
+        }
         this.reDraw();
     }
-    
+
     reDraw(){
         if(this._selector && this._data && this._nameKey && this._valueKey){
-            //var container = d3.select(this._selector);
+            //var container = select(this._selector);
             var container = document.getElementById(this._selector);
             if(!this._width){
                 this.__width = container.offsetWidth;
@@ -89,7 +96,7 @@ class HorizontalBarChart{
                 if(filter_items.length >0){
                     var chart_header_div = document.createElement("div");
                     chart_header_div.setAttribute("class", "chart-header");
-                    
+
                     var filter_label = document.createElement("div");
                     filter_label.setAttribute("class", "filter-label");
                     filter_label.style.fontFamily = this._fontFace;
@@ -98,7 +105,7 @@ class HorizontalBarChart{
 
                     filter_label.innerHTML = this._filterLabel;
                     chart_header_div.append(filter_label);
-            
+
                     var selectElement = document.createElement("select");
                     selectElement.setAttribute("class", "select-list");
                     selectElement.style.fontFamily = this._fontFace;
@@ -114,7 +121,7 @@ class HorizontalBarChart{
 
                     chart_header_div.appendChild(selectElement);
                     container.append(chart_header_div);
-                    
+
                     selectElement.addEventListener('change', (event) => {
                         var filter_value = event.target.value;
                         this.drawFilterChart(filter_value);
@@ -160,15 +167,15 @@ class HorizontalBarChart{
     drawGroupChart(chart_data){
         var group_data = this.getGroupBy(chart_data, this._groupKey);
         var group_keys = Object.keys(group_data);
-        group_keys.sort((a,b)=>d3.ascending(a, b));
-        var group_count= group_keys.length; 
+        group_keys.sort((a,b)=>ascending(a, b));
+        var group_count= group_keys.length;
         var height = chart_data.length * (this._barHeight +this._barSpace) + group_count * this._groupSpace + 10 + this.margin.top + this.margin.bottom;
-        var chart_container = d3.select('#' + this._selector + ' .chart-content');
+        var chart_container = select('#' + this._selector + ' .chart-content');
         chart_container.selectAll("*").remove();
         var chart = chart_container.append('svg')
           .style('width', '100%')
           .attr('viewBox', `0 0 ${this.__width} ${height}`);
-        var xScale = d3.scaleLinear()
+        var xScale = scaleLinear()
           .range([0, this.__width - this.margin.left - this.margin.right])
           .domain([this._minValue, this._maxValue]);
          // add the x Axis
@@ -178,22 +185,22 @@ class HorizontalBarChart{
                           .style('font-size', this._fontSize + 'px')
                           .style('font-weight', 500)
                           .attr("transform", `translate(${this.margin.left}, ${height - this.margin.bottom})`)
-                          .call(d3.axisBottom(xScale)
+                          .call(axisBottom(xScale)
                                 .ticks(this._ticks)
                                 .tickSizeInner([-height])
                                 .tickSizeOuter([0])
                                 .tickPadding([10])
-                                .tickFormat(d =>{ 
+                                .tickFormat(d =>{
                                     return this.getLabelFormat(d,this._xAxisUnit);
-                                }));       
-        var color = d3.scaleOrdinal()
-          .range(d3.schemeCategory10)  // 20, 20b, 20c
+                                }));
+        var color = scaleOrdinal()
+          .range(schemeCategory10)  // 20, 20b, 20c
           .domain(chart_data.map(d => d[this._valueKey]));
 
         var y = 0;
         group_keys.forEach((group_key)=>{
            var group_items = group_data[group_key];
-           group_items.sort((a,b)=>d3.ascending(a[this._nameKey], b[this._nameKey]));
+           group_items.sort((a,b)=>ascending(a[this._nameKey], b[this._nameKey]));
            chart.append('text')
                 .attr('class', 'item-label')
                 .attr('alignment-baseline', 'middle')
@@ -214,7 +221,7 @@ class HorizontalBarChart{
                     .attr('x', 0)
                     .attr('y', y)
                     .attr('rx', 2)
-                    .attr('rx', 2)    
+                    .attr('rx', 2)
                chart.append('text')
                     .attr('class', 'item-label')
                     .attr('alignment-baseline', 'middle')
@@ -225,7 +232,7 @@ class HorizontalBarChart{
                     .style('font-size', this._fontSize + 'px')
                     //.style('font-weight', 'bold')
                     .text(item[this._nameKey]);
-               
+
                chart.data([item])
                     .append('rect')
                     .attr('class', 'bar')
@@ -257,36 +264,36 @@ class HorizontalBarChart{
                     .style('fill', this._fontColor)
                     .style('font-size', this._fontSize + 'px')
                     .style('font-weight', '500')
-                    
+
                 bar_text.append("tspan").text(this.getLabelFormat(item[this._valueKey], this._barUnit));
                 bar_text.append("tspan").style("fill", "lightgray").text(` (${percent.toFixed(2)}%)`);
                 bar_text.transition().duration(500).attr('x', xScale(item[this._valueKey]) + this.margin.left + 5)
-                 
-                y+=this._barHeight +this._barSpace;    
+
+                y+=this._barHeight +this._barSpace;
            });
         });
     }
 
     drawSingleChart(chart_data){
-        chart_data.sort((a,b)=>d3.ascending(a[this._nameKey], b[this._nameKey]));
+        chart_data.sort((a,b)=>ascending(a[this._nameKey], b[this._nameKey]));
 
         var height = chart_data.length * (this._barHeight +this._barSpace) + 10 + this.margin.top + this.margin.bottom;
-        var chart_container = d3.select('#' + this._selector + ' .chart-content');
+        var chart_container = select('#' + this._selector + ' .chart-content');
         chart_container.selectAll("*").remove();
         var chart = chart_container.append('svg')
           .style('width', '100%')
           .attr('viewBox', `0 0 ${this.__width} ${height}`);
-        var xScale = d3.scaleLinear()
+        var xScale = scaleLinear()
           .range([0, this.__width - this.margin.left - this.margin.right])
           .domain([this._minValue, this._maxValue]);
-        var yScale = d3.scaleBand()
+        var yScale = scaleBand()
           .range([0, height - 10 - this.margin.top - this.margin.bottom])
           .domain(chart_data.map(d => d[this._nameKey]));
-        
-        var color = d3.scaleOrdinal()
-          .range(d3.schemeCategory10)
+
+        var color = scaleOrdinal()
+          .range(schemeCategory10)
           .domain(chart_data.map(d => d[this._valueKey]));
-        
+
         // add the x Axis
         var xAxis = chart.append("g")
             .attr("class", "grid")
@@ -294,20 +301,20 @@ class HorizontalBarChart{
             .style('font-size', this._fontSize + 'px')
             .style('font-weight', 500)
             .attr("transform", `translate(${this.margin.left}, ${height - this.margin.bottom})`)
-            .call(d3.axisBottom(xScale)
+            .call(axisBottom(xScale)
                     .ticks(this._ticks)
                     .tickSizeInner([-height])
                     .tickSizeOuter([0])
                     .tickPadding([10])
-                    .tickFormat(d =>{ 
+                    .tickFormat(d =>{
                         return this.getLabelFormat(d,this._xAxisUnit);
-                    }));     
+                    }));
         /*
         const yAxis = chart.append('g')
-          .call(d3.axisLeft(yScale))
+          .call(axisLeft(yScale))
           .attr('transform', `translate(${margin.left}, ${margin.top})`);
         */
-    
+
         chart.selectAll('.label-bar')
             .data(chart_data)
             .enter()
@@ -319,8 +326,8 @@ class HorizontalBarChart{
             .attr('x', 0)
             .attr('y', d => yScale(d[this._nameKey]))
             .attr('rx', 2)
-            .attr('rx', 2)    
-        
+            .attr('rx', 2)
+
         chart.selectAll('.item-label')
             .data(chart_data)
             .enter()
@@ -334,7 +341,7 @@ class HorizontalBarChart{
             .style('font-size', this._fontSize + 'px')
             //.style('font-weight', 'bold')
             .text(d => d[this._nameKey]);
-    
+
         chart.selectAll('.bar')
             .data(chart_data)
             .enter()
@@ -359,7 +366,7 @@ class HorizontalBarChart{
             .duration(500)
             //.delay((d,i) => i*100)
             .attr("width", d => xScale(d[this._valueKey]))
-            
+
         var bar_text = chart.selectAll('.bar-label')
                             .data(chart_data)
                             .enter()
@@ -388,7 +395,7 @@ class HorizontalBarChart{
               result.push(element[key]);
            }
        });
-       result.sort((a,b)=>d3.ascending(a, b));
+       result.sort((a,b)=>ascending(a, b));
        return result;
     }
     getGroupBy(array, key){
@@ -399,7 +406,7 @@ class HorizontalBarChart{
         }, {});
     }
     getSum(data, value_key){
-        return d3.sum(data, function(d) {
+        return sum(data, function(d) {
             return d[value_key];
         });
     }
@@ -420,17 +427,17 @@ class HorizontalBarChart{
                 value = value/1000000000;
                 value = value > 0 ? parseInt(value) : value.toFixed(2)
                 result = 'R' + value + 'B';
-                break;     
+                break;
             default:
                 value = value > 0 ? parseInt(value):value.toFixed(2)
                 result = 'R' + value;
                 break;
         }
         if(value < 0.01){
-            return 'R0' 
+            return 'R0'
         }else{
             return result;
-        }       
+        }
     }
     onMouseOver(d){
         var tooltip_html=['<table><tbody>'];
@@ -445,8 +452,8 @@ class HorizontalBarChart{
         tooltip_html.push('</tbody></table>');
         this.tooltip.html(tooltip_html.join(''))
                     .style("display", "inline-block")
-                    .style("left", d3.event.pageX - document.getElementById(this._selector + '-tooltip').offsetWidth/2 + "px")
-                    .style("top", d3.event.pageY - document.getElementById(this._selector + '-tooltip').offsetHeight - 30 + "px");
+                    .style("left", event.pageX - document.getElementById(this._selector + '-tooltip').offsetWidth/2 + "px")
+                    .style("top", event.pageY - document.getElementById(this._selector + '-tooltip').offsetHeight - 30 + "px");
     }
     onMouseClick(d){
         if(this._urlKey){
@@ -471,12 +478,12 @@ class HorizontalBarChart{
         this.tooltip.attr("id", this._selector + "-tooltip");
         return this;
     }
-    
+
     data(newValue){
         this._data = newValue;
         if(this._data && this._valueKey){
             if(!this._maxValue){
-                this._maxValue = 1.5 * d3.max(this._data, d => d[this._valueKey]);
+                this._maxValue = 1.5 * max(this._data, d => d[this._valueKey]);
             }
             this.sum = this.getSum(this._data, this._valueKey);
         }
@@ -492,7 +499,7 @@ class HorizontalBarChart{
         this._valueKey = newValue;
         if(this._data && this._valueKey){
             if(!this._maxValue){
-                this._maxValue = 1.5 * d3.max(this._data, d => d[this._valueKey]);
+                this._maxValue = 1.5 * max(this._data, d => d[this._valueKey]);
             }
             if(!this.sum){
                 this.sum = this.getSum(this._data, this._valueKey);
