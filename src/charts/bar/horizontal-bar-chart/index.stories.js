@@ -4,6 +4,8 @@ import { HorizontalBarChart } from './horizontal-bar-chart';
 export default { title: 'Horizontal Bar Chart' };
 
 export const Simple = () => {
+  const id = "horizontal-bars-simple";
+
   const items = [
     {
       "label_full": "Gauteng",
@@ -22,12 +24,13 @@ export const Simple = () => {
   ];
 
   const container = document.createElement('div');
+  container.id = id;
 
   const myChart = new HorizontalBarChart()
-        .select(container)
+        .select(id)
         .data(items)
         .nameKey("label_full")
-        .reDraw();
-
+        .valueKey("value");
+  window.setTimeout(function() { console.log("here"); myChart.reDraw() }, 5000);
   return container;
 };

@@ -35,7 +35,7 @@ var options = {
 export class HorizontalBarChart{
 
     constructor(selector, data, options){
-
+      console.log("constructor");
         var options = options || {};
         this._selector = selector || undefined;
         this._data = data || undefined;
