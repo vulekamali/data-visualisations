@@ -1,3 +1,8 @@
+#horizontal-bars-simple {
+    margin-top: 100px;
+}
+
+
 .chart-header{
   display: flex;
   position: relative;
@@ -7,12 +12,14 @@
   margin-bottom: 20px;
   border-bottom: 2px solid #ddd;
 }
+
 .chart-header .filter-label{
     position: absolute;
     left: 5px;
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
 }
+
 .chart-header .select-list{
     position: absolute;
     right: 0;
@@ -21,20 +28,25 @@
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
 }
+
 .chart-content{
   position: relative;
   width: 100%;
 }
+
 .grid line {
   stroke: lightgrey;
   stroke-opacity: 0.6;
 }
+
 .grid path {
    stroke-width: 1;
 }
+
 .grid text{
   fill: black;
 }
+
 rect.bar:hover {
     /*fill: cyan;*/
     stroke: cyan;
@@ -53,6 +65,7 @@ rect.bar:hover {
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.7);
 }
+
 .toolTip:after {
     content: "";
     position: absolute;
