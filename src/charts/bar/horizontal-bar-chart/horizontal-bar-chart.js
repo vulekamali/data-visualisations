@@ -1,7 +1,7 @@
 /*======================================
 var options = {
-    width: 500,
-    marginLeft: 100,
+    width: undefined,
+    marginLeft: undefined,
     barHeight: 20,
     barSpace: 5,
     groupSpace: 30,
@@ -13,7 +13,8 @@ var options = {
     urlkey: undefined,
     filterLabel: "Choose a Filter Item:",
     fontFace: 'auto',
-    fontSize: 12
+    fontSize: 12,
+    fontColor: 'black',
     minValue: 0,
     maxValue: 100,  // default = max(data)
     barUnit: undefined, // 'K' 'M', 'B'
@@ -22,7 +23,7 @@ var options = {
 }
 =======================================*/
 
-//var horizonalBarChart = (selector, data, options) => new HorizonalBarChart(selector, data, options);
+//var horizontalBarChart = (selector, data, options) => new HorizontalBarChart(selector, data, options);
 
 class HorizontalBarChart{
    
@@ -34,12 +35,14 @@ class HorizontalBarChart{
         this._barHeight = options.barHeight || 20;
         this._barSpace = options.barSpace || 5;
         this._groupSpace = options.groupSpace || 30;
-        this._width = options.width || 500;
-        this._marginLeft = options.marginLeft || 100;
+        this._width = options.width || undefined;
+        this.__width = this._width;
+        this._marginLeft = options.marginLeft || undefined;
+        this.margin = { top: 0, right: 30, bottom: 30, left: this._marginLeft };
         this._filterLabel = options.filterLabel || 'Choose a Filter Item:';
         this._fontFace = options.fontFace || 'auto';
         this._fontSize = options.fontSize || 12;
-        this.margin = { top: 0, right: 30, bottom: 20, left: this._marginLeft };
+        this._fontColor = options.fontColor || 'black';
         this._ticks = options.ticks || 5;
         this._filterKey = options.filterKey || undefined;
         this._groupKey = options.groupKey || undefined;
@@ -59,16 +62,26 @@ class HorizontalBarChart{
         this._colors = options.colors || undefined;
         this.tooltip = d3.select("body").append("div")
                                         .attr("class", "toolTip")
-                                        .attr("id","custom-toolTip")
-                                        .style('font-family', this._fontFace);
-                                        //.style('font-size', this._fontSize + 'px');
-        this.createChart();
+                                        .style('font-family', this._fontFace)
+                                        .style('font-size', this._fontSize + 'px');
+        if(this._selector){
+            this.tooltip.attr("id", this._selector + "-tooltip");
+        }                                        
+        this.reDraw();
     }
     
-    createChart(){
+    reDraw(){
         if(this._selector && this._data && this._nameKey && this._valueKey){
             //var container = d3.select(this._selector);
             var container = document.getElementById(this._selector);
+            if(!this._width){
+                this.__width = container.offsetWidth;
+            }else{
+                container.style.width = this._width + 'px';
+            }
+            if(!this._marginLeft){
+                this.margin.left = parseInt(this.__width/5);
+            }
             container.innerHTML = '';
 
             if(this._filterKey){
@@ -80,7 +93,8 @@ class HorizontalBarChart{
                     var filter_label = document.createElement("div");
                     filter_label.setAttribute("class", "filter-label");
                     filter_label.style.fontFamily = this._fontFace;
-                    //filter_label.style.fontSize = this._fontSize + 'px';
+                    filter_label.style.color = this._fontColor;
+                    filter_label.style.fontSize = this._fontSize + 'px';
 
                     filter_label.innerHTML = this._filterLabel;
                     chart_header_div.append(filter_label);
@@ -88,7 +102,8 @@ class HorizontalBarChart{
                     var selectElement = document.createElement("select");
                     selectElement.setAttribute("class", "select-list");
                     selectElement.style.fontFamily = this._fontFace;
-                    //selectElement.style.fontSize = this._fontSize + 'px';
+                    selectElement.style.color = this._fontColor;
+                    selectElement.style.fontSize = this._fontSize + 'px';
 
                     filter_items.forEach((item)=>{
                         var option = document.createElement("option");
@@ -118,6 +133,7 @@ class HorizontalBarChart{
                 this.drawChart(this._data);
             }
         }
+        return this;
     }
 
     drawFilterChart(filter_value){
@@ -147,13 +163,13 @@ class HorizontalBarChart{
         group_keys.sort((a,b)=>d3.ascending(a, b));
         var group_count= group_keys.length; 
         var height = chart_data.length * (this._barHeight +this._barSpace) + group_count * this._groupSpace + 10 + this.margin.top + this.margin.bottom;
-        var chart_container = d3.select('.chart-content');
+        var chart_container = d3.select('#' + this._selector + ' .chart-content');
         chart_container.selectAll("*").remove();
         var chart = chart_container.append('svg')
           .style('width', '100%')
-          .attr('viewBox', `0 0 ${this._width} ${height}`);
+          .attr('viewBox', `0 0 ${this.__width} ${height}`);
         var xScale = d3.scaleLinear()
-          .range([0, this._width - this.margin.left - this.margin.right])
+          .range([0, this.__width - this.margin.left - this.margin.right])
           .domain([this._minValue, this._maxValue]);
          // add the x Axis
          var xAxis = chart.append("g")
@@ -185,6 +201,7 @@ class HorizontalBarChart{
                 .attr('y', y + this._groupSpace/2)
                 .style('font-family', this._fontFace)
                 .style('font-size', this._fontSize + 'px')
+                .style('fill', this._fontColor)
                 .style('font-weight', 'bold')
                 .text(group_key);
            y+=this._groupSpace;
@@ -204,6 +221,7 @@ class HorizontalBarChart{
                     .attr('x', 5)
                     .attr('y', y +this._barHeight/2)
                     .style('font-family', this._fontFace)
+                    .style('fill', this._fontColor)
                     .style('font-size', this._fontSize + 'px')
                     //.style('font-weight', 'bold')
                     .text(item[this._nameKey]);
@@ -236,6 +254,7 @@ class HorizontalBarChart{
                     .attr('x', this.margin.left + 5)
                     .attr('y', y +this._barHeight/2 + 4)
                     .style('font-family', this._fontFace)
+                    .style('fill', this._fontColor)
                     .style('font-size', this._fontSize + 'px')
                     .style('font-weight', '500')
                     
@@ -252,13 +271,13 @@ class HorizontalBarChart{
         chart_data.sort((a,b)=>d3.ascending(a[this._nameKey], b[this._nameKey]));
 
         var height = chart_data.length * (this._barHeight +this._barSpace) + 10 + this.margin.top + this.margin.bottom;
-        var chart_container = d3.select('.chart-content');
+        var chart_container = d3.select('#' + this._selector + ' .chart-content');
         chart_container.selectAll("*").remove();
         var chart = chart_container.append('svg')
           .style('width', '100%')
-          .attr('viewBox', `0 0 ${this._width} ${height}`);
+          .attr('viewBox', `0 0 ${this.__width} ${height}`);
         var xScale = d3.scaleLinear()
-          .range([0, this._width - this.margin.left - this.margin.right])
+          .range([0, this.__width - this.margin.left - this.margin.right])
           .domain([this._minValue, this._maxValue]);
         var yScale = d3.scaleBand()
           .range([0, height - 10 - this.margin.top - this.margin.bottom])
@@ -311,6 +330,7 @@ class HorizontalBarChart{
             .attr('x', 5)
             .attr('y', d => yScale(d[this._nameKey]) +this._barHeight/2)
             .style('font-family', this._fontFace)
+            .style('fill', this._fontColor)
             .style('font-size', this._fontSize + 'px')
             //.style('font-weight', 'bold')
             .text(d => d[this._nameKey]);
@@ -349,6 +369,7 @@ class HorizontalBarChart{
                             .attr('x', this.margin.left + 5)
                             .attr('y', d => yScale(d[this._nameKey]) +this._barHeight/2 + 4)
                             .style('font-family', this._fontFace)
+                            .style('fill', this._fontColor)
                             .style('font-size', this._fontSize + 'px')
                             .style('font-weight', '500')
         bar_text.append("tspan").text(d => { return this.getLabelFormat(d[this._valueKey], this._barUnit); });
@@ -424,8 +445,8 @@ class HorizontalBarChart{
         tooltip_html.push('</tbody></table>');
         this.tooltip.html(tooltip_html.join(''))
                     .style("display", "inline-block")
-                    .style("left", d3.event.pageX - document.getElementById('custom-toolTip').offsetWidth/2 + "px")
-                    .style("top", d3.event.pageY - document.getElementById('custom-toolTip').offsetHeight - 30 + "px");
+                    .style("left", d3.event.pageX - document.getElementById(this._selector + '-tooltip').offsetWidth/2 + "px")
+                    .style("top", d3.event.pageY - document.getElementById(this._selector + '-tooltip').offsetHeight - 30 + "px");
     }
     onMouseClick(d){
         if(this._urlKey){
@@ -447,7 +468,7 @@ class HorizontalBarChart{
 
     select(newValue){
         this._selector = newValue;
-        this.createChart();
+        this.tooltip.attr("id", this._selector + "-tooltip");
         return this;
     }
     
@@ -459,13 +480,11 @@ class HorizontalBarChart{
             }
             this.sum = this.getSum(this._data, this._valueKey);
         }
-        this.createChart();
         return this;
     }
 
     nameKey(newValue){
         this._nameKey = newValue;
-        this.createChart();
         return this;
     }
 
@@ -479,22 +498,18 @@ class HorizontalBarChart{
                 this.sum = this.getSum(this._data, this._valueKey);
             }
         }
-        this.createChart();
         return this;
     }
     filterKey(newValue){
         this._filterKey = newValue;
-        this.createChart();
         return this;
     }
     filterLabel(newValue){
         this._filterLabel = newValue;
-        this.createChart();
         return this;
     }
     groupKey(newValue){
         this._groupKey = newValue;
-        this.createChart();
         return this;
     }
     urlKey(newValue){
@@ -503,69 +518,62 @@ class HorizontalBarChart{
     }
     barUnit(newValue){
         this._barUnit = newValue;
-        this.createChart();
         return this;
     }
     xAxisUnit(newValue){
         this._xAxisUnit = newValue;
-        this.createChart();
         return this;
     }
     minValue(newValue){
         this._minValue = newValue;
-        this.createChart();
         return this;
     }
     maxValue(newValue){
         this._maxValue = newValue;
-        this.createChart();
         return this;
     }
     colors(newValue){
         this._colors = newValue;
-        this.createChart();
         return this;
     }
     width(newValue){
         this._width = newValue;
-        this.createChart();
+        this.__width = this._width;
         return this;
     }
     marginLeft(newValue){
         this._marginLeft = newValue;
-        this.createChart();
+        this.margin.left = newValue;
         return this;
     }
     barHeight(newValue){
         this._barHeight = newValue;
-        this.createChart();
         return this;
     }
     barSpace(newValue){
         this._barSpace = newValue;
-        this.createChart();
         return this;
     }
     groupSpace(newValue){
         this._groupSpace = newValue;
-        this.createChart();
         return this;
     }
     ticks(newValue){
         this._ticks = newValue;
-        this.createChart();
         return this;
     }
     fontFace(newValue){
         this._fontFace = newValue;
-        document.getElementById("custom-toolTip").style.fontFamily = this._fontFace;
-        this.createChart();
+        document.getElementById(this._selector + "-tooltip").style.fontFamily = this._fontFace;
         return this;
     }
     fontSize(newValue){
         this._fontSize = newValue;
-        //document.getElementById("custom-toolTip").style.fontSize = this._fontSize + 'px';
-        this.createChart();
+        document.getElementById(this._selector + "-tooltip").style.fontSize = this._fontSize + 'px';
+        return this;
+    }
+    fontColor(newValue){
+        this._fontColor = newValue;
         return this;
     }
 }

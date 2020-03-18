@@ -32,7 +32,9 @@
 .grid path {
    stroke-width: 1;
 }
-
+.grid text{
+  fill: black;
+}
 rect.bar:hover {
     /*fill: cyan;*/
     stroke: cyan;
