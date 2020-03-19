@@ -19,6 +19,7 @@ var options = {
     maxValue: 100,  // default = max(data)
     barUnit: undefined, // 'K' 'M', 'B'
     xAxisUnit: undefined, // 'K' 'M', 'B'
+    colorKey: undefined,
     colors:undefined // example: ['#111','#222','#333']
 }
 =======================================*/
@@ -59,7 +60,11 @@ class HorizontalBarChart{
         }
         this._barUnit = options.barUnit || undefined;
         this._xAxisUnit = options.xAxisUnit || undefined;
+        this._colorKey = options.colorKey || undefined;
         this._colors = options.colors || undefined;
+        if(this._colors){
+            this._colors.sort((a,b)=>d3.descending(a.value, b.value));
+        }
         this.tooltip = d3.select("body").append("div")
                                         .attr("class", "toolTip")
                                         .style('font-family', this._fontFace)
@@ -230,8 +235,8 @@ class HorizontalBarChart{
                     .append('rect')
                     .attr('class', 'bar')
                     .attr('fill', d=>{
-                        if(this._colors){
-                            return this.getColor(d[this._valueKey]);
+                        if(this._colorKey && this._colors){
+                            return this.getColor(d[this._colorKey]);
                         }else{
                             return color(item[this._valueKey]);
                         }
@@ -341,8 +346,8 @@ class HorizontalBarChart{
             .append('rect')
             .attr('class', 'bar')
             .attr('fill', d => {
-                if(this._colors){
-                    return this.getColor(d[this._valueKey]);
+                if(this._colorKey && this._colors){
+                    return this.getColor(d[this._colorKey]);
                 }else{
                     return color(d[this._valueKey])
                 }
@@ -456,13 +461,19 @@ class HorizontalBarChart{
         }
     }
     getColor(value){
-       for(var i=0;i<this._colors.length;i++){
-          var a = this._maxValue/this._colors.length*i;
-          var b = this._maxValue/this._colors.length*(i+1);
-          if(value >= a && value < b){
-             return this._colors[i];
-          }
-       }
+      if(this._colorKey == this._valueKey){
+        for(var i=0;i<this._colors.length;i++){
+           if(value >= this._colors[i].value) {
+              return this._colors[i].color
+           }
+        }
+      }else{
+        for(var i=0;i<this._colors.length;i++){
+            if(this._colors[i].value == value){
+              return this._colors[i].color;
+            }
+        }
+      }
        return '#000';
     }
 
@@ -532,8 +543,13 @@ class HorizontalBarChart{
         this._maxValue = newValue;
         return this;
     }
+    colorKey(newValue){
+        this._colorKey = newValue;
+        return this;
+    }
     colors(newValue){
         this._colors = newValue;
+        this._colors.sort((a,b)=>d3.descending(a.value, b.value));
         return this;
     }
     width(newValue){

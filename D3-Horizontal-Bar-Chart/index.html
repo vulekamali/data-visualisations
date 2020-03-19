@@ -66,13 +66,17 @@
                            .filterKey('country')
                            .groupKey('city')
                            .urlKey('more_url')
+                           .colorKey('value')
                            .minValue(0)
                            .maxValue(10000000000)
                            .xAxisUnit('B')
                            .barUnit('M')
                            .filterLabel('Choose a country :')
                            .fontFace(`'Courier New', Courier, monospace`)
-                           .colors(['#7bb344','#57802f'])
+                           .colors([
+                               {value: 5000000000, color:'#57802f'},
+                               {value: 0, color:'#7bb344'}
+                            ])
                            .reDraw();
         
         var chart2 = new HorizontalBarChart()
@@ -85,13 +89,17 @@
                            .filterKey('country')
                            .groupKey('city')
                            .urlKey('more_url')
+                           .colorKey('country')
                            .minValue(0)
                            .maxValue(10000000000)
                            .xAxisUnit('B')
                            .barUnit('M')
                            .filterLabel('Choose a country :')
                            .fontFace(`'Courier New', Courier, monospace`)
-                           .colors(['#7bb344','#57802f'])
+                           .colors([
+                               {value:'Italy', color:'#57802f'},
+                               {value:'United States', color: '#7bb344'}
+                           ])
                            .reDraw();
         
         
