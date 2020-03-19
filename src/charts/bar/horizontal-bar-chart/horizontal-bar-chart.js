@@ -32,7 +32,6 @@ var options = {
 
 export class HorizontalBarChart {
   constructor(selector, data, options) {
-    console.log('constructor');
     var options = options || {};
     this._selector = selector || undefined;
     this._data = data || undefined;
@@ -388,7 +387,6 @@ export class HorizontalBarChart {
   getGroupBy(array, key) {
     return array.reduce((result, currentValue) => {
       (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
-      // console.log(result);
       return result;
     }, {});
   }
