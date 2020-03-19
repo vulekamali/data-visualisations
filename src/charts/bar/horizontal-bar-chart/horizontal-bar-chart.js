@@ -3,7 +3,7 @@ import { select, event } from 'd3-selection';
 import { scaleLinear, scaleOrdinal, scaleBand } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { schemeCategory10 } from 'd3-scale-chromatic';
-
+import { transition } from 'd3-transition'; // import just to register on selection
 
 /*======================================
 var options = {
