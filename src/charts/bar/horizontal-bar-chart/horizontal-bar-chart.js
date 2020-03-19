@@ -2,7 +2,6 @@ import { max, ascending, sum } from 'd3-array';
 import { select, event } from 'd3-selection';
 import { scaleLinear, scaleOrdinal, scaleBand } from 'd3-scale';
 import { axisBottom, axisLeft } from 'd3-axis';
-import { schemeCategory10 } from 'd3-scale-chromatic';
 import { transition } from 'd3-transition'; // import just to register on selection
 
 /*= =====================================
@@ -26,7 +25,6 @@ var options = {
     maxValue: 100,  // default = max(data)
     barUnit: undefined, // 'K' 'M', 'B'
     xAxisUnit: undefined, // 'K' 'M', 'B'
-    colors:undefined // example: ['#111','#222','#333']
 }
 ======================================= */
 
@@ -67,7 +65,6 @@ export class HorizontalBarChart {
     }
     this._barUnit = options.barUnit || undefined;
     this._xAxisUnit = options.xAxisUnit || undefined;
-    this._colors = options.colors || undefined;
     this.tooltip = select('body').append('div')
       .attr('class', 'toolTip')
       .style('font-family', this._fontFace)
@@ -190,9 +187,6 @@ export class HorizontalBarChart {
         .tickSizeOuter([0])
         .tickPadding([10])
         .tickFormat((d) => this.getLabelFormat(d, this._xAxisUnit)));
-    const color = scaleOrdinal()
-      .range(schemeCategory10) // 20, 20b, 20c
-      .domain(chart_data.map((d) => d[this._valueKey]));
 
     let y = 0;
     group_keys.forEach((group_key) => {
@@ -234,10 +228,11 @@ export class HorizontalBarChart {
           .append('rect')
           .attr('class', 'bar')
           .attr('fill', (d) => {
-            if (this._colors) {
-              return this.getColor(d[this._valueKey]);
+            if (typeof d.color === 'undefined') {
+              return '#00F';
+            } else {
+              return d.color;
             }
-            return color(item[this._valueKey]);
           })
           .attr('height', this._barHeight)
           .attr('width', 0)
@@ -285,10 +280,6 @@ export class HorizontalBarChart {
     const yScale = scaleBand()
       .range([0, height - 10 - this.margin.top - this.margin.bottom])
       .domain(chart_data.map((d) => d[this._nameKey]));
-
-    const color = scaleOrdinal()
-      .range(schemeCategory10)
-      .domain(chart_data.map((d) => d[this._valueKey]));
 
     // add the x Axis
     const xAxis = chart.append('g')
@@ -342,10 +333,11 @@ export class HorizontalBarChart {
       .append('rect')
       .attr('class', 'bar')
       .attr('fill', (d) => {
-        if (this._colors) {
-          return this.getColor(d[this._valueKey]);
+        if (typeof d.color === 'undefined') {
+          return '#00F';
+        } else {
+          return d.color;
         }
-        return color(d[this._valueKey]);
       })
       .attr('height', this._barHeight)
     // .attr('width', d => xScale(d[this._valueKey]))
@@ -459,17 +451,6 @@ export class HorizontalBarChart {
     }
   }
 
-  getColor(value) {
-    for (let i = 0; i < this._colors.length; i++) {
-      const a = this._maxValue / this._colors.length * i;
-      const b = this._maxValue / this._colors.length * (i + 1);
-      if (value >= a && value < b) {
-        return this._colors[i];
-      }
-    }
-    return '#000';
-  }
-
   select(newValue) {
     this._selector = newValue;
     this.tooltip.attr('id', `${this._selector}-tooltip`);
@@ -542,11 +523,6 @@ export class HorizontalBarChart {
 
   maxValue(newValue) {
     this._maxValue = newValue;
-    return this;
-  }
-
-  colors(newValue) {
-    this._colors = newValue;
     return this;
   }
 

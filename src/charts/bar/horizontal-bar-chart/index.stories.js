@@ -102,7 +102,6 @@ export const GroupedFiltered = () => {
     .valueKey('amount')
     .groupKey('geo_level')
     .filterKey('province')
-    .colors(['#6E2195'])
     .urlKey('more_url')
     .xAxisUnit('B')
     .barUnit('M');
@@ -130,6 +129,43 @@ export const Narrow = () => {
       geo_level: 'Province',
       more_url: '/2020-21/departments?province=eastern-cape&sphere=provincial',
       value: 2123456789,
+    },
+  ];
+
+  const container = document.createElement('div');
+  container.id = id;
+
+  const myChart = new HorizontalBarChart()
+    .select(id)
+    .data(items)
+    .nameKey('label_full')
+    .valueKey('value');
+
+  // hack to draw after returning because dev didn't listen to requirements
+  window.setTimeout(() => { console.log('here'); myChart.reDraw(); }, 5000);
+
+  return container;
+};
+
+export const Coloured = () => {
+  const id = 'horizontal-bars-coloured';
+
+  const items = [
+    {
+      label_full: 'Gauteng',
+      label_short: 'GT',
+      geo_level: 'Province',
+      more_url: '/2020-21/departments?province=provincial&sphere=provincial',
+      value: 9123456789,
+      color: '#0f0',
+    },
+    {
+      label_full: 'Eastern Cape',
+      label_short: 'EC',
+      geo_level: 'Province',
+      more_url: '/2020-21/departments?province=eastern-cape&sphere=provincial',
+      value: 2123456789,
+      color: '#f0f',
     },
   ];
 
