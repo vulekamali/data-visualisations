@@ -183,3 +183,73 @@ export const Coloured = () => {
 
   return container;
 };
+
+export const ClipLongLabels = () => {
+  const id = 'horizontal-bars-long-label';
+
+  const items = [
+    {
+      label_full: 'A very very long fied label that should disappear behind the bar and not show up beyond the length of the bar',
+      label_short: 'GT',
+      geo_level: 'Province',
+      more_url: '/2020-21/departments?province=provincial&sphere=provincial',
+      value: 9123456789,
+    },
+    {
+      label_full: 'Eastern Cape',
+      label_short: 'EC',
+      geo_level: 'Province',
+      more_url: '/2020-21/departments?province=eastern-cape&sphere=provincial',
+      value: 2123456789,
+    },
+  ];
+
+  const container = document.createElement('div');
+  container.id = id;
+
+  const myChart = new HorizontalBarChart()
+    .select(id)
+    .data(items)
+    .nameKey('label_full')
+    .valueKey('value');
+
+  // hack to draw after returning because dev didn't listen to requirements
+  window.setTimeout(() => { console.log('here'); myChart.reDraw(); }, 5000);
+
+  return container;
+};
+
+export const ClipLongLabelsGrouped = () => {
+  const id = 'horizontal-bars-long-label-grouped';
+
+  const items = [
+    {
+      label_full: 'A very very long fied label that should disappear behind the bar and not show up beyond the length of the bar',
+      label_short: 'GT',
+      geo_level: 'Province',
+      more_url: '/2020-21/departments?province=provincial&sphere=provincial',
+      value: 9123456789,
+    },
+    {
+      label_full: 'Eastern Cape',
+      label_short: 'EC',
+      geo_level: 'Province',
+      more_url: '/2020-21/departments?province=eastern-cape&sphere=provincial',
+      value: 2123456789,
+    },
+  ];
+
+  const container = document.createElement('div');
+  container.id = id;
+
+  const myChart = new HorizontalBarChart()
+    .select(id)
+    .data(items)
+    .nameKey('label_full')
+    .valueKey('value');
+
+  // hack to draw after returning because dev didn't listen to requirements
+  window.setTimeout(() => { console.log('here'); myChart.reDraw(); }, 5000);
+
+  return container;
+};

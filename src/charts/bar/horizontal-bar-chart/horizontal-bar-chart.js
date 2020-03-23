@@ -66,7 +66,6 @@ export class HorizontalBarChart {
     this._xAxisUnit = options.xAxisUnit || undefined;
     this.tooltip = select('body').append('div')
       .attr('class', 'toolTip')
-      .style('font-family', this._fontFace)
       .style('font-size', `${this._fontSize}px`);
     if (this._selector) {
       this.tooltip.attr('id', `${this._selector}-tooltip`);
@@ -176,7 +175,6 @@ export class HorizontalBarChart {
     // add the x Axis
     const xAxis = chart.append('g')
       .attr('class', 'grid')
-      .style('font-family', this._fontFace)
       .style('font-size', `${this._fontSize}px`)
       .style('font-weight', 500)
       .attr('transform', `translate(${this.margin.left}, ${height - this.margin.bottom})`)
@@ -196,7 +194,6 @@ export class HorizontalBarChart {
         .attr('alignment-baseline', 'middle')
         .attr('x', 0)
         .attr('y', y + this._groupSpace / 2)
-        .style('font-family', this._fontFace)
         .style('font-size', `${this._fontSize}px`)
         .style('fill', this._fontColor)
         .style('font-weight', 'bold')
@@ -217,7 +214,6 @@ export class HorizontalBarChart {
           .attr('alignment-baseline', 'middle')
           .attr('x', 5)
           .attr('y', y + this._barHeight / 2)
-          .style('font-family', this._fontFace)
           .style('fill', this._fontColor)
           .style('font-size', `${this._fontSize}px`)
         // .style('font-weight', 'bold')
@@ -250,7 +246,6 @@ export class HorizontalBarChart {
           .attr('alignment-baseline', 'middle')
           .attr('x', this.margin.left + 5)
           .attr('y', y + this._barHeight / 2 + 4)
-          .style('font-family', this._fontFace)
           .style('fill', this._fontColor)
           .style('font-size', `${this._fontSize}px`)
           .style('font-weight', '500');
@@ -272,32 +267,14 @@ export class HorizontalBarChart {
     chart_container.selectAll('*').remove();
     const chart = chart_container.append('svg')
       .style('width', '100%')
-      .attr('viewBox', `0 0 ${this.__width} ${height}`);
+          .attr('viewBox', `0 0 ${this.__width} ${height}`);
+    const chartWidth = this.__width - this.margin.left;
     const xScale = scaleLinear()
-      .range([0, this.__width - this.margin.left - this.margin.right])
+      .range([0, chartWidth])
       .domain([this._minValue, this._maxValue]);
     const yScale = scaleBand()
       .range([0, height - 10 - this.margin.top - this.margin.bottom])
       .domain(chart_data.map((d) => d[this._nameKey]));
-
-    // add the x Axis
-    const xAxis = chart.append('g')
-      .attr('class', 'grid')
-      .style('font-family', this._fontFace)
-      .style('font-size', `${this._fontSize}px`)
-      .style('font-weight', 500)
-      .attr('transform', `translate(${this.margin.left}, ${height - this.margin.bottom})`)
-      .call(axisBottom(xScale)
-        .ticks(this._ticks)
-        .tickSizeInner([-height])
-        .tickSizeOuter([0])
-        .tickPadding([10])
-        .tickFormat((d) => this.getLabelFormat(d, this._xAxisUnit)));
-    /*
-        const yAxis = chart.append('g')
-          .call(axisLeft(yScale))
-          .attr('transform', `translate(${margin.left}, ${margin.top})`);
-        */
 
     chart.selectAll('.label-bar')
       .data(chart_data)
@@ -320,11 +297,29 @@ export class HorizontalBarChart {
       .attr('alignment-baseline', 'middle')
       .attr('x', 5)
       .attr('y', (d) => yScale(d[this._nameKey]) + this._barHeight / 2)
-      .style('font-family', this._fontFace)
       .style('fill', this._fontColor)
       .style('font-size', `${this._fontSize}px`)
-    // .style('font-weight', 'bold')
       .text((d) => d[this._nameKey]);
+
+    /* Draw after labels, before axis and bars.*/
+    chart.append('rect')
+      .attr('class', 'chart-background')
+      .attr('transform', `translate(${this.margin.left}, 0)`)
+      .attr('width', `${chartWidth}px`)
+      .attr('height', `${height}px`);
+
+    // add the x Axis
+    const xAxis = chart.append('g')
+      .attr('class', 'grid')
+      .style('font-size', `${this._fontSize}px`)
+      .style('font-weight', 500)
+      .attr('transform', `translate(${this.margin.left}, ${height - this.margin.bottom})`)
+      .call(axisBottom(xScale)
+        .ticks(this._ticks)
+        .tickSizeInner([-height])
+        .tickSizeOuter([0])
+        .tickPadding([10])
+        .tickFormat((d) => this.getLabelFormat(d, this._xAxisUnit)));
 
     chart.selectAll('.bar')
       .data(chart_data)
@@ -359,7 +354,6 @@ export class HorizontalBarChart {
       .attr('alignment-baseline', 'middle')
       .attr('x', this.margin.left + 5)
       .attr('y', (d) => yScale(d[this._nameKey]) + this._barHeight / 2 + 4)
-      .style('font-family', this._fontFace)
       .style('fill', this._fontColor)
       .style('font-size', `${this._fontSize}px`)
       .style('font-weight', '500');

@@ -8,6 +8,12 @@
 }
 
 
+#horizontal-bars-long-label {
+    margin-top: 100px;
+    width: 500px;
+}
+
+
 .chart-header{
   display: flex;
   position: relative;
@@ -37,6 +43,10 @@
 .chart-content{
   position: relative;
   width: 100%;
+}
+
+.chart-background {
+    fill: white;
 }
 
 .grid line {
@@ -81,3 +91,7 @@ rect.bar:hover {
     border-style: solid;
     border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
  }
+
+body {
+    font-family: Sans-Serif;
+}
