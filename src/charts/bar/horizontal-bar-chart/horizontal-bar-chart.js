@@ -279,7 +279,9 @@ export class HorizontalBarChart {
           .style('font-weight', '500');
 
         bar_text.append('tspan').text(this.getLabelFormat(item[this._valueKey], this._barUnit));
-        bar_text.append('tspan').style('fill', 'lightgray').text(` (${percent.toFixed(2)}%)`);
+        bar_text.append('tspan')
+          .attr('class', 'bar-label-percent')
+          .text(` (${percent.toFixed(2)}%)`);
         bar_text.transition().duration(500).attr('x', xScale(item[this._valueKey]) + this.margin.left + 5);
 
         y += this._barHeight + this._barSpace;
@@ -388,9 +390,11 @@ export class HorizontalBarChart {
       .style('fill', this._fontColor)
       .style('font-size', `${this._fontSize}px`)
       .style('font-weight', '500');
-    bar_text.append('tspan').text((d) => this.getLabelFormat(d[this._valueKey], this._barUnit));
     bar_text.append('tspan')
-      .style('fill', 'lightgray')
+      .attr('class', 'bar-label-absolute')
+      .text((d) => this.getLabelFormat(d[this._valueKey], this._barUnit));
+    bar_text.append('tspan')
+      .attr('class', 'bar-label-percent')
       .text((d) => {
         const percent = d[this._valueKey] / this.sum * 100;
         return ` (${percent.toFixed(2)}%)`;
