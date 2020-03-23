@@ -35,6 +35,10 @@
     cursor: pointer;
 }
 
+.bar-label-percent {
+    fill: #979797;
+}
+
 .chart-header .filter-label{
     position: absolute;
     left: 5px;
