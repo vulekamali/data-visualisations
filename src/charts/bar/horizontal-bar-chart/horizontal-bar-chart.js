@@ -18,7 +18,6 @@ var options = {
     valuekey: undefined,
     urlkey: undefined,
     filterLabel: "Choose a Filter Item:",
-    fontFace: 'auto',
     fontSize: 12,
     fontColor: 'black',
     minValue: 0,
@@ -45,7 +44,6 @@ export class HorizontalBarChart {
       top: 0, right: 30, bottom: 30, left: this._marginLeft,
     };
     this._filterLabel = options.filterLabel || 'Choose a Filter Item:';
-    this._fontFace = options.fontFace || 'auto';
     this._fontSize = options.fontSize || 12;
     this._fontColor = options.fontColor || 'black';
     this._ticks = options.ticks || 5;
@@ -66,7 +64,6 @@ export class HorizontalBarChart {
     this._xAxisUnit = options.xAxisUnit || undefined;
     this.tooltip = select('body').append('div')
       .attr('class', 'toolTip')
-      .style('font-family', this._fontFace)
       .style('font-size', `${this._fontSize}px`);
     if (this._selector) {
       this.tooltip.attr('id', `${this._selector}-tooltip`);
@@ -96,7 +93,6 @@ export class HorizontalBarChart {
 
           const filter_label = document.createElement('div');
           filter_label.setAttribute('class', 'filter-label');
-          filter_label.style.fontFamily = this._fontFace;
           filter_label.style.color = this._fontColor;
           filter_label.style.fontSize = `${this._fontSize}px`;
 
@@ -105,7 +101,6 @@ export class HorizontalBarChart {
 
           const selectElement = document.createElement('select');
           selectElement.setAttribute('class', 'select-list');
-          selectElement.style.fontFamily = this._fontFace;
           selectElement.style.color = this._fontColor;
           selectElement.style.fontSize = `${this._fontSize}px`;
 
@@ -170,13 +165,59 @@ export class HorizontalBarChart {
     const chart = chart_container.append('svg')
       .style('width', '100%')
       .attr('viewBox', `0 0 ${this.__width} ${height}`);
+    const chartWidth = this.__width - this.margin.left;
+
+    let y = 0;
+    group_keys.forEach((group_key) => {
+      const group_items = group_data[group_key];
+      group_items.sort((a, b) => ascending(a[this._nameKey], b[this._nameKey]));
+      y += this._groupSpace;
+
+      group_items.forEach((item) => {
+        // item labels
+
+        chart.data([item])
+          .append('rect')
+          .attr('class', 'label-bar')
+          .attr('fill', '#f8f8f8')
+          .attr('height', this._barHeight)
+          .attr('width', this.margin.left - 5)
+          .attr('x', 0)
+          .attr('y', y)
+          .attr('rx', 2)
+          .attr('rx', 2)
+          .on('mouseover', (d) => this.onMouseOver(d))
+          .on('mouseout', (d) => this.tooltip.style('display', 'none'))
+          .on('click', (d) => this.onMouseClick(d));
+
+        chart.append('text')
+          .attr('class', 'item-label')
+          .attr('alignment-baseline', 'middle')
+          .attr('x', 5)
+          .attr('y', y + this._barHeight / 2)
+          .style('fill', this._fontColor)
+          .style('font-size', `${this._fontSize}px`)
+          .text(item[this._nameKey]);
+
+        y += this._barHeight + this._barSpace;
+      });
+    });
+
+    /* Chart Background: Under group label, axis and bars; over item labels. */
+    chart.append('rect')
+      .attr('class', 'chart-background')
+      .attr('transform', `translate(${this.margin.left}, 0)`)
+      .attr('width', `${chartWidth}px`)
+      .attr('height', `${height}px`);
+
+
+
     const xScale = scaleLinear()
-      .range([0, this.__width - this.margin.left - this.margin.right])
+      .range([0, chartWidth])
       .domain([this._minValue, this._maxValue]);
     // add the x Axis
     const xAxis = chart.append('g')
       .attr('class', 'grid')
-      .style('font-family', this._fontFace)
       .style('font-size', `${this._fontSize}px`)
       .style('font-weight', 500)
       .attr('transform', `translate(${this.margin.left}, ${height - this.margin.bottom})`)
@@ -187,42 +228,25 @@ export class HorizontalBarChart {
         .tickPadding([10])
         .tickFormat((d) => this.getLabelFormat(d, this._xAxisUnit)));
 
-    let y = 0;
+    y = 0;
     group_keys.forEach((group_key) => {
       const group_items = group_data[group_key];
       group_items.sort((a, b) => ascending(a[this._nameKey], b[this._nameKey]));
+
+      // group label
       chart.append('text')
         .attr('class', 'item-label')
         .attr('alignment-baseline', 'middle')
         .attr('x', 0)
         .attr('y', y + this._groupSpace / 2)
-        .style('font-family', this._fontFace)
         .style('font-size', `${this._fontSize}px`)
         .style('fill', this._fontColor)
         .style('font-weight', 'bold')
         .text(group_key);
       y += this._groupSpace;
-      group_items.forEach((item) => {
-        chart.append('rect')
-          .attr('class', '.label-bar')
-          .attr('fill', '#f8f8f8')
-          .attr('height', this._barHeight)
-          .attr('width', this.margin.left - 5)
-          .attr('x', 0)
-          .attr('y', y)
-          .attr('rx', 2)
-          .attr('rx', 2);
-        chart.append('text')
-          .attr('class', 'item-label')
-          .attr('alignment-baseline', 'middle')
-          .attr('x', 5)
-          .attr('y', y + this._barHeight / 2)
-          .style('font-family', this._fontFace)
-          .style('fill', this._fontColor)
-          .style('font-size', `${this._fontSize}px`)
-        // .style('font-weight', 'bold')
-          .text(item[this._nameKey]);
 
+      // group chart items
+      group_items.forEach((item) => {
         chart.data([item])
           .append('rect')
           .attr('class', 'bar')
@@ -250,7 +274,6 @@ export class HorizontalBarChart {
           .attr('alignment-baseline', 'middle')
           .attr('x', this.margin.left + 5)
           .attr('y', y + this._barHeight / 2 + 4)
-          .style('font-family', this._fontFace)
           .style('fill', this._fontColor)
           .style('font-size', `${this._fontSize}px`)
           .style('font-weight', '500');
@@ -272,45 +295,30 @@ export class HorizontalBarChart {
     chart_container.selectAll('*').remove();
     const chart = chart_container.append('svg')
       .style('width', '100%')
-      .attr('viewBox', `0 0 ${this.__width} ${height}`);
+          .attr('viewBox', `0 0 ${this.__width} ${height}`);
+    const chartWidth = this.__width - this.margin.left;
     const xScale = scaleLinear()
-      .range([0, this.__width - this.margin.left - this.margin.right])
+      .range([0, chartWidth])
       .domain([this._minValue, this._maxValue]);
     const yScale = scaleBand()
       .range([0, height - 10 - this.margin.top - this.margin.bottom])
       .domain(chart_data.map((d) => d[this._nameKey]));
 
-    // add the x Axis
-    const xAxis = chart.append('g')
-      .attr('class', 'grid')
-      .style('font-family', this._fontFace)
-      .style('font-size', `${this._fontSize}px`)
-      .style('font-weight', 500)
-      .attr('transform', `translate(${this.margin.left}, ${height - this.margin.bottom})`)
-      .call(axisBottom(xScale)
-        .ticks(this._ticks)
-        .tickSizeInner([-height])
-        .tickSizeOuter([0])
-        .tickPadding([10])
-        .tickFormat((d) => this.getLabelFormat(d, this._xAxisUnit)));
-    /*
-        const yAxis = chart.append('g')
-          .call(axisLeft(yScale))
-          .attr('transform', `translate(${margin.left}, ${margin.top})`);
-        */
-
     chart.selectAll('.label-bar')
       .data(chart_data)
       .enter()
       .append('rect')
-      .attr('class', '.label-bar')
+      .attr('class', 'label-bar')
       .attr('fill', '#f8f8f8')
       .attr('height', this._barHeight)
       .attr('width', this.margin.left - 5)
       .attr('x', 0)
       .attr('y', (d) => yScale(d[this._nameKey]))
       .attr('rx', 2)
-      .attr('rx', 2);
+      .attr('rx', 2)
+      .on('mouseover', (d) => this.onMouseOver(d))
+      .on('mouseout', (d) => this.tooltip.style('display', 'none'))
+      .on('click', (d) => this.onMouseClick(d));
 
     chart.selectAll('.item-label')
       .data(chart_data)
@@ -320,11 +328,29 @@ export class HorizontalBarChart {
       .attr('alignment-baseline', 'middle')
       .attr('x', 5)
       .attr('y', (d) => yScale(d[this._nameKey]) + this._barHeight / 2)
-      .style('font-family', this._fontFace)
       .style('fill', this._fontColor)
       .style('font-size', `${this._fontSize}px`)
-    // .style('font-weight', 'bold')
       .text((d) => d[this._nameKey]);
+
+    /* Chart Background: Under axis and bars; over item labels. */
+    chart.append('rect')
+      .attr('class', 'chart-background')
+      .attr('transform', `translate(${this.margin.left}, 0)`)
+      .attr('width', `${chartWidth}px`)
+      .attr('height', `${height}px`);
+
+    // add the x Axis
+    const xAxis = chart.append('g')
+      .attr('class', 'grid')
+      .style('font-size', `${this._fontSize}px`)
+      .style('font-weight', 500)
+      .attr('transform', `translate(${this.margin.left}, ${height - this.margin.bottom})`)
+      .call(axisBottom(xScale)
+        .ticks(this._ticks)
+        .tickSizeInner([-height])
+        .tickSizeOuter([0])
+        .tickPadding([10])
+        .tickFormat((d) => this.getLabelFormat(d, this._xAxisUnit)));
 
     chart.selectAll('.bar')
       .data(chart_data)
@@ -359,7 +385,6 @@ export class HorizontalBarChart {
       .attr('alignment-baseline', 'middle')
       .attr('x', this.margin.left + 5)
       .attr('y', (d) => yScale(d[this._nameKey]) + this._barHeight / 2 + 4)
-      .style('font-family', this._fontFace)
       .style('fill', this._fontColor)
       .style('font-size', `${this._fontSize}px`)
       .style('font-weight', '500');
@@ -553,12 +578,6 @@ export class HorizontalBarChart {
 
   ticks(newValue) {
     this._ticks = newValue;
-    return this;
-  }
-
-  fontFace(newValue) {
-    this._fontFace = newValue;
-    document.getElementById(`${this._selector}-tooltip`).style.fontFamily = this._fontFace;
     return this;
   }
 

@@ -8,6 +8,16 @@
 }
 
 
+#horizontal-bars-long-label {
+    margin-top: 100px;
+    width: 500px;
+}
+#horizontal-bars-long-label-grouped {
+    margin-top: 100px;
+    width: 500px;
+}
+
+
 .chart-header{
   display: flex;
   position: relative;
@@ -16,6 +26,13 @@
   height: 50px;
   margin-bottom: 20px;
   border-bottom: 2px solid #ddd;
+}
+
+.item-label {
+    pointer-events: none;
+}
+.label-bar {
+    cursor: pointer;
 }
 
 .chart-header .filter-label{
@@ -37,6 +54,10 @@
 .chart-content{
   position: relative;
   width: 100%;
+}
+
+.chart-background {
+    fill: white;
 }
 
 .grid line {
@@ -81,3 +102,7 @@ rect.bar:hover {
     border-style: solid;
     border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
  }
+
+body {
+    font-family: Sans-Serif;
+}
