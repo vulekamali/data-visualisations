@@ -139,6 +139,9 @@ export const Narrow = () => {
     .select(id)
     .data(items)
     .nameKey('label_full')
+    .ticks(3)
+    .xAxisUnit('B')
+    .barUnit('B')
     .valueKey('value');
 
   // hack to draw after returning because dev didn't listen to requirements
@@ -224,17 +227,43 @@ export const ClipLongLabelsGrouped = () => {
 
   const items = [
     {
-      label_full: 'A very very long fied label that should disappear behind the bar and not show up beyond the length of the bar',
-      label_short: 'GT',
-      geo_level: 'Province',
-      more_url: '/2020-21/departments?province=provincial&sphere=provincial',
-      value: 9123456789,
+      label: 'Nelson Mandela Bay  A very very long fied label that should disappear behind the bar and not show up beyond the length of the bar',
+      code: 'NMA',
+      province: 'Eastern Cape',
+      geo_level: 'Metropolitain Municipalities',
+      more_url: 'https://municipalmoney.gov.za/profiles/municipality-NMA',
+      value: 1123456789,
     },
     {
-      label_full: 'Eastern Cape',
-      label_short: 'EC',
-      geo_level: 'Province',
-      more_url: '/2020-21/departments?province=eastern-cape&sphere=provincial',
+      label: 'Buffalo City',
+      code: 'BUF',
+      province: 'Eastern Cape',
+      geo_level: 'Metropolitain Municipalities',
+      more_url: 'https://municipalmoney.gov.za/profiles/municipality-NMA',
+      value: 3123456789,
+    },
+    {
+      label: 'Cape Town',
+      code: 'CPT',
+      province: 'Western Cape',
+      geo_level: 'Metropolitain Municipalities',
+      more_url: 'https://municipalmoney.gov.za/profiles/municipality-CPT',
+      value: 4123456789,
+    },
+    {
+      label: 'Small cape muni',
+      code: 'WC123',
+      province: 'Western Cape',
+      geo_level: 'Local Municipalities Municipalities',
+      more_url: 'https://municipalmoney.gov.za/profiles/municipality-NMA',
+      value: 3123456789,
+    },
+    {
+      label: 'A district A very very long fied label that should disappear behind the bar and not show up beyond the length of the bar',
+      code: 'DC20',
+      province: 'Western Cape',
+      geo_level: 'District Municipalities',
+      more_url: 'https://municipalmoney.gov.za/profiles/district-DC20',
       value: 2123456789,
     },
   ];
@@ -245,7 +274,12 @@ export const ClipLongLabelsGrouped = () => {
   const myChart = new HorizontalBarChart()
     .select(id)
     .data(items)
-    .nameKey('label_full')
+    .nameKey('label')
+    .groupKey('geo_level')
+    .filterKey('province')
+    .urlKey('more_url')
+    .xAxisUnit('B')
+    .barUnit('M')
     .valueKey('value');
 
   // hack to draw after returning because dev didn't listen to requirements
