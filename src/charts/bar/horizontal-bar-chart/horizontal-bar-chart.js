@@ -174,7 +174,10 @@ export class HorizontalBarChart {
       y += this._groupSpace;
 
       group_items.forEach((item) => {
-        chart.append('rect')
+        // item labels
+
+        chart.data([item])
+          .append('rect')
           .attr('class', 'label-bar')
           .attr('fill', '#f8f8f8')
           .attr('height', this._barHeight)
@@ -182,7 +185,10 @@ export class HorizontalBarChart {
           .attr('x', 0)
           .attr('y', y)
           .attr('rx', 2)
-          .attr('rx', 2);
+          .attr('rx', 2)
+          .on('mouseover', (d) => this.onMouseOver(d))
+          .on('mouseout', (d) => this.tooltip.style('display', 'none'))
+          .on('click', (d) => this.onMouseClick(d));
 
         chart.append('text')
           .attr('class', 'item-label')
@@ -227,6 +233,7 @@ export class HorizontalBarChart {
       const group_items = group_data[group_key];
       group_items.sort((a, b) => ascending(a[this._nameKey], b[this._nameKey]));
 
+      // group label
       chart.append('text')
         .attr('class', 'item-label')
         .attr('alignment-baseline', 'middle')
@@ -238,6 +245,7 @@ export class HorizontalBarChart {
         .text(group_key);
       y += this._groupSpace;
 
+      // group chart items
       group_items.forEach((item) => {
         chart.data([item])
           .append('rect')
@@ -307,7 +315,10 @@ export class HorizontalBarChart {
       .attr('x', 0)
       .attr('y', (d) => yScale(d[this._nameKey]))
       .attr('rx', 2)
-      .attr('rx', 2);
+      .attr('rx', 2)
+      .on('mouseover', (d) => this.onMouseOver(d))
+      .on('mouseout', (d) => this.tooltip.style('display', 'none'))
+      .on('click', (d) => this.onMouseClick(d));
 
     chart.selectAll('.item-label')
       .data(chart_data)

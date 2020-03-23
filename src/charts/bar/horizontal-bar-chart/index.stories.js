@@ -55,7 +55,7 @@ export const GroupedFiltered = () => {
       code: 'BUF',
       province: 'Eastern Cape',
       geo_level: 'Metropolitain Municipalities',
-      more_url: 'https://municipalmoney.gov.za/profiles/municipality-NMA',
+      more_url: 'https://municipalmoney.gov.za/profiles/municipality-BUF',
       amount: 3123456789,
     },
     {
@@ -79,7 +79,7 @@ export const GroupedFiltered = () => {
       code: 'WC123',
       province: 'Western Cape',
       geo_level: 'Local Municipalities Municipalities',
-      more_url: 'https://municipalmoney.gov.za/profiles/municipality-NMA',
+      more_url: 'https://municipalmoney.gov.za/profiles/municipality-WC123',
       amount: 3123456789,
     },
     {
@@ -239,7 +239,7 @@ export const ClipLongLabelsGrouped = () => {
       code: 'BUF',
       province: 'Eastern Cape',
       geo_level: 'Metropolitain Municipalities',
-      more_url: 'https://municipalmoney.gov.za/profiles/municipality-NMA',
+      more_url: 'https://municipalmoney.gov.za/profiles/municipality-BUF',
       value: 3123456789,
     },
     {
@@ -255,7 +255,7 @@ export const ClipLongLabelsGrouped = () => {
       code: 'WC123',
       province: 'Western Cape',
       geo_level: 'Local Municipalities Municipalities',
-      more_url: 'https://municipalmoney.gov.za/profiles/municipality-NMA',
+      more_url: 'https://municipalmoney.gov.za/profiles/municipality-WC123',
       value: 3123456789,
     },
     {

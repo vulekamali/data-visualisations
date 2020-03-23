@@ -28,6 +28,13 @@
   border-bottom: 2px solid #ddd;
 }
 
+.item-label {
+    pointer-events: none;
+}
+.label-bar {
+    cursor: pointer;
+}
+
 .chart-header .filter-label{
     position: absolute;
     left: 5px;
